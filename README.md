@@ -1,0 +1,1 @@
+# paperfigure-idealized-SST-structure
