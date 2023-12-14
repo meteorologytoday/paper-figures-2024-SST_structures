@@ -22,6 +22,7 @@ convert $fig_dir/sst_analysis_map.png \
 
 name_pairs=(
     merged-sst_analysis.png                fig01.png
+    input_sounding_woML.png                fig02.png
 )
 
 N=$(( ${#name_pairs[@]} / 2 ))
