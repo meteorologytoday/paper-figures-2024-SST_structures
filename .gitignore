@@ -15,5 +15,8 @@
 *.log
 *.zip
 *.mp4
+AR_sounding/
+figures/
+final_figures/
 __pycache__/
 data/*

@@ -21,8 +21,10 @@ convert $fig_dir/sst_analysis_map.png \
         -gravity Northwest +append $fig_dir/merged-sst_analysis.png
 
 name_pairs=(
-    merged-sst_analysis.png                fig01.png
-    input_sounding_woML.png                fig02.png
+    merged-sst_analysis.png                                 fig01.png
+    input_sounding_woML.png                                 fig02.png
+    snapshots/dT100/woML_MYNN25/snapshot_woML_24-30.png     fig03.png
+    spatial_anomaly/spatial_anomaly_24-30.png               fig06.png
 )
 
 N=$(( ${#name_pairs[@]} / 2 ))
