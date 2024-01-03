@@ -24,6 +24,7 @@ name_pairs=(
     merged-sst_analysis.png                                 fig01.png
     input_sounding_woML.png                                 fig02.png
     snapshots/dT100/woML_MYNN25/snapshot_woML_24-30.png     fig03.png
+    test_steady_state/dT100/woML_MYNN25/steady_state_test_woML_00-72.png     fig04.png
     spatial_anomaly/spatial_anomaly_24-30.png               fig06.png
 )
 

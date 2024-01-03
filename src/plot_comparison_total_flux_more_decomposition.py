@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import argparse
 import tool_fig_config
-import diagnostics
 import wrf_load_helper 
 import datetime
 
@@ -72,7 +71,7 @@ for i, input_dir in enumerate(args.input_dirs):
         beg_time = time_beg,
         end_time = time_end,
         prefix="wrfout_d01_",
-        avg=False,
+        avg=None,
         verbose=False,
         inclusive="both",
     )

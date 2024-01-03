@@ -4,13 +4,13 @@ fig_dir=figures/sine_200km
 
 input_dirs=""
 exp_names=""
-input_dir_root="runs/lab_sine_200km"
+input_dir_root="data/runs/lab_sine_200km"
 for dT in 000 010 020 030 040 050 060 070 080 090 100 ; do
 #for dT in 000 020 040 ; do
         for MLsetup in woML ; do
             for MLscheme in MYNN25 ; do 
                 for wnm in 01 ; do
-                    input_dirs="$input_dirs $input_dir_root/case_mph-off_dT${dT}_wnm${wnm}_${MLsetup}_U5_${MLscheme}"
+                    input_dirs="$input_dirs $input_dir_root/case_mph-off_dT${dT}_wnm${wnm}_${MLsetup}_${MLscheme}"
                     exp_names="$exp_names $dT"
                 done
             done
