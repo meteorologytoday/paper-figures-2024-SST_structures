@@ -50,6 +50,10 @@ exp_beg_time = pd.Timestamp(args.exp_beg_time)
 time_beg = exp_beg_time + pd.Timedelta(hours=args.time_rng[0])
 time_end = exp_beg_time + pd.Timedelta(hours=args.time_rng[1])
 
+def relTimeInHrs(t):
+    return (t - exp_beg_time.to_datetime64()) / np.timedelta64(1, 'h')
+
+
 data_interval = pd.Timedelta(seconds=args.wrfout_data_interval)
 
 # Loading data
@@ -430,9 +434,9 @@ for i, plot_bundle in enumerate(plot_bundles):
     _ax.grid(True)
 
 time_fmt = "%Y/%m/%d %Hh"
-fig.suptitle("Time: %s ~ %s\nAverage: %d ~ %d km\n($\\overline{C}_H = %.1f$, $L_q \\overline{C}_Q = %.1f$, $\\overline{U} = %.1f$, $\\overline{T}_{OA} = %.1f \\mathrm{K}$, $\\overline{Q}_{OA} = %.1f \\mathrm{g}/\\mathrm{kg}$)" % (
-    time_beg.strftime(time_fmt),
-    time_end.strftime(time_fmt),
+fig.suptitle("Time: %d ~ %d hr\nAverage: %d ~ %d km\n($\\overline{C}_H = %.1f$, $L_q \\overline{C}_Q = %.1f$, $\\overline{U} = %.1f$, $\\overline{T}_{OA} = %.1f \\mathrm{K}$, $\\overline{Q}_{OA} = %.1f \\mathrm{g}/\\mathrm{kg}$)" % (
+    relTimeInHrs(time_beg),
+    relTimeInHrs(time_end),
     args.x_rng[0],
     args.x_rng[1],
     ref_C_H_m,

@@ -143,7 +143,7 @@ if args.enclosed_time_rng is not None:
 
     _ax.add_patch(rect)
 
-_ax.plot(mid_t_rel, max_absdU10dt * 1e4, "b-", label="max")
+_ax.plot(mid_t_rel, max_absdU10dt * 1e4, "b-", label="max_abs")
 _ax.plot(mid_t_rel, rms_dU10dt * 1e4, "r-", label="rms")
 
 

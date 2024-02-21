@@ -38,6 +38,10 @@ wrfout_data_interval = pd.Timedelta(seconds=args.wrfout_data_interval)
 time_beg = exp_beg_time + pd.Timedelta(minutes=args.time_rng[0])
 time_end = exp_beg_time + pd.Timedelta(minutes=args.time_rng[1])
 
+def relTimeInHrs(t):
+    return (t - exp_beg_time.to_datetime64()) / np.timedelta64(1, 'h')
+
+
 
 
 # Loading data
@@ -198,10 +202,10 @@ fig, ax = plt.subplots(
     sharex=True,
 )
 
-time_fmt="%y/%m/%d %Hh"
+#time_fmt="%y/%m/%d %Hh"
 
 if args.overwrite_title == "":
-    fig.suptitle("%sTime: %s ~ %s" % (args.extra_title, time_beg.strftime(time_fmt), time_end.strftime(time_fmt)))
+    fig.suptitle("%sTime: %d ~ %d hr" % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end),))
     
 else:
     fig.suptitle(args.overwrite_title)

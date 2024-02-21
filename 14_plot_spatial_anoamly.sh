@@ -4,16 +4,18 @@ fig_dir=figures/spatial_anomaly
 
 input_dirs=""
 exp_names=""
-input_dir_root=data/runs/lab_sine_200km
+input_dir_root=data/runs
+
+
 for dT in 000 010 020 030 040 050 060 070 080 090 100 ; do
-#for dT in 000 020 040 ; do
-        for MLsetup in woML ; do
-            for MLscheme in MYNN25 ; do 
-                for wnm in 01 ; do
-                    input_dirs="$input_dirs $input_dir_root/case_mph-off_dT${dT}_wnm${wnm}_${MLsetup}_${MLscheme}"
-                    exp_names="$exp_names $dT"
-                done
+    for Lx in "100" ; do
+        for U in "15" ; do
+            for _bl_scheme in "MYNN25" ; do
+                
+                input_dirs="$input_dirs ${input_dir_root}/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}"
+                exp_names="$exp_names $dT"
             done
+        done
     done
 done
 
@@ -22,7 +24,7 @@ mkdir -p $output_dir
 N=2
 
 dhr=6
-for i in 4; do
+for i in $(seq 7 12 ); do
     
     ((j=j%N)); ((j++==0)) && wait
 
@@ -35,8 +37,6 @@ for i in 4; do
         --exp-beg-time "2001-01-01 00:00:00" \
         --time-rng $hrs_beg $hrs_end \
         --x-rng 0 200        \
-        --HFX-rng -15 10        \
-        --LH-rng 10 35        \
         --exp-names $exp_names \
         --ref-exp-order 1 \
         --wrfout-data-interval 60 \

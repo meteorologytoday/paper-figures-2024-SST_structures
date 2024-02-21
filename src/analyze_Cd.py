@@ -16,12 +16,13 @@ parser.add_argument('--exp-beg-time', type=str, help='Title', required=True)
 parser.add_argument('--wrfout-data-interval', type=int, help='Time interval between each adjacent record in wrfout files in seconds.', required=True)
 parser.add_argument('--frames-per-wrfout-file', type=int, help='Number of frames in each wrfout file.', required=True)
 
-parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
-parser.add_argument('--x-rng', type=float, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
+#parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
+parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in minutes after --exp-beg-time", required=True)
+parser.add_argument('--x-rng', type=float, nargs=2, help="Spatial range to do the average", required=True)
 parser.add_argument('--SST-rng', type=float, nargs=2, help='Title', default=[14.5, 16.5])
 parser.add_argument('--no-display', action="store_true")
-parser.add_argument('--plot-check', action="store_true")
 parser.add_argument('--extra-title', type=str, help='Extra title', default="")
+parser.add_argument('--time-format', type=str, help='Time format in the title. `hr` or `min`', default="hr", choices=["hr", "min"])
 
 args = parser.parse_args()
 
@@ -42,11 +43,21 @@ else:
         raise Exception("Error: --exp-names does not receive the same length as --input-dirs")
 
 exp_beg_time = pd.Timestamp(args.exp_beg_time)
-time_beg = exp_beg_time + pd.Timedelta(hours=args.time_rng[0])
-time_end = exp_beg_time + pd.Timedelta(hours=args.time_rng[1])
+time_beg = exp_beg_time + pd.Timedelta(minutes=args.time_rng[0])
+time_end = exp_beg_time + pd.Timedelta(minutes=args.time_rng[1])
 
 def relTimeInHrs(t):
     return (t - exp_beg_time.to_datetime64()) / np.timedelta64(1, 'h')
+
+def relTimeInMins(t):
+    return (t - exp_beg_time.to_datetime64()) / np.timedelta64(1, 'm')
+
+if args.time_format == "hr":
+    relTimeInFormat = relTimeInHrs
+elif args.time_format == "min":
+    relTimeInFormat = relTimeInMins
+else:
+    raise Exception("Unknown `--time-format`: %s" % (args.time_format,))
 
 
 data_interval = pd.Timedelta(seconds=args.wrfout_data_interval)
@@ -146,93 +157,38 @@ for i, input_dir in enumerate(args.input_dirs):
     merge_data.append(WND_sfc)
     merge_data.append(C_H)
     merge_data.append(C_Q)
-   
-    ds = xr.merge(merge_data)
 
+
+    theta_a = ds["T"].isel(bottom_top=0) + 300
+    theta_a = theta_a.rename("theta_a") 
+  
+    Q = ds["QVAPOR"].isel(bottom_top=0) 
+    Qvsh = Q / (1.0 + Q)
+    Tvcon = 1 + 0.60772 * Qvsh
+    theta_av = theta_a * Tvcon
+    theta_av = theta_av.rename("theta_av")
+ 
+    Linv_verify = 0.40 * 9.81 * ds["MOL"] / theta_av / ds["USTM"]**2
+    Linv_verify = Linv_verify.rename("Linv_verify")
+
+    merge_data.append(theta_a)
+    merge_data.append(theta_a)
+    merge_data.append(Linv_verify)
+    
+    ds = xr.merge(merge_data)
+    
     ds = ds.where(
         (ds.coords["west_east"] >= args.x_rng[0]) & 
         (ds.coords["west_east"] <= args.x_rng[1]) 
     )
-    
-    # Surface flux approximation comes from 
-    # the file : module_sf_mynn.F    
-    #Ulev1 = ds["U_T"].isel(bottom_top=0).to_numpy()
-    #Vlev1 = ds["V"].isel(bottom_top=0).to_numpy()
-    
-
-    HFX_approx = ds["C_H"] * ds["WND_sfc"] * ds["TOA"]
-    HFX_approx = HFX_approx.rename("HFX_approx")
-    
-    QFX_approx = ds["C_Q"] * ds["WND_sfc"] * ds["QOA"]
-    _tmp = QFX_approx.to_numpy()
-    _tmp[_tmp <= -0.02] = -0.02
-    QFX_approx[:] = _tmp
-    LH_approx = Lq * QFX_approx
-    LH_approx = LH_approx.rename("LH_approx")
-   
-    ds = xr.merge([ds, HFX_approx, LH_approx])
-    
-    def horDecomp(da, name_m="mean", name_p="prime"):
-        m = da.mean(dim="west_east").rename(name_m)
-        p = (da - m).rename(name_p) 
-        return m, p
-
-    WND_m, WND_p = horDecomp(ds["WND_sfc"], "WND_m", "WND_p")
-    
-    C_H_m, C_H_p = horDecomp(ds["C_H"], "C_H_m", "C_H_p")
-    TOA_m, TOA_p = horDecomp(ds["TOA"], "TOA_m", "TOA_p")
-    
-    C_H_TOA_cx = (C_H_p * TOA_p).mean(dim="west_east").rename("C_H_TOA_cx")
-    C_H_WND_cx = (C_H_p * WND_p).mean(dim="west_east").rename("C_H_WND_cx")
-    WND_TOA_cx = (WND_p * TOA_p).mean(dim="west_east").rename("WND_TOA_cx")
-    C_H_WND_TOA_cx = (C_H_p * WND_p * TOA_p).mean(dim="west_east").rename("C_H_WND_TOA_cx")
-
-    C_Q_m, C_Q_p = horDecomp(ds["C_Q"], "C_Q_m", "C_Q_p")
-    QOA_m, QOA_p = horDecomp(ds["QOA"], "QOA_m", "QOA_p")
-
-    C_Q_QOA_cx = (C_Q_p * QOA_p).mean(dim="west_east").rename("C_Q_QOA_cx")
-    C_Q_WND_cx = (C_Q_p * WND_p).mean(dim="west_east").rename("C_Q_WND_cx")
-    WND_QOA_cx = (WND_p * QOA_p).mean(dim="west_east").rename("WND_QOA_cx")
-    C_Q_WND_QOA_cx = (C_Q_p * WND_p * QOA_p).mean(dim="west_east").rename("C_Q_WND_QOA_cx")
-    
-    SST_m, SST_p = horDecomp(ds["TSK"], "SST_m", "SST_p")
-
-    LST = ( ds["RMOL"] ** (-1) ).rename("LST")
-
-    ds = xr.merge([ds, 
-
-        SST_m, SST_p,
-        WND_m, WND_p,
-
-        C_H_m, C_H_p,
-        TOA_m, TOA_p,
-        C_H_TOA_cx,
-        C_H_WND_cx,
-        WND_TOA_cx,
-        C_H_WND_TOA_cx,
-
-        C_Q_m, C_Q_p,
-        QOA_m, QOA_p,
-        C_Q_QOA_cx,
-        C_Q_WND_cx,
-        WND_QOA_cx,
-        C_Q_WND_QOA_cx,
-
-        LST,
-    ])
-
+     
     ds.attrs["dT"]             = dT
-
-    ds = ds.mean(dim=['time',], skipna=True, keep_attrs=True)
+    
+    ds = ds.mean(dim=['time', 'west_east'], skipna=True, keep_attrs=True)
     data.append(ds)
 
-print("Done")
 
-
-
-# =================================================================
-# Figure: HFX decomposition
-# =================================================================
+print("Compute delta information...")
 
 if args.ref_exp_order is not None:
     ref_exp_idx = args.ref_exp_order - 1
@@ -241,46 +197,55 @@ else:
     raise Exception("Error: No ref_order specified.")    
 
 
-plot_infos = dict(
-
-    WND_p = dict(
-        label = "$ \\left| \\vec{U}_\\mathrm{sfc} \\right|'$",
-    ),
-
-    TOA_p = dict(
-        label = "$ T_\\mathrm{OA}' $",
-    ),
-
-    QOA_p = dict(
-        label = "$ q_\\mathrm{OA}' $",
-    ),
-
-    C_H_p = dict(
-        label = "$ C_H' $",
-    ),
-
-    C_Q_p = dict(
-        label = "$ C_q' $",
-    ),
-
-    SST_p = dict(
-        label = "$ \\mathrm{SST}' $",
-    ),
-
-    LST = dict(
-        label = "$ L_* $",
-    ),
-
-    RMOL = dict(
-        label = "$ L_*^{-1} $",
-    ),
+# Weird offset of theta_*
+Linv_offset = ref_ds["Linv_verify"].to_numpy() - ref_ds["RMOL"].to_numpy()
+#for _data in data:
+#    _data["RMOL"] += Linv_offset
 
 
-    UST = dict(
-        label = "$ u_* $",
-    ),
+merge_data = []
+dTs = np.array([ _data.attrs["dT"] for _data in data])
 
-)
+for varname in ["dln_theta_a", "dln_UST", "dln_TST", "dln_Linv", "dln_Linv_verify", "Linv", "Linv_verify"]:
+    
+    empty_var = xr.DataArray(
+        data=np.zeros_like(dTs),
+        dims=["dT",],
+        coords=dict(
+            dT=(["dT",], dTs),
+        ),
+    ).rename(varname)
+    
+    merge_data.append(empty_var)
+
+new_ds = xr.merge(merge_data)
+
+for i, _data in enumerate(data):
+   
+    for var_ln, var_raw in [
+        ["dln_UST", "UST"],
+        ["dln_TST", "MOL"],
+        ["dln_Linv", "RMOL"],
+        ["dln_theta_a", "theta_a"],
+    ]:
+        _ref = ref_ds[var_raw].to_numpy()
+        _delta = _data[var_raw].to_numpy() - _ref
+        new_ds[var_ln][i] = _delta / _ref
+
+    new_ds["Linv"][i] = _data["RMOL"].to_numpy()
+    new_ds["Linv_verify"][i] = _data["Linv_verify"].to_numpy()
+
+    #new_ds["Linv_verify"][i] = 0.40 * 9.81 * _data["MOL"] / (_data["theta_a"] * _data["UST"]**2)
+ 
+  
+new_ds["dln_Linv_verify"][:] = - 2 * new_ds["dln_UST"] - new_ds["dln_theta_a"] + new_ds["dln_TST"]
+   
+
+print("new_ds['dln_Linv'] = ", new_ds['dln_Linv'].to_numpy())
+
+
+ 
+print("Done")
 
 # =================================================================
 print("Loading matplotlib...")
@@ -294,56 +259,38 @@ print("Done")
 
 
 print("Plotting decomposition...")
-plot_vars = [
-    "SST_p",
-    "WND_p",
-    "TOA_p",
-    "QOA_p",
-    "C_H_p",
-    "C_Q_p",
-    "UST",
-    "LST",
-    "RMOL",
-]
 
 fig, ax = plt.subplots(
-    len(plot_vars),
     1,
-    figsize=(8, 12),
+    2,
+    figsize=(12, 6),
     gridspec_kw=dict(hspace=0.3),
     sharex=True,
 )
 
-color_starting = 0.8
 
-for i, plot_var in enumerate(plot_vars):
+_ax = ax[0]
 
-    _ax = ax[i]
+_ax.plot(new_ds.coords["dT"], new_ds["dln_Linv"], marker="o", color="black", label="$ \\Delta \\mathrm{ln} L^{-1}$")
+_ax.plot(new_ds.coords["dT"], new_ds["dln_Linv_verify"], marker="o", color="black", linestyle="--", label="$ \\Delta \\mathrm{ln} L^{-1}_\\mathrm{veri}$")
+_ax.plot(new_ds.coords["dT"], new_ds["dln_UST"], marker="x", label="$ \\Delta \\mathrm{ln} u_*$")
+_ax.plot(new_ds.coords["dT"], new_ds["dln_TST"], marker="x", label="$ \\Delta \\mathrm{ln} \\theta_*$")
+_ax.plot(new_ds.coords["dT"], new_ds["dln_theta_a"], marker="x", label="$ \\Delta \\mathrm{ln} \\theta_a$")
 
-    plot_info = plot_infos[plot_var]
+_ax.set_xlabel("$\\Delta T$ [K]")
 
-    for j in range(len(args.input_dirs)):
-        _ds = data[j]
+_ax = ax[1]
+_ax.plot(new_ds.coords["dT"], new_ds["Linv"], marker="o", color="black", label="$ \\mathrm{ln} L^{-1}$")
+_ax.plot(new_ds.coords["dT"], new_ds["Linv_verify"], marker="o", color="black", linestyle="--", label="$ \\mathrm{ln} L^{-1}_\\mathrm{veri}$")
 
-        color = tuple([ color_starting * ( 1.0 - j / len(args.input_dirs) ) ] * 3)
-
-        #_ax.plot(X_sT, _ds[plot_var] - ref_ds[plot_var], color=color, label="%d" % (j,))
-        _ax.plot(X_sT, _ds[plot_var], color=color, label="%d" % (j,))
-
-    _ax.set_title("(%s) %s" % ("abcdefghijklmn"[i], plot_info["label"],))
-    #_ax.set_ylabel("[$\\mathrm{W} / \\mathrm{m}^2$]")
-    #_ax.legend(loc="upper right", ncol=5)
+for _ax in ax.flatten():
+    _ax.legend()
     _ax.grid(True)
 
-ax[-1].set_xlabel("[km]")
 
-
-#time_fmt = "%Y/%m/%d %Hh"
-fig.suptitle("%sTime: %d ~ %d hr" % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end),))
+#fig.suptitle("%sTime: %d ~ %d hr, $L^{-1}_\\mathrm{ref} = $ %.2e" % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end), ref_ds["RMOL"]))
+fig.suptitle("%sTime: %d ~ %d %s, $L^{-1}_\\mathrm{ref} = $ %.2e" % (args.extra_title, relTimeInFormat(time_beg), relTimeInFormat(time_end), args.time_format, ref_ds["RMOL"]))
     
-
-
-#ax[-1].set_xlabel("Amplitude [ K ]")
 
 if args.output != "":
     print("Saving output: ", args.output)

@@ -139,7 +139,7 @@ _ax.set_xticks(ticks=xticks, labels=["$10^{%.1f}$" % (d, ) for d in xticks])
 _ax.set_yticks(ticks=yticks, labels=["$10^{%d}$" % (d, ) for d in yticks])
 
 _ax.grid(True)
-_ax.set_xlabel("Frequency [cycle / deg]")
+_ax.set_xlabel("Wavenumber [cycle / deg]")
 _ax.set_ylabel("Spectral Intensity [$ \\mathrm{K}^2 $]")
 
 
