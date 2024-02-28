@@ -12,6 +12,8 @@ cp_a  = 1004.0  # J / kg / K
 Lq = 2.5e6
 
 
+
+
 def genFluxAnalysis(
     input_dir,
     exp_beg_time,
@@ -19,8 +21,7 @@ def genFluxAnalysis(
     frames_per_wrfout_file,
     time_rng,
     x_rng,
-    overwrite = False,
-)
+):
 
     exp_beg_time = pd.Timestamp(exp_beg_time)
     time_beg = exp_beg_time + pd.Timedelta(hours=time_rng[0])
@@ -71,20 +72,19 @@ def genFluxAnalysis(
 
     print("Processing...")
     ds = ds.mean(dim=['south_north', 'south_north_stag'], keep_attrs=True)
-    if ref_ds is None:
     
-        ref_ds = ds.mean(dim=['time'], keep_attrs=True)
-        Nx = ref_ds.dims['west_east']
-        Nz = ref_ds.dims['bottom_top']
+    ref_ds = ds.mean(dim=['time'], keep_attrs=True)
+    Nx = ref_ds.dims['west_east']
+    Nz = ref_ds.dims['bottom_top']
 
-        X_sU = ref_ds.DX * np.arange(Nx+1) / 1e3
-        X_sT = (X_sU[1:] + X_sU[:-1]) / 2
-        X_T = np.repeat(np.reshape(X_sT, (1, -1)), [Nz,], axis=0)
-        X_W = np.repeat(np.reshape(X_sT, (1, -1)), [Nz+1,], axis=0)
+    X_sU = ref_ds.DX * np.arange(Nx+1) / 1e3
+    X_sT = (X_sU[1:] + X_sU[:-1]) / 2
+    X_T = np.repeat(np.reshape(X_sT, (1, -1)), [Nz,], axis=0)
+    X_W = np.repeat(np.reshape(X_sT, (1, -1)), [Nz+1,], axis=0)
 
-        Z_W = (ref_ds.PHB + ref_ds.PH) / 9.81
-        Z_T = (Z_W[1:, :] + Z_W[:-1, :]) / 2
-    
+    Z_W = (ref_ds.PHB + ref_ds.PH) / 9.81
+    Z_T = (Z_W[1:, :] + Z_W[:-1, :]) / 2
+
 
 
     ds = ds.assign_coords(dict(
@@ -230,4 +230,37 @@ def genFluxAnalysis(
 
 
 if __name__ == "__main__":
+    
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--input-dir', type=str, help='Input directories.', required=True)
+    parser.add_argument('--output', type=str, help='Output filename in png.', default="")
+    parser.add_argument('--exp-beg-time', type=str, help='Experiment begin time.', required=True)
+    parser.add_argument('--wrfout-data-interval', type=int, help='Time interval between each adjacent record in wrfout files in seconds.', required=True)
+    parser.add_argument('--frames-per-wrfout-file', type=int, help='Number of frames in each wrfout file.', required=True)
+
+    parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
+    parser.add_argument('--x-rng', type=float, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
+    
+    args = parser.parse_args()
+
+    print(args)
+    
+   
+
+    print("Processing ...")
+    ds = genFluxAnalysis(
+        args.input_dir,
+        args.exp_beg_time,
+        args.wrfout_data_interval,
+        args.frames_per_wrfout_file,
+        args.time_rng,
+        args.x_rng,
+    )
+
+    print("Output file: ", args.output)
+    ds.to_netcdf(args.output)
+    print("Done")
+    
+    
+    
     
