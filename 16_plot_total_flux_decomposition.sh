@@ -1,12 +1,16 @@
 #!/bin/bash
 
-fig_dir=figures
+source 00_setup.sh
+
+
 
 input_dirs=""
 exp_names=""
-input_dir_root="data/runs"
+input_dir_root=$data_dir/$target_lab
+output_dir=$fig_dir/total_flux_decomposition
 
-for dT in 000 010 020 030 040 050 060 070 080 090 100 ; do
+#for dT in 000 010 020 030 040 050 060 070 080 090 100 ; do
+for dT in 000 020 040 060 080 100 ; do
     for Lx in "100" ; do
         for U in "15" ; do
             for _bl_scheme in "MYNN25" ; do
@@ -19,12 +23,12 @@ for dT in 000 010 020 030 040 050 060 070 080 090 100 ; do
 done
 
 
-output_dir=$fig_dir
+
 mkdir -p $output_dir
 N=2
 
-dhr=6
-for i in $( seq 0 12 ); do
+dhr=24
+for i in $( seq 3 5 ); do
 #for i in 4 ; do
     
     ((j=j%N)); ((j++==0)) && wait

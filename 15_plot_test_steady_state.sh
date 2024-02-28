@@ -1,7 +1,9 @@
 #!/bin/bash
 
+source 00_setup.sh
+
 nproc=2
-fig_dir=figures/test_steady_state
+output_fig_dir=$fig_dir/test_steady_state
 dhr=72
 offset=0
 
@@ -11,8 +13,8 @@ for dT in "100"; do
         for U in "15" ; do
             for _bl_scheme in "MYNN25" ; do
                 
-                input_dir=data/runs/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
-                output_dir=$fig_dir/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
+                input_dir=$data_dir/$target_lab/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
+                output_dir=$output_fig_dir/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
 
                 mkdir -p $output_dir
 

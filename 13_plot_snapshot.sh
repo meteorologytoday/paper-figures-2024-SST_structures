@@ -1,28 +1,30 @@
 #!/bin/bash
 
-fig_dir=figures/snapshots
+source 00_setup.sh
+
+output_fig_dir=$fig_dir/snapshots
 
 nproc=2
 
 proc_cnt=0
 
-
+dhr=24
 
 for dT in "100"; do
     for Lx in "100" ; do
         for U in "15" ; do
             for _bl_scheme in "MYNN25" ; do
                 
-                input_dir=data/runs/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
-                output_dir=$fig_dir/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
+                input_dir=$data_dir/$target_lab/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
+                output_dir=$output_fig_dir/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
 
                 mkdir -p $output_dir
 
                 #for t in $( seq 0 7 ); do
-                for t in 4; do
+                for t in 1 2 0 ; do
                  
-                    hrs_beg=$( printf "%02d" $(( $t * 6 )) )
-                    hrs_end=$( printf "%02d" $(( ($t + 1) * 6 )) )
+                    hrs_beg=$( printf "%02d" $(( $t * $dhr )) )
+                    hrs_end=$( printf "%02d" $(( ($t + 1) * $dhr )) )
 
                     output_name="$output_dir/snapshot_${hrs_beg}-${hrs_end}.png"
                     extra_title=""

@@ -6,7 +6,7 @@ import os.path
 import re
 from datetime import datetime
 
-engine = "scipy"
+engine = "netcdf4"
 wrfout_time_fmt="%Y-%m-%d_%H:%M:%S"
 wrfout_prefix="wrfout_d01_"
 

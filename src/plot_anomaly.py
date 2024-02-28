@@ -275,6 +275,9 @@ plot_infos = dict(
         label = "$ L_*^{-1} $",
     ),
 
+    MOL = dict(
+        label = "$ \\theta_* $",
+    ),
 
     UST = dict(
         label = "$ u_* $",
@@ -302,7 +305,7 @@ plot_vars = [
     "C_H_p",
     "C_Q_p",
     "UST",
-    "LST",
+    "MOL",
     "RMOL",
 ]
 
