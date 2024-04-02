@@ -7,8 +7,8 @@ flux_dir=$gendata_dir/flux_decomposition
 dhr=24
 
 Lxs="20 40 60 80 100 120 140 160 180 200"
-Ugs="5 10 15 20"
-dSSTs="100"
+Ugs="0 5 10 15 20"
+dSSTs="000 020 040 060 080 100"
 bl_scheme="MYNN25"
 
                 

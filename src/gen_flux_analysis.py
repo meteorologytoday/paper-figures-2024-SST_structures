@@ -239,13 +239,16 @@ if __name__ == "__main__":
     parser.add_argument('--frames-per-wrfout-file', type=int, help='Number of frames in each wrfout file.', required=True)
 
     parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
-    parser.add_argument('--x-rng', type=float, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
+    parser.add_argument('--x-rng', type=float, nargs=2, help="X range in km", required=True)
     
     args = parser.parse_args()
 
     print(args)
     
-   
+  
+    x_rng = np.array(args.x_rng) * 1e3
+    print(x_rng)
+ 
 
     print("Processing ...")
     ds = genFluxAnalysis(
@@ -254,7 +257,7 @@ if __name__ == "__main__":
         args.wrfout_data_interval,
         args.frames_per_wrfout_file,
         args.time_rng,
-        args.x_rng,
+        x_rng,
     )
 
     print("Output file: ", args.output)
