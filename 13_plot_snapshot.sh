@@ -1,6 +1,8 @@
 #!/bin/bash
 
-fig_dir=figures/snapshots
+source 00_setup.sh
+
+snapshot_dir=$fig_dir/snapshots
 
 nproc=2
 
@@ -13,8 +15,8 @@ for dT in "100"; do
         for U in "15" ; do
             for _bl_scheme in "MYNN25" ; do
                 
-                input_dir=data/runs/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
-                output_dir=$fig_dir/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
+                input_dir=$simulation_dir/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
+                output_dir=$snapshot_dir/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
 
                 mkdir -p $output_dir
 
