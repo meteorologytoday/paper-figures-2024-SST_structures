@@ -16,5 +16,6 @@ python3 $src_dir/make_ideal_sounding_simple.py \
     --T-sfc $SST_base  \
     --z-st  $z_st \
     --output-fig $fig_dir/input_sounding_woML.png \
+    --thumbnail-numbering bcdefg \
     --no-display
 

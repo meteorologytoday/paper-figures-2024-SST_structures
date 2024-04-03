@@ -18,6 +18,7 @@ parser.add_argument('--no-display', action="store_true")
 parser.add_argument('--output-fig', type=str, help='Output figure filename.', default="")
 parser.add_argument('--total-height', type=float, help='Total atmospheric height (m).', default=23e3)
 parser.add_argument('--Nz', type=float, help='Number of points.', default=500)
+parser.add_argument('--thumbnail-numbering', type=str, help='Output sounding filename.', default="abcdefg")
 args = parser.parse_args()
 
 
@@ -175,8 +176,9 @@ ax[1].plot(N2**0.5 * 1e2, z_T_plot, label="$N$")
 #ax[2].plot(u_W, z_W_plot, label="$U$")
 #ax[2].plot(v_W, z_W_plot, label="$V$")
 
-ax[0].set_title("(a) Temperature")
-ax[1].set_title("(b) Brunt–Väisälä frequency $N$")
+
+ax[0].set_title("(%s) Temperature" % args.thumbnail_numbering[0] )
+ax[1].set_title("(%s) Brunt–Väisälä frequency $N$" % args.thumbnail_numbering[1] )
 
 ax[0].set_xlabel("[ $\\mathrm{K}$ ]")
 ax[1].set_xlabel("[ $\\times 10^{-2} \\, \\mathrm{s}^{-1}$ ]")

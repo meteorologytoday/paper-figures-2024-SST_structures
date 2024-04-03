@@ -20,3 +20,4 @@ figures/
 final_figures/
 __pycache__/
 data/*
+!figures_static/*
