@@ -37,7 +37,7 @@ for dT in "100"; do
                         --time-rng $(( $hrs_beg * 60 )) $(( $hrs_end * 60 ))  \
                         --extra-title "$extra_title"         \
                         --coarse-grained-time 3600           \
-                        --enclosed-time-rng 24 30           \
+                        --enclosed-time-rng 24 48            \
                         --no-display \
                         --output $output_name
 

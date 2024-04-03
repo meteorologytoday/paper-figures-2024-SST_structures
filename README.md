@@ -18,3 +18,13 @@ This is the code to generate the figures of the paper "Examining the SST Tendenc
 3. Unzip the folder `data` from `data.zip` into this git project root folder (i.e., the same folder containing this `README.md` file).
 4. Run `00_runall.sh`.
 5. The figures are generated in the folder `final_figures`.
+
+
+
+
+
+
+
+# Notes
+
+`61_collect_flux.sh` runs to generate nc files for `71_plot_WRF_phase.sh` to plot.
