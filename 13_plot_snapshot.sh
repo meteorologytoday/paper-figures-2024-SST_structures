@@ -21,7 +21,7 @@ for dT in "100"; do
                 mkdir -p $output_dir
 
                 #for t in $( seq 0 7 ); do
-                for t in 1 2 0 ; do
+                for t in 4 1 2 0 ; do
                  
                     hrs_beg=$( printf "%02d" $(( $t * $dhr )) )
                     hrs_end=$( printf "%02d" $(( ($t + 1) * $dhr )) )

@@ -4,8 +4,10 @@ source 00_setup.sh
 
 nproc=2
 output_fig_dir=$fig_dir/test_steady_state
-dhr=72
+dhr=120
 offset=0
+
+#dhr=6
 
 #for dT in "000" "020" "040" "060" "080" "100"; do
 for dT in "100"; do
@@ -34,10 +36,11 @@ for dT in "100"; do
                         --exp-beg-time "2001-01-01 00:00:00" \
                         --wrfout-data-interval 60            \
                         --frames-per-wrfout-file 60          \
-                        --time-rng $(( $hrs_beg * 60 )) $(( $hrs_end * 60 ))  \
+                        --time-rng $hrs_beg $hrs_end         \
                         --extra-title "$extra_title"         \
                         --coarse-grained-time 3600           \
                         --enclosed-time-rng 24 48            \
+                        --diag-press-lev 850 \
                         --no-display \
                         --output $output_name
 
