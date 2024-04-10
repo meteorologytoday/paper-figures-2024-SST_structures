@@ -18,7 +18,8 @@ parser.add_argument('--wrfout-data-interval', type=int, help='Time interval betw
 parser.add_argument('--frames-per-wrfout-file', type=int, help='Number of frames in each wrfout file.', required=True)
 
 parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
-parser.add_argument('--x-rng', type=float, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
+parser.add_argument('--x-rng', type=float, nargs=2, help="Time range in hours after --exp-beg-time", default=None)
+parser.add_argument('--parameter', type=str, help="What to put on x-axis. It can be `dT` or `Ug`.", required=True, choices=["Ug", "dT"])
 parser.add_argument('--LH-rng', type=float, nargs=2, help="LH range", default=[20, 100])
 parser.add_argument('--HFX-rng', type=float, nargs=2, help="HFX range", default=[-20, 40])
 parser.add_argument('--blh-method', type=str, help='Method to determine boundary layer height', default=["grad", "bulk"], nargs='+', choices=['bulk', 'grad'])
@@ -109,6 +110,11 @@ for i, input_dir in enumerate(args.input_dirs):
     #WIND10 = ((ds["U10"]**2 + ds["V10"]**2)**0.5).rename("WIND10")
     
     dT = (np.amax(ds["TSK"].to_numpy()) - np.amin(ds["TSK"].to_numpy())) / 2 
+
+
+
+    P = ds["PB"] + ds["P"]
+    Ug = ds["U"].where((P <= 850e2) & (P >= 700e2)).mean(skipna=True)
     #WIND10 = ds["U10"].copy().rename("WIND10")
     #V10 = ds["V"].isel(bottom_top=0).to_numpy()
     #U10 = ds["U"].isel(bottom_top=0).to_numpy()
@@ -154,11 +160,12 @@ for i, input_dir in enumerate(args.input_dirs):
    
     ds = xr.merge(merge_data)
 
-    ds = ds.where(
-        (ds.coords["west_east"] >= args.x_rng[0]) & 
-        (ds.coords["west_east"] <= args.x_rng[1]) 
-    )
-    
+    if args.x_rng is not None:
+        ds = ds.where(
+            (ds.coords["west_east"] >= args.x_rng[0]) & 
+            (ds.coords["west_east"] <= args.x_rng[1]) 
+        )
+        
     # Surface flux approximation comes from 
     # the file : module_sf_mynn.F    
     #Ulev1 = ds["U_T"].isel(bottom_top=0).to_numpy()
@@ -228,6 +235,7 @@ for i, input_dir in enumerate(args.input_dirs):
     ])
 
     ds.attrs["dT"]             = dT
+    ds.attrs["Ug"]             = Ug
 
     ds = ds.mean(dim=['time', 'west_east'], skipna=True, keep_attrs=True)
     data.append(ds)
@@ -320,7 +328,7 @@ if args.ref_exp_order is not None:
         y_LH["d(C_Q_WND_QOA_cx)"][j] = Lq * ( _ds["C_Q_WND_QOA_cx"] - ref_ds["C_Q_WND_QOA_cx"] )
 
 
-        x[j] = _ds.attrs["dT"]
+        x[j] = _ds.attrs[args.parameter]
         
         
     y_HFX["res"] = y_HFX["full"] - (
@@ -446,7 +454,11 @@ fig.suptitle("Time: %d ~ %d hr\nAverage: %d ~ %d km\n($\\overline{C}_H = %.1f$, 
     ref_QOA_m * 1e3,
 ))
 
-ax[-1].set_xlabel("Amplitude [ K ]")
+
+if args.parameter == "dT":
+    ax[-1].set_xlabel("Amplitude [ \\mathrm{K} ]")
+elif args.parameter == "Ug":
+    ax[-1].set_xlabel("$U_\\mathrm{g}$ [ \\mathrm{m} \\, / \\, \\mathrm{s} ]")
 
 if args.output_decomp != "":
     print("Saving output: ", args.output_decomp)

@@ -6,14 +6,14 @@ source 00_setup.sh
 
 input_dirs=""
 exp_names=""
-parameter=dT
+parameter=Ug
 input_dir_root=$data_dir/$target_lab
 output_dir=$fig_dir/total_flux_decomposition/$parameter
 
 #for dT in 000 010 020 030 040 050 060 070 080 090 100 ; do
-for dT in 000 020 040 060 080 100 ; do
+for dT in 100 ; do
     for Lx in "100" ; do
-        for U in "15" ; do
+        for U in "00" "05" "10" "15" "20" ; do
             for _bl_scheme in "MYNN25" ; do
                 
                 input_dirs="$input_dirs ${input_dir_root}/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}"
