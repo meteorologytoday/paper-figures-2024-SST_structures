@@ -18,7 +18,7 @@ trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
                 
 for i in 1 2 0; do
     for Lx in "020" "040" "060" "080" "100" "120" "140" "160" "180" "200" ; do
-        for U in "00" "05" "10" "15" "20" ; do
+        for U in "00" "05" "10" "15" "20" "25" "30" ; do
             for _bl_scheme in "MYNN25" ; do
                 for dT in 000 020 040 060 080 100 ; do
                     

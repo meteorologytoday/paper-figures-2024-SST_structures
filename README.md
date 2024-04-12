@@ -27,4 +27,10 @@ This is the code to generate the figures of the paper "Examining the SST Tendenc
 
 # Notes
 
-`61_collect_flux.sh` runs to generate nc files for `71_plot_WRF_phase.sh` to plot.
+## WRF's phase diagram of flux analysis
+
+- Run `51_generate_flux_analysis.sh`
+- Run `61_collect_flux.sh` runs to generate nc files
+- Run `71_plot_WRF_phase.sh` to plot.
+
+

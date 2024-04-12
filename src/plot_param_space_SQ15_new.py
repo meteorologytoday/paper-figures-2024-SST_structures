@@ -14,17 +14,14 @@ parser = argparse.ArgumentParser(
                     description = 'Plot prediction skill of GFS on AR.',
 )
 
-parser.add_argument('--input-dir', type=str, help='Input directory that contains all cases', required=True)
-parser.add_argument('--varying-params', type=str, nargs=2, help='Parameters. The first and second parameters will be the varying parameters while the rest stays fixed.', required=True, choices=["dSST", "Ug", "Lx", "DTheta"])
-parser.add_argument('--fixed-params', type=str, nargs='*', help='Parameters that stay fixed.', required=True, choices=["dSST", "Ug", "Lx", "DTheta"])
+parser.add_argument('--input-file', type=str, help='Input directory that contains all cases', required=True)
+parser.add_argument('--varying-params', type=str, nargs=2, help='Parameters. The first and second parameters will be the varying parameters while the rest stays fixed.', required=True, choices=["dSST", "Ug", "Lx", "DTheta", "RH"])
+parser.add_argument('--fixed-params', type=str, nargs='*', help='Parameters that stay fixed.', required=True, choices=["dSST", "Ug", "Lx", "DTheta", "RH"])
 parser.add_argument('--fixed-param-values', type=float, nargs="*", help='The values of the fixed parameters', default=[])
 
 parser.add_argument('--param1-rng', type=float, nargs=2, help='Parameter 1 range in plotting', default=[None, None])
 parser.add_argument('--param2-rng', type=float, nargs=2, help='Parameter 1 range in plotting', default=[None, None])
 
-parser.add_argument('--RH', type=float, help='Relative humidity', required=True)
-parser.add_argument('--Ugs',    type=float, nargs='+', help='Selected Ugs.', required=True)
-parser.add_argument('--Lxs', type=int,   nargs='+', help='Wave lengths in km.', required=True)
 parser.add_argument('--output', type=str, help='Output file', default="")
 parser.add_argument('--no-display', action="store_true")
 
@@ -34,112 +31,19 @@ print(args)
 pathlist = []
 sorting = []
 
-varnames = ["UTOA", "UQOA"]
+sel_dict = {}
+for i, param in enumerate(args.fixed_params):
+    sel_dict[param] = args.fixed_param_values[i]
 
-Ugs = args.Ugs
-wvlens = args.wvlens
-dSSTs = np.array([args.selected_dSST])
-DThetas = np.array([args.selected_DTheta])
-
-
-data = xr.Dataset(
-
-    data_vars = {
-        k : ( ["DTheta", "Ug", "wvlen", "dSST"], np.zeros((len(DThetas), len(Ugs), len(wvlens), len(dSSTs)))) 
-        for k in varnames
-    },
-
-    coords=dict(
-        DTheta=(["DTheta", ], DThetas),
-        Ug=(["Ug", ], Ugs),
-        wvlen=(["wvlen", ], wvlens),
-        dSST=(["dSST", ], dSSTs),
-    ),
-)
-
-for i, Ug in enumerate(args.Ugs):
-    for j, wvlen in enumerate(args.wvlens):
-        
-        filename = os.path.join(
-            args.input_dir,
-            "DTheta_{DTheta:.1f}-Ug_{Ug:.1f}-wvlen_{wvlen:03d}-dSST_{dSST:.2f}.nc".format(
-                DTheta = args.selected_DTheta,
-                Ug = Ug,
-                wvlen = wvlen,
-                dSST = args.selected_dSST,
-            ),
-        )
-
-        print("Loading case: ", filename)
-
-        _ds = xr.open_dataset(filename)
-        _ds = _ds.isel(y_T=0)
-       
-        if _ds.attrs["dSST"] != args.selected_dSST:
-            raise Exception("Problem loading dSST! Not consistent with selected dSST")
-
-        
-        # Do integration
-        dx_T = _ds["dx_T"].to_numpy()
-       
-        U = ( (_ds["u_0"] + _ds["u_1"])**2 + (_ds["v_0"] + _ds["v_1"])**2 )**0.5
-        U = U.isel(z_T=0).to_numpy() 
-        TOA = (_ds["sst_1"] -  _ds["pt_1"]).to_numpy()
-     
-        #U_1 = ((_ds["u_1"]**2 + _ds["v_1"]**2)**0.5).isel(z_T=0).to_numpy()
-        #U_1 = _ds["u_1"].isel(z_T=0).to_numpy()
-        #U_0 = U_1*0 + (( _ds["u_0"]**2 + _ds["v_0"]**2 )**0.5).isel(z_T=0).to_numpy()
-
-        #data["U1delta1"][i] = np.sum(dx_T * U_1 * delta_1) / np.sum(dx_T)
-        #data["U0delta1"][i] = np.sum(dx_T * U_0 * delta_1) / np.sum(dx_T)
-        U_mean = np.sum(dx_T * U) / np.sum(dx_T)
-        TOA_mean = np.sum(dx_T * TOA) / np.sum(dx_T)
-
-        #data["Udelta_FULL"][i, j, 0] = np.sum(dx_T * U * delta) / np.sum(dx_T)
-        #data["U_mean"][i, j, 0]      = U_mean
-        #data["delta_mean"][i, j, 0]  = delta_mean
-        #data["Udelta_CORR"][i, j, 0] = np.sum(dx_T * (U - U_mean) * (delta - delta_mean)) / np.sum(dx_T)
-        data["UTOA"][0, i, j, 0] = np.sum(dx_T * U * TOA) / np.sum(dx_T)
-
-        # Bolton (1980)
-        def T2q(T, P, RH): # T in Kelvin, results in Pa
-            E1 = 0.6112e3 * np.exp(17.67 * (T - 273.15) / (T - 29.65) ) * RH
-            q = 0.622 * E1 / (P - E1)
-            return q
-            
-        sst_total = (_ds.attrs["Theta0"] + _ds["sst_1"]).to_numpy()
-        pt_total  = (_ds.attrs["Theta0"] + _ds["pt_1"]).to_numpy()
-
-        Qsfc = T2q(sst_total, 1000e2, 1.0)
-        Qair = T2q(pt_total,  1000e2, args.RH)
-
-        QOA = Qsfc - Qair
-        data["UQOA"][0, i, j, 0] = np.sum(dx_T * U * QOA) / np.sum(dx_T)
-     
-
-
-        
-"""
-const_H = 6.9
-ref_idx = 0
-data_dif = dict(
-    WND = np.zeros((N,)),
-    THM = np.zeros((N,)),
-    COR = np.zeros((N,)),
-    FUL = np.zeros((N,)),
-)
-
-for i, path in enumerate(pathlist):
+print("sel_dict = ", str(sel_dict))
     
-    data_dif["WND"][i] = const_H * (data["U_mean"][i] - data["U_mean"][ref_idx]) * data["delta_mean"][ref_idx]
-    data_dif["THM"][i] = const_H * (data["delta_mean"][i] - data["delta_mean"][ref_idx]) * data["U_mean"][ref_idx]
-    data_dif["COR"][i] = const_H * (data["Udelta_CORR"][i] - data["Udelta_CORR"][ref_idx])
-    data_dif["FUL"][i] = const_H * (data["Udelta_FULL"][i] - data["Udelta_FULL"][ref_idx])
+coord_x_varname = args.varying_params[0]
+coord_y_varname = args.varying_params[1]
 
-data_dif["RES"] = data_dif["FUL"] - (data_dif["THM"] + data_dif["COR"] + data_dif["WND"])
-"""
+print("Loading input file: ", args.input_file)
+data = xr.open_dataset(args.input_file)
 
-print("Domain size: sum(dx_T) = ", np.sum(dx_T))
+
 
 
 plot_infos = dict(
@@ -159,6 +63,38 @@ plot_infos = dict(
     )
 
 )
+
+coord_infos = dict(
+
+    dSST = dict(
+        label = "$ \\Delta \\mathrm{SST} $",
+        unit  = "$ \\mathrm{K} $",
+        factor = 1,
+    ),
+
+    Lx   = dict(
+        label = "$ L_x $",
+        unit  = "$\\mathrm{km}$",
+    ),
+
+    Ug   = dict(
+        label = "$ U_\\mathrm{g} $",
+        unit  = "$ \\mathrm{m} / \\mathrm{s} $",
+    ),
+
+    RH   = dict(
+        label = "RH",
+        unit  = "",
+    ),
+
+    DTheta   = dict(
+        label = "$ \\Delta \\Theta $",
+        unit  = "$ \\mathrm{K} $",
+    ),
+
+
+)
+
 
 
 # Plot data
@@ -211,20 +147,43 @@ fig, ax = plt.subplots(
     sharex=True,
 )
 
-fig.suptitle("$ \\Delta \\Theta = {DTheta:d} \\mathrm{{K}} $, $ \\mathrm{{RH}} = {RH:.1f} \\% $".format(
-    DTheta = int(args.selected_DTheta),
-    RH     = args.RH * 1e2,
-))
+
+pieces = [
+    "{label:s} = {val:.1f} {unit:s}".format(
+        label = coord_infos[k]["label"],
+        unit  = coord_infos[k]["unit"],
+        val   = sel_dict[k],
+    )
+    for k in args.fixed_params
+]
+
+
+fig.suptitle(", ".join(pieces))
  
 for i, varname in enumerate(varnames):
     
     _ax = ax.flatten()[i]
 
     plot_info = plot_infos[varname]
+    
 
-    _plot_data = data[varname].isel(dSST=0).isel(DTheta=0).to_numpy() / plot_info['factor']
+
+    coord_x = data.coords[coord_x_varname].to_numpy().copy()
+    coord_y = data.coords[coord_y_varname].to_numpy().copy()
+    coord_info_x = coord_infos[coord_x_varname]
+    coord_info_y = coord_infos[coord_y_varname]
+
+
+    if 'factor' in coord_info_x:
+        coord_x *= coord_info_x['factor']
+
+    if 'factor' in coord_info_y:
+        coord_y *= coord_info_y['factor']
+
+
+    _plot_data = data[varname].sel(**sel_dict).transpose(coord_x_varname, coord_y_varname).to_numpy() / plot_info['factor']
     _cntr_levs = plot_info['cntr_levs']
-    cs = _ax.contour(wvlens, Ugs, _plot_data, _cntr_levs, colors='black')
+    cs = _ax.contour(coord_x, coord_y, np.transpose(_plot_data), _cntr_levs, colors='black')
     plt.clabel(cs)
 
     _ax.set_title("{label:s} [{unit:s}]".format(
@@ -232,8 +191,8 @@ for i, varname in enumerate(varnames):
         unit  = plot_info["unit"],
     ))
 
-    _ax.set_xlabel("$ L_x $ [ km ]")
-    _ax.set_ylabel("$ U_\\mathrm{g} $ [ m / s ]")
+    _ax.set_xlabel("{label:s} [ {unit:s} ]".format(label=coord_info_x["label"], unit=coord_info_x["unit"]))
+    _ax.set_ylabel("{label:s} [ {unit:s} ]".format(label=coord_info_y["label"], unit=coord_info_y["unit"]))
 
 
 for _ax in ax.flatten():

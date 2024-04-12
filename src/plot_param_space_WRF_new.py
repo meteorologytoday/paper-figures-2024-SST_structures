@@ -155,8 +155,8 @@ for i, varname in enumerate(varnames):
 
 
 
-    coord_x = data.coords[coord_x_varname].to_numpy()
-    coord_y = data.coords[coord_y_varname].to_numpy()
+    coord_x = data.coords[coord_x_varname].to_numpy().copy()
+    coord_y = data.coords[coord_y_varname].to_numpy().copy()
     coord_info_x = coord_infos[coord_x_varname]
     coord_info_y = coord_infos[coord_y_varname]
 
