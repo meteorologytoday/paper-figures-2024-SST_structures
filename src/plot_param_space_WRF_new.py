@@ -16,15 +16,30 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('--title', type=str, help='Title', default=None)
 parser.add_argument('--input', type=str, help='Input filename', required=True)
-parser.add_argument('--parameters', type=str, nargs="+", help='Parameters. The first and second parameters will be the varying parameters while the rest stays fixed.', required=True)
-parser.add_argument('--selected-dSST', type=float, help='Selected fixed dSST', required=True)
-parser.add_argument('--Ug-rng', type=float, nargs=2, help='Ug range in plotting', default=[None, None])
-parser.add_argument('--Lx-rng', type=float, nargs=2, help='Lx range in plotting', default=[None, None])
+parser.add_argument('--varying-params', type=str, nargs=2, help='Parameters. The first and second parameters will be the varying parameters while the rest stays fixed.', required=True, choices=["dSST", "Ug", "Lx"])
+parser.add_argument('--fixed-params', type=str, nargs='*', help='Parameters that stay fixed.', required=True, choices=["dSST", "Ug", "Lx"])
+parser.add_argument('--fixed-param-values', type=float, nargs="*", help='The values of the fixed parameters', default=[])
+
+
+parser.add_argument('--param1-rng', type=float, nargs=2, help='Parameter 1 range in plotting', default=[None, None])
+parser.add_argument('--param2-rng', type=float, nargs=2, help='Parameter 1 range in plotting', default=[None, None])
 parser.add_argument('--output', type=str, help='Output file', default="")
 parser.add_argument('--no-display', action="store_true")
 
 args = parser.parse_args()
 print(args)
+
+if len(args.fixed_params) != len(args.fixed_param_values):
+    raise Exception("Length of `--fixed-params` should match `--fixed-param-values`.")
+
+sel_dict = {}
+for i, param in enumerate(args.fixed_params):
+    sel_dict[param] = args.fixed_param_values[i]
+
+print("sel_dict = ", str(sel_dict))
+    
+coord_x_varname = args.varying_params[0]
+coord_y_varname = args.varying_params[1]
 
 pathlist = []
 sorting = []
@@ -33,9 +48,6 @@ varnames = ["WND_TOA_cx", "WND_QOA_cx", ]
 
 
 data = xr.open_dataset(args.input)
-
-
-
 
 
 # Plot data
@@ -59,6 +71,18 @@ plot_infos = dict(
 )
 
 
+coord_infos = dict(
+    dSST = dict(
+        label = "$ \\Delta \\mathrm{SST} $ [ K ]",
+        factor = 1e-2,
+    ),
+    Lx   = dict(
+        label = "$ L_x $ [ km ]",
+    ),
+    Ug   = dict(
+        label = "$ U_\\mathrm{g} $ [ m / s ]"
+    ),
+)
 
 print("Loading Matplotlib...")
 import matplotlib as mpl
@@ -114,7 +138,12 @@ for i, varname in enumerate(varnames):
     _ax = ax.flatten()[i]
 
     plot_info = plot_infos[varname]
-    _plot_data = data[varname].sel(dSST=args.selected_dSST).to_numpy()
+
+    _plot_data = data[varname].sel(**sel_dict).transpose(coord_x_varname, coord_y_varname)
+
+    print(_plot_data)
+
+    _plot_data = _plot_data.to_numpy()
     print("%s : mean = %f , std = %f" % (varname, _plot_data.mean(), _plot_data.std()))
     _plot_data /= plot_info["factor"]
 
@@ -125,7 +154,25 @@ for i, varname in enumerate(varnames):
 
 
 
-    cs = _ax.contour(data.coords['Lx'], data.coords['Ug'], _plot_data, cntr_levs, colors='black')
+
+    coord_x = data.coords[coord_x_varname].to_numpy()
+    coord_y = data.coords[coord_y_varname].to_numpy()
+    coord_info_x = coord_infos[coord_x_varname]
+    coord_info_y = coord_infos[coord_y_varname]
+
+
+    if 'factor' in coord_info_x:
+        coord_x *= coord_info_x['factor']
+
+    if 'factor' in coord_info_y:
+        coord_y *= coord_info_y['factor']
+
+
+    print(len(coord_x))
+    print(len(coord_y))
+    print(_plot_data.shape)
+
+    cs = _ax.contour(coord_x, coord_y, np.transpose(_plot_data), cntr_levs, colors='black')
 
 
 
@@ -134,13 +181,15 @@ for i, varname in enumerate(varnames):
         label = plot_info["label"],
         unit  = plot_info["unit"],
     ))
-    _ax.set_xlabel("$ L_x $ [ km ]")
-    _ax.set_ylabel("$ U_\\mathrm{g} $ [ m / s ]")
+
+
+    _ax.set_xlabel(coord_info_x["label"])
+    _ax.set_ylabel(coord_info_y["label"])
     
     
     _ax.grid()
-    _ax.set_ylim(args.Ug_rng)
-    _ax.set_xlim(args.Lx_rng)
+    #_ax.set_xlim(args.param1_rng)
+    #_ax.set_ylim(args.param2_rng)
 
 if args.title is not None:
     fig.suptitle(args.title)

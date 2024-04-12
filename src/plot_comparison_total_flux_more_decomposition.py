@@ -442,11 +442,10 @@ for i, plot_bundle in enumerate(plot_bundles):
     _ax.grid(True)
 
 time_fmt = "%Y/%m/%d %Hh"
-fig.suptitle("Time: %d ~ %d hr\nAverage: %d ~ %d km\n($\\overline{C}_H = %.1f$, $L_q \\overline{C}_Q = %.1f$, $\\overline{U} = %.1f$, $\\overline{T}_{OA} = %.1f \\mathrm{K}$, $\\overline{Q}_{OA} = %.1f \\mathrm{g}/\\mathrm{kg}$)" % (
+fig.suptitle("Time: %d ~ %d hr\n%s($\\overline{C}_H = %.1f$, $L_q \\overline{C}_Q = %.1f$, $\\overline{U} = %.1f$, $\\overline{T}_{OA} = %.1f \\mathrm{K}$, $\\overline{Q}_{OA} = %.1f \\mathrm{g}/\\mathrm{kg}$)" % (
     relTimeInHrs(time_beg),
     relTimeInHrs(time_end),
-    args.x_rng[0],
-    args.x_rng[1],
+    "Average: %d ~ %d km\n" % (args.x_rng[0], args.x_rng[1]) if args.x_rng is not None else "",
     ref_C_H_m,
     ref_C_Q_m * Lq,
     ref_WND_m,
@@ -456,9 +455,9 @@ fig.suptitle("Time: %d ~ %d hr\nAverage: %d ~ %d km\n($\\overline{C}_H = %.1f$, 
 
 
 if args.parameter == "dT":
-    ax[-1].set_xlabel("Amplitude [ \\mathrm{K} ]")
+    ax[-1].set_xlabel("Amplitude [ $\\mathrm{K}$ ]")
 elif args.parameter == "Ug":
-    ax[-1].set_xlabel("$U_\\mathrm{g}$ [ \\mathrm{m} \\, / \\, \\mathrm{s} ]")
+    ax[-1].set_xlabel("$U_\\mathrm{g}$ [ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
 
 if args.output_decomp != "":
     print("Saving output: ", args.output_decomp)

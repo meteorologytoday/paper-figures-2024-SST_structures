@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--Ugs', type=int, nargs="+", help='Ug in m/s.', required=True)
     parser.add_argument('--Lxs', type=int, nargs="+", help='Lx in km.', required=True)
-    parser.add_argument('--dSSTs', type=float, nargs="+", help='dSST in K.', required=True)
+    parser.add_argument('--dSSTs', type=float, nargs="+", help='dSST in 0.01K.', required=True)
 
     args = parser.parse_args()
 
