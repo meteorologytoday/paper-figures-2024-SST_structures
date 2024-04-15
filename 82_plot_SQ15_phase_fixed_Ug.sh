@@ -10,7 +10,7 @@ output_dir=$fig_dir/phase_SQ15
 
 mkdir -p $output_dir
 
-for Ug in 20 ; do
+for Ug in 10 ; do
 for RH in 0.999 ; do
 for DTheta in 0.1 1 5 10 ; do
 
