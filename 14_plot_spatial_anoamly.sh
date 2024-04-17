@@ -33,7 +33,8 @@ for i in $(seq 1 2 ) 0; do
     ((j=j%N)); ((j++==0)) && wait
 
     hrs_beg=$( printf "%02d" $(( $i * $dhr )) )
-    hrs_end=$( printf "%02d" $(( ($i + 1) * $dhr )) )
+    #hrs_end=$( printf "%02d" $(( ($i + 1) * $dhr )) )
+    hrs_end=$( printf "%02d" $(( ($i  * $dhr) + 1 )) )
     output_name="$output_dir/spatial_anomaly_${hrs_beg}-${hrs_end}.png"
 
     python3 src/plot_anomaly.py \

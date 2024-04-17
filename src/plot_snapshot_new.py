@@ -188,7 +188,7 @@ if args.plot_check:
     )
 
 
-    fig, ax = plt.subplots(1, 7, figsize=(14, 6), sharey=True)
+    fig, ax = plt.subplots(1, 7, figsize=(6, 14), sharey=True)
 
 
     ax[0].plot(U,  Z_T[:, loc], label="U")
@@ -225,12 +225,28 @@ if args.plot_check:
 
     plt.show(block=False)
 
+ncol = 4
+nrow = 3
+figsize, gridspec_kw = tool_fig_config.calFigParams(
+    w = [6, 1, 1, 1],
+    h = [4, 4/3, 4/3],
+    wspace = 1.0,
+    hspace = 1.0,
+    w_left = 1.0,
+    w_right = 1.0,
+    h_bottom = 1.0,
+    h_top = 1.0,
+    ncol = ncol,
+    nrow = nrow,
+)
+
 fig, ax = plt.subplots(
-    5, 2,
-    figsize=(8, 15),
+    3, 4,
+    figsize=(15, 8),
     subplot_kw=dict(aspect="auto"),
-    gridspec_kw=dict(height_ratios=[3, 3, 3, 1, 1], width_ratios=[5, 1], hspace=0.3, right=0.8),
+    gridspec_kw=gridspec_kw,
     constrained_layout=False,
+    squeeze=False,
 )
 
 #time_fmt="%y/%m/%d %Hh"
@@ -244,7 +260,7 @@ else:
 
 u_levs = np.linspace(-1, 1, 11)
 v_levs = np.linspace(-1, 1, 11)
-w_levs = np.linspace(-5, 5, 21) / 10
+w_levs = np.linspace(-5, 5, 11) / 10
 #theta_levs = np.arange(273, 500, 2)
 theta_levs = np.concatenate( 
     (
@@ -260,75 +276,86 @@ cmap_diverge = cmocean.cm.balance
 
 mappable1 = ax[0, 0].contourf(X_W, Z_W, ds.W * 1e2, levels=w_levs, cmap=cmap_diverge, extend="both")
 
-cax = tool_fig_config.addAxesNextToAxes(fig, ax[0, 0], "right", thickness=0.03, spacing=0.05)
-cbar0 = plt.colorbar(mappable1, cax=cax, orientation="vertical")
+#cax = tool_fig_config.addAxesNextToAxes(fig, ax[0, 0], "right", thickness=0.03, spacing=0.05)
+#cbar0 = plt.colorbar(mappable1, cax=cax, orientation="vertical")
 
+cs = ax[0, 0].contour(X_W, Z_W, ds.W * 1e2, levels=w_levs, colors="black")
+plt.clabel(cs)
 
-#U = (ds.U[:, :-1] + ds.U[:, 1:]) / 2
-U = (U_prime[:, :-1] + U_prime[:, 1:]) / 2
-mappable1 = ax[1, 0].contourf(X_T, Z_T, U, levels=u_levs, cmap=cmap_diverge, extend="both")
-cax = tool_fig_config.addAxesNextToAxes(fig, ax[1, 0], "right", thickness=0.03, spacing=0.05)
-cbar1 = plt.colorbar(mappable1, cax=cax, orientation="vertical")
-
-
-mappable1 = ax[2, 0].contourf(X_T, Z_T, V_prime, levels=v_levs, cmap=cmap_diverge, extend="both")
-cax = tool_fig_config.addAxesNextToAxes(fig, ax[2, 0], "right", thickness=0.03, spacing=0.05)
-cbar2 = plt.colorbar(mappable1, cax=cax, orientation="vertical")
-
-
-for _ax in ax[0:3, 0].flatten():
-    cs = _ax.contour(X_T, Z_T, theta_prime, levels=theta_levs, colors='k')
-    plt.clabel(cs)
+for _ax in ax[0:1, 0].flatten():
+    #cs = _ax.contour(X_T, Z_T, theta_prime, levels=theta_levs, colors='k')
+    #plt.clabel(cs)
     _ax.plot(X_sT, ds.PBLH, color="pink", linestyle="--")
 
 
 ax[0, 1].plot(ds_ref_stat["T"] + 300, ref_Z_T)
-ax[1, 1].plot(ds_ref_stat["U"], ref_Z_T)
-ax[2, 1].plot(ds_ref_stat["V"], ref_Z_T)
+ax[0, 2].plot(ds_ref_stat["U"], ref_Z_T)
+ax[0, 3].plot(ds_ref_stat["V"], ref_Z_T)
 
 
 U10_mean = np.mean(ds.U10)
 V10_mean = np.mean(ds.V10)
-ax[3, 0].plot(X_sT, ds.U10 - U10_mean, "k-", label="$U_{\\mathrm{10m}} - \\overline{U}_{\\mathrm{10m}}$")
-ax[3, 0].plot(X_sT, ds.V10 - V10_mean, "k--",   label="$V_{\\mathrm{10m}} - \\overline{V}_{\\mathrm{10m}}$")
+ax[1, 0].plot(X_sT, ds.U10 - U10_mean, "k-", label="$U_{\\mathrm{10m}} - \\overline{U}_{\\mathrm{10m}}$")
+ax[1, 0].plot(X_sT, ds.V10 - V10_mean, "k--",   label="$V_{\\mathrm{10m}} - \\overline{V}_{\\mathrm{10m}}$")
 
 # SST
-ax[4, 0].plot(X_sT, SST, color='blue', label="SST")
-ax[4, 0].plot(X_sT, ds.T2 - zerodegC, color='red', label="$T_{\\mathrm{2m}}$")
+ax[2, 0].plot(X_sT, SST, color='blue', label="SST")
+ax[2, 0].plot(X_sT, ds.T2 - zerodegC, color='red', label="$T_{\\mathrm{2m}}$")
 
 
-cbar0.ax.set_ylabel("W [$\\mathrm{cm} / \\mathrm{s}$]")
-cbar1.ax.set_ylabel("U [$\\mathrm{m} / \\mathrm{s}$]")
-cbar2.ax.set_ylabel("V [$\\mathrm{m} / \\mathrm{s}$]")
+#cbar0.ax.set_ylabel("W [$\\mathrm{cm} / \\mathrm{s}$]")
+#cbar1.ax.set_ylabel("U [$\\mathrm{m} / \\mathrm{s}$]")
+#cbar2.ax.set_ylabel("V [$\\mathrm{m} / \\mathrm{s}$]")
 
 
 
-for _ax in ax[0:3, :].flatten():
+for i, _ax in enumerate(ax[0, :]):
     _ax.set_ylim(args.z_rng)
-    _ax.set_ylabel("z [ m ]")
+     
+    if i==0:
+        _ax.set_ylabel("$z$ [ m ]")
+    else:
+        _ax.set_ylabel("")
+        _ax.set_yticks(_ax.get_yticks(), [""]*len(_ax.get_yticks()))
+        _ax.grid()
 
 
-ax[0, 0].set_title("(a)")
-ax[1, 0].set_title("(b)")
+
+ax[0, 0].set_title("(a) $W$ [$\\mathrm{cm} / \\mathrm{s}$]")
 ax[2, 0].set_title("(c)")
+ax[0, 1].set_title("(d) $\\overline{\\theta}$")
+ax[0, 2].set_title("(e) $U$")
+ax[0, 3].set_title("(f) $V$")
 
-ax[4, 0].set_title("(e)")
+ax[0, 1].set_xlabel("[ $\\mathrm{K}$ ]")
+ax[0, 2].set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
+ax[0, 3].set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
 
-ax[3, 0].legend()
-ax[3, 0].set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
-ax[3, 0].set_title("(d) $\\left( \\overline{U}_{\\mathrm{10m}}, \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right)$" % (U10_mean, V10_mean,))
 
-ax[4, 0].legend()
-ax[4, 0].set_ylabel("[ $ \\mathrm{K}$ ]", color="black")
+
+ax[1, 0].legend()
+ax[1, 0].set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
+ax[1, 0].set_title("(b) $\\left( \\overline{U}_{\\mathrm{10m}}, \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right)$" % (U10_mean, V10_mean,))
+
+ax[2, 0].legend()
+ax[2, 0].set_ylabel("[ $ \\mathrm{K}$ ]", color="black")
 
 for _ax in ax[:, 0].flatten():
     _ax.grid()
-    _ax.set_xlabel("[km]")
+    _ax.set_xlabel("$x$ [km]")
     _ax.set_xlim(np.array(args.x_rng))
 
 
-ax[3, 0].set_ylim([-2.5, 2.5])
-ax[4, 0].set_ylim([13.5, 16.5])
+ax[0, 1].set_xlim([285, 310])
+ax[0, 2].set_xlim([0, 20])
+ax[0, 3].set_xlim([-1, 3])
+
+ax[1, 0].set_ylim([-2.5, 2.5])
+ax[2, 0].set_ylim([13.5, 16.5])
+
+
+for _ax in ax[1:, 1:].flatten():
+    plt.delaxes(_ax)
 
 if args.output != "":
     print("Saving output: ", args.output)
