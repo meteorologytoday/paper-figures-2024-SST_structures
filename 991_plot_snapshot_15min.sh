@@ -12,7 +12,7 @@ dmin=15
 
 for dT in "100"; do
     for Lx in "100" ; do
-        for U in "15" ; do
+        for U in "20" ; do
             for _bl_scheme in "MYNN25" ; do
                 
                 input_dir=$data_dir/$target_lab/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
@@ -21,8 +21,8 @@ for dT in "100"; do
                 mkdir -p $output_dir
 
                 #for t in $( seq 0 7 ); do
-                #for t in $( seq 0 480 ) ; do
-                for t in $( seq 240 280 ) ; do
+                for t in $( seq 0 480 ) ; do
+                #for t in $( seq 240 280 ) ; do
                  
                     min_beg=$( printf "%04d" $(( $t * $dmin )) )
                     min_end=$( printf "%04d" $(( ($t + 1) * $dmin )) )
@@ -45,6 +45,8 @@ for dT in "100"; do
                             --time-rng $min_beg $min_end         \
                             --extra-title "$extra_title"         \
                             --z-rng 0 5000 \
+                            --U-rng 10 30  \
+                            --V-rng -1 4   \
                             --output $output_name \
                             --no-display &
 

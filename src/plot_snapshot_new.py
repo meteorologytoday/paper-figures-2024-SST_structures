@@ -23,6 +23,8 @@ parser.add_argument('--wrfout-data-interval', type=int, help='Time interval betw
 parser.add_argument('--frames-per-wrfout-file', type=int, help='Number of frames in each wrfout file.', required=True)
 parser.add_argument('--z-rng', type=float, nargs=2, help='The plotted height rng in meters.', default=[0, 1200.0])
 parser.add_argument('--x-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
+parser.add_argument('--U-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
+parser.add_argument('--V-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
 parser.add_argument('--U10-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
 
 args = parser.parse_args()
@@ -260,7 +262,7 @@ else:
 
 u_levs = np.linspace(-1, 1, 11)
 v_levs = np.linspace(-1, 1, 11)
-w_levs = np.linspace(-5, 5, 11) / 10
+w_levs = np.linspace(-8, 8, 17) / 10
 #theta_levs = np.arange(273, 500, 2)
 theta_levs = np.concatenate( 
     (
@@ -285,7 +287,7 @@ plt.clabel(cs)
 for _ax in ax[0:1, 0].flatten():
     #cs = _ax.contour(X_T, Z_T, theta_prime, levels=theta_levs, colors='k')
     #plt.clabel(cs)
-    _ax.plot(X_sT, ds.PBLH, color="pink", linestyle="--")
+    _ax.plot(X_sT, ds.PBLH, color="pink", linestyle="-.")
 
 
 ax[0, 1].plot(ds_ref_stat["T"] + 300, ref_Z_T)
@@ -322,7 +324,7 @@ for i, _ax in enumerate(ax[0, :]):
 
 
 ax[0, 0].set_title("(a) $W$ [$\\mathrm{cm} / \\mathrm{s}$]")
-ax[2, 0].set_title("(c)")
+ax[2, 0].set_title("(c) SST (blue) and $T_\\mathrm{2m}$ (red)")
 ax[0, 1].set_title("(d) $\\overline{\\theta}$")
 ax[0, 2].set_title("(e) $U$")
 ax[0, 3].set_title("(f) $V$")
@@ -337,7 +339,7 @@ ax[1, 0].legend()
 ax[1, 0].set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
 ax[1, 0].set_title("(b) $\\left( \\overline{U}_{\\mathrm{10m}}, \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right)$" % (U10_mean, V10_mean,))
 
-ax[2, 0].legend()
+#ax[2, 0].legend()
 ax[2, 0].set_ylabel("[ $ \\mathrm{K}$ ]", color="black")
 
 for _ax in ax[:, 0].flatten():
@@ -347,8 +349,8 @@ for _ax in ax[:, 0].flatten():
 
 
 ax[0, 1].set_xlim([285, 310])
-ax[0, 2].set_xlim([0, 20])
-ax[0, 3].set_xlim([-1, 3])
+ax[0, 2].set_xlim(args.U_rng)
+ax[0, 3].set_xlim(args.V_rng)
 
 ax[1, 0].set_ylim([-2.5, 2.5])
 ax[2, 0].set_ylim([13.5, 16.5])
