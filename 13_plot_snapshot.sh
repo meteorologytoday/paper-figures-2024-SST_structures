@@ -2,7 +2,7 @@
 
 source 00_setup.sh
 
-output_fig_dir=$fig_dir/snapshots_test
+output_fig_dir=$fig_dir/snapshots
 
 nproc=2
 
@@ -12,7 +12,7 @@ dhr=24
 
 for dT in "100"; do
     for Lx in "100" ; do
-        for U in "15" ; do
+        for U in "20" ; do
             for _bl_scheme in "MYNN25" ; do
                 
                 input_dir=$data_dir/$target_lab/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}

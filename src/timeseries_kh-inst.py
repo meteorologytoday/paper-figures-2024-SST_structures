@@ -128,14 +128,14 @@ plot_infos = dict(
     TO = dict(
         factor = 1,
         label = "$T_O$",
-        unit = "$ \\times 10^{-4} \\, \\mathrm{m} / \\mathrm{s}^2 $",
+        unit = "$ \\mathrm{K} $",
         ylim = [0, 8],
     ),
 
     TA = dict(
         factor = 1,
         label = "$\\overline{T_A}$",
-        unit = "$ \\times 10^{-4} \\, \\mathrm{m} / \\mathrm{s}^2 $",
+        unit = "$ \\mathrm{K} $",
         ylim = [0, 8],
     ),
 
@@ -191,7 +191,7 @@ plot_infos = dict(
     HFX = dict(
         factor = 1,
         label = "$\\overline{F_\\mathrm{sen}}$",
-        unit = "$ \\mathrm{m} $",
+        unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
         ylim = [0, 1500],
     ),
 
@@ -267,7 +267,7 @@ for i, varnames in enumerate(plot_varnames):
         _ax.plot(t_rel, vardata, label=plot_info["label"])
 
     _ax.set_title("(%s)" % (args.thumbnail_numbering[i],))
-    _ax.set_ylabel("[ %s ]" % (plot_info["label"]))
+    _ax.set_ylabel("%s [ %s ]" % (plot_info["label"], plot_info["unit"]))
 
     #_ax.set_ylim(ylim)
 

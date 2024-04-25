@@ -18,8 +18,8 @@ parser.add_argument('--wrfout-data-interval', type=int, help='Time interval betw
 parser.add_argument('--frames-per-wrfout-file', type=int, help='Number of frames in each wrfout file.', required=True)
 
 parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
-parser.add_argument('--x-rng', type=float, nargs=2, help="Time range in hours after --exp-beg-time", default=None)
-parser.add_argument('--parameter', type=str, help="What to put on x-axis. It can be `dT` or `Ug`.", required=True, choices=["Ug", "dT"])
+parser.add_argument('--parameter', type=str, help="What to put on x-axis. It can be `dT` or `Ug`.", required=True, choices=["Ug", "dT", "Lx"])
+parser.add_argument('--parameter-values', type=float, nargs="+", help="The value of parameters.", default=None)
 parser.add_argument('--LH-rng', type=float, nargs=2, help="LH range", default=[20, 100])
 parser.add_argument('--HFX-rng', type=float, nargs=2, help="HFX range", default=[-20, 40])
 parser.add_argument('--blh-method', type=str, help='Method to determine boundary layer height', default=["grad", "bulk"], nargs='+', choices=['bulk', 'grad'])
@@ -32,6 +32,7 @@ parser.add_argument('--plot-HFX', action="store_true", help='If to plot HFX in t
 args = parser.parse_args()
 
 print(args)
+
 
 rho_a = 1.2     # kg / m^3
 cp_a  = 1004.0  # J / kg / K
@@ -83,7 +84,7 @@ for i, input_dir in enumerate(args.input_dirs):
 
 
     ds = ds.mean(dim=['south_north', 'south_north_stag'], keep_attrs=True)
-    if ref_ds is None:
+    if ref_ds is None or args.parameter == "Lx":
     
         ref_ds = ds.mean(dim=['time'], keep_attrs=True)
         Nx = ref_ds.dims['west_east']
@@ -160,12 +161,6 @@ for i, input_dir in enumerate(args.input_dirs):
    
     ds = xr.merge(merge_data)
 
-    if args.x_rng is not None:
-        ds = ds.where(
-            (ds.coords["west_east"] >= args.x_rng[0]) & 
-            (ds.coords["west_east"] <= args.x_rng[1]) 
-        )
-        
     # Surface flux approximation comes from 
     # the file : module_sf_mynn.F    
     #Ulev1 = ds["U_T"].isel(bottom_top=0).to_numpy()
@@ -236,6 +231,18 @@ for i, input_dir in enumerate(args.input_dirs):
 
     ds.attrs["dT"]             = dT
     ds.attrs["Ug"]             = Ug
+
+    ds.attrs["paremter_name"] = args.parameter
+
+    if args.parameter_values is None:
+        if args.parameter == "dT":
+            ds.attrs["parameter_value"]  = dT
+        elif args.parameter == "Ug":
+            ds.attrs["parameter_value"]  = Ug
+
+    else:
+        ds.attrs["parameter_value"]  = args.parameter_values[i]
+
 
     ds = ds.mean(dim=['time', 'west_east'], skipna=True, keep_attrs=True)
     data.append(ds)
@@ -328,7 +335,7 @@ if args.ref_exp_order is not None:
         y_LH["d(C_Q_WND_QOA_cx)"][j] = Lq * ( _ds["C_Q_WND_QOA_cx"] - ref_ds["C_Q_WND_QOA_cx"] )
 
 
-        x[j] = _ds.attrs[args.parameter]
+        x[j] = _ds.attrs["parameter_value"]
         
         
     y_HFX["res"] = y_HFX["full"] - (
@@ -442,10 +449,10 @@ for i, plot_bundle in enumerate(plot_bundles):
     _ax.grid(True)
 
 time_fmt = "%Y/%m/%d %Hh"
-fig.suptitle("Time: %d ~ %d hr\n%s($\\overline{C}_H = %.1f$, $L_q \\overline{C}_Q = %.1f$, $\\overline{U} = %.1f$, $\\overline{T}_{OA} = %.1f \\mathrm{K}$, $\\overline{Q}_{OA} = %.1f \\mathrm{g}/\\mathrm{kg}$)" % (
+fig.suptitle("Time: %d ~ %d hr\n($\\overline{C}_H = %.1f$, $L_q \\overline{C}_Q = %.1f$, $\\overline{U} = %.1f$, $\\overline{T}_{OA} = %.1f \\mathrm{K}$, $\\overline{Q}_{OA} = %.1f \\mathrm{g}/\\mathrm{kg}$)" % (
     relTimeInHrs(time_beg),
     relTimeInHrs(time_end),
-    "Average: %d ~ %d km\n" % (args.x_rng[0], args.x_rng[1]) if args.x_rng is not None else "",
+#    "Average: %d ~ %d km\n" % (args.x_rng[0], args.x_rng[1]) if args.x_rng is not None else "",
     ref_C_H_m,
     ref_C_Q_m * Lq,
     ref_WND_m,
@@ -458,6 +465,8 @@ if args.parameter == "dT":
     ax[-1].set_xlabel("Amplitude [ $\\mathrm{K}$ ]")
 elif args.parameter == "Ug":
     ax[-1].set_xlabel("$U_\\mathrm{g}$ [ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
+elif args.parameter == "Lx":
+    ax[-1].set_xlabel("$ L_x $ [ $\\mathrm{km} $ ]")
 
 if args.output_decomp != "":
     print("Saving output: ", args.output_decomp)
@@ -581,7 +590,7 @@ ax.flatten()[-1].set_xlabel("Amplitude [ K ]")
 
 #ax[0,0].set_xlim([0,1500])
 time_fmt = "%Y/%m/%d %Hh"
-fig.suptitle("Time: %s ~ %s\nAverage: %d ~ %d km" % (time_beg.strftime(time_fmt), time_end.strftime(time_fmt), args.x_rng[0], args.x_rng[1]))
+fig.suptitle("Time: %s ~ %s" % (time_beg.strftime(time_fmt), time_end.strftime(time_fmt)))
 
 
 

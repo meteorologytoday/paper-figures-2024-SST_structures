@@ -19,11 +19,12 @@ python3 postprocess_figures.py --input-dir $fig_dir --output-dir $fig_dir
 name_pairs=(
     merged-sst_analysis.png                                               fig01.png
     merged-experiment_design.png                                          fig02.png
-    test_steady_state/Lx100_U20_dT100_MYNN25/steady_state_test_00-72.png  fig03.png
+    test_steady_state/Lx100_U20_dT100_MYNN25/steady_state_test_00-120.png fig03.png
     timeseries_kh/Lx100_U20_dT100_MYNN25/TOAQOA_timeseries_00-120.png     fig04.png
-    snapshots/Lx100_U2020T100_MYNN25/snapshot_48-72.png                   fig05.png
+    snapshots/Lx100_U20_dT100_MYNN25/snapshot_48-72.png                   fig05.png
     spatial_anomaly/spatial_anomaly_48-72.png                             fig06.png
-    decomp_comparison_total_flux_48-72.png                                fig07.png
+    total_flux_decomposition/dT/decomp_comparison_total_flux_dT_48-72.png fig07.png
+    total_flux_decomposition/Lx/decomp_comparison_total_flux_Lx_48-72.png fig08.png
 )
 
 
