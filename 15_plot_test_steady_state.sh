@@ -4,8 +4,8 @@ source 00_setup.sh
 
 nproc=2
 output_fig_dir=$fig_dir/test_steady_state
-dhr=120
-offset=0
+dhr=24
+offset=48
 
 #dhr=6
 

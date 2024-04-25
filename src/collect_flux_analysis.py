@@ -38,7 +38,7 @@ if __name__ == "__main__":
         coords = dict(
             Ug = (["Ug"], args.Ugs),
             Lx = (["Lx"], args.Lxs),
-            dSST = (["dSST"], args.dSSTs),
+            dSST = (["dSST"], np.array(args.dSSTs)/100.0),
         )
     )
     

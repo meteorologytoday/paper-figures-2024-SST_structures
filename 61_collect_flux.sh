@@ -12,7 +12,7 @@ dSSTs="000 020 040 060 080 100"
 bl_scheme="MYNN25"
 
                 
-for day in 1; do
+for day in 2; do
     
     hrs_beg=$( printf "%02d" $(( $day * $dhr )) )
     hrs_end=$( printf "%02d" $(( ($day + 1) * $dhr )) )

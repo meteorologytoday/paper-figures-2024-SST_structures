@@ -8,7 +8,7 @@ bl_scheme="MYNN25"
 
                
  
-for day in 1; do
+for day in 1 2; do
 
     for Ug in 5 10 20; do
         
