@@ -2,17 +2,24 @@
 
 source 00_setup.sh
 
-nproc=2
+nproc=1
 output_fig_dir=$fig_dir/timeseries_kh
 dhr=120
 offset=0
 
+dhr=240
+
 #dhr=6
+trap "exit" INT TERM
+trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
+
 
 #for dT in "000" "020" "040" "060" "080" "100"; do
-for dT in "100" ; do
-    for Lx in "100" "200" ; do
-        for U in "20" ; do
+for dT in "000" ; do
+#    for Lx in "100" "200" ; do
+    for Lx in "100" ; do
+        for U in "20"  ; do
+            #for _bl_scheme in "YSU" "MYNN25" ; do
             for _bl_scheme in "MYNN25" ; do
                 
                 input_dir=$data_dir/$target_lab/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
@@ -39,6 +46,7 @@ for dT in "100" ; do
                         --time-rng $hrs_beg $hrs_end         \
                         --extra-title "$extra_title"         \
                         --coarse-grained-time 3600           \
+                        --Ug $U \
                         --no-display \
                         --output $output_name &
 

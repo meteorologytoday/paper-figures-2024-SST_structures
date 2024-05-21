@@ -22,3 +22,4 @@ __pycache__/
 data/*
 gendata/*
 !figures_static/*
+.nfs*

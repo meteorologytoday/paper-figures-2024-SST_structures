@@ -8,7 +8,7 @@ input_dirs=""
 exp_names=""
 parameter=Lx
 input_dir_root=$data_dir/$target_lab
-output_dir=$fig_dir/total_flux_decomposition/$parameter
+output_dir=$fig_dir/total_flux_decomposition/$target_lab/$parameter
 
 parameter_values=""
 #for dT in 000 010 020 030 040 050 060 070 080 090 100 ; do
@@ -34,14 +34,13 @@ mkdir -p $output_dir
 N=2
 
 dhr=24
-for i in $( seq 1 2 ); do
+for i in $( seq 3 ); do
 #for i in 4 ; do
     
     ((j=j%N)); ((j++==0)) && wait
 
     hrs_beg=$( printf "%02d" $(( $i * $dhr )) )
     hrs_end=$( printf "%02d" $(( ($i + 1) * $dhr )) )
-    #hrs_end=$( printf "%02d" $(( $hrs_beg + 3 )) )
     output_name="$output_dir/comparison_total_flux_${hrs_beg}-${hrs_end}.png"
     output_name_decomp="$output_dir/decomp_comparison_total_flux_${parameter}_${hrs_beg}-${hrs_end}.png"
 

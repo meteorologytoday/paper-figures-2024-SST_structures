@@ -7,11 +7,13 @@ mkdir -p $fig_dir
 plot_codes=(
     $sh 11_plot_ocean_SST_anaylsis.sh "BLANK"
     $sh 12_plot_sounding.sh "BLANK"
-    $sh 13_plot_snapshot.sh "BLANK"
-    $sh 14_plot_spatial_anoamly.sh "BLANK"
-    $sh 15_plot_test_steady_state.sh "BLANK"
-    $sh 16_plot_total_flux_decomposition.sh "BLANK"
 )
+#    $sh 13_plot_snapshot.sh "BLANK"
+#    $sh 14_plot_spatial_anoamly.sh "BLANK"
+#    $sh 15_plot_test_steady_state.sh "BLANK"
+#    $sh 16_plot_total_flux_decomposition.sh "BLANK"
+#    $sh 18_plot_timeseries-kh.sh "BLANK"
+#    $sh 73_plot_WRF_SQ15_phase_fixed_Ug.sh "BLANK"
 
 
 N=$(( ${#plot_codes[@]} / 3 ))

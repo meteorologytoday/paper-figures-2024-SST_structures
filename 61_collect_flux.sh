@@ -10,14 +10,15 @@ Lxs="20 40 60 80 100 120 140 160 180 200"
 Ugs="0 5 10 15 20 25 30"
 dSSTs="000 020 040 060 080 100"
 bl_scheme="MYNN25"
+#bl_scheme="YSU"
 
                 
-for day in 2; do
+for day in 4; do
     
     hrs_beg=$( printf "%02d" $(( $day * $dhr )) )
     hrs_end=$( printf "%02d" $(( ($day + 1) * $dhr )) )
    
-    input_dir="${flux_dir}/hr${hrs_beg}-${hrs_end}"
+    input_dir="${flux_dir}/$target_lab/hr${hrs_beg}-${hrs_end}"
     output_file="${input_dir}/case_mph-off_${bl_scheme}.nc"
 
     if [ ! -f "$output_file" ] ; then
@@ -25,7 +26,7 @@ for day in 2; do
         eval "python3 src/collect_flux_analysis.py  \
             --input-dir $input_dir  \
             --output ${output_file} \
-            --file-fmt 'case_mph-off_Lx{Lx:03d}_U{Ug:02d}_dT{dSST:03d}_MYNN25.nc' \
+            --file-fmt 'case_mph-off_Lx{Lx:03d}_U{Ug:02d}_dT{dSST:03d}_${bl_scheme}.nc' \
             --Ugs $Ugs \
             --Lxs $Lxs \
             --dSSTs $dSSTs

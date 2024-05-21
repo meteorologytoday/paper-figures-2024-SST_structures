@@ -19,8 +19,8 @@ print(args)
 # ==================================================
 print("Merging SST analysis figure")
 new_img = postprocess_tools.concatImages([
-    os.path.join(args.input_dir, "sst_analysis_map.png"),
-    os.path.join(args.input_dir, "sst_analysis_spec.png"),
+    os.path.join(args.input_dir, "sst_analysis_map_20170101.png"),
+    os.path.join(args.input_dir, "sst_analysis_spec_20170101.png"),
 ], "horizontal")
 
 new_img.save(os.path.join(args.output_dir, "merged-sst_analysis.png"), format="PNG")

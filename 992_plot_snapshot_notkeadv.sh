@@ -2,9 +2,12 @@
 
 source 00_setup.sh
 
-output_fig_dir=$fig_dir/snapshots_15min_new
+target_lab=lab_sine_noadv
 
-nproc=50
+
+output_fig_dir=$fig_dir/snapshots_notkeadv
+
+nproc=40
 
 proc_cnt=0
 
@@ -13,17 +16,20 @@ dmin=6
 trap "exit" INT TERM
 trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 
-for dT in "100"; do
+for dT in "000" "100"; do
     for Lx in "100" ; do
-        for U in "30" "20" "10" ; do
+        for U in "20" ; do
             for _bl_scheme in "MYNN25" ; do
                 
                 input_dir=$data_dir/$target_lab/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
-                output_dir=$output_fig_dir/$target_lab/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
+                output_dir=$output_fig_dir/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
 
                 mkdir -p $output_dir
 
-                for t in $( seq $(( 0 * 60 / $dmin )) $(( ( 120 * 60 / $dmin ) - 1 )) ) ; do
+                #for t in $( seq 0 7 ); do
+                for t in $( seq 0 $(( 120 * 60 / $dmin )) ) ; do
+                #for t in $( seq 0 7 ) ; do
+                #for t in $( seq 240 280 ) ; do
                  
                     min_beg=$( printf "%05d" $(( $t * $dmin )) )
                     min_end=$( printf "%05d" $(( ($t + 1) * $dmin )) )
@@ -37,11 +43,7 @@ for dT in "100"; do
                         echo "Already exists. Skip $output_name"
                     else
 
-                        if [ "$_bl_scheme" = "YSU" ]; then
-                            tke_analysis=FALSE
-                        else
-                            tke_analysis=TRUE
-                        fi 
+ 
                         python3 src/plot_snapshot_new.py  \
                             --input-dir $input_dir  \
                             --exp-beg-time "2001-01-01 00:00:00" \
@@ -49,12 +51,11 @@ for dT in "100"; do
                             --frames-per-wrfout-file 60          \
                             --time-rng $min_beg $min_end         \
                             --extra-title "$extra_title"         \
-                            --z-rng 0 2000 \
+                            --z-rng 0 5000 \
                             --U-rng 10 30  \
                             --V-rng -1 4   \
                             --DTKE-rng   -0.01 0.01    \
                             --TKE-rng  0.0 2.0         \
-                            --tke-analysis $tke_analysis           \
                             --output $output_name    \
                             --no-display &
 

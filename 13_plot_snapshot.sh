@@ -13,10 +13,10 @@ dhr=24
 for dT in "100"; do
     for Lx in "100" ; do
         for U in "20" ; do
-            for _bl_scheme in "MYNN25" ; do
+            for _bl_scheme in "${bl_schemes[@]}" ; do
                 
                 input_dir=$data_dir/$target_lab/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
-                output_dir=$output_fig_dir/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
+                output_dir=$output_fig_dir/$target_lab/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
 
                 mkdir -p $output_dir
 
@@ -40,6 +40,7 @@ for dT in "100"; do
                         --extra-title "$extra_title"         \
                         --z-rng 0 5000 \
                         --output $output_name \
+                        --tke-analysis TRUE \
                         --no-display
 
                     proc_cnt=$(( $proc_cnt + 1))

@@ -24,7 +24,8 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument('--input-file', type=str, help='Input file', required=True)
-parser.add_argument('--output', type=str, help='Output file', default="")
+parser.add_argument('--output-SSTmap', type=str, help='Output file', default="")
+parser.add_argument('--output-SSTspec', type=str, help='Output file', default="")
 parser.add_argument('--lat-rng', type=float, nargs=2, help='The x axis range to be plot in km.', default=[None, None])
 parser.add_argument('--lat-avg-interval', type=float, help='The x axis range to be plot in km.', default=0)
 parser.add_argument('--lon-rng', type=float, nargs=2, help='The x axis range to be plot in km.', default=[None, None])
@@ -148,23 +149,20 @@ import matplotlib.ticker as mticker
 import cartopy.crs as ccrs
 import tool_fig_config
 
-ncol = 3
+print("Plotting Frequency")
+
+
+ncol = 1
 nrow = 1
 
-h = 4.0
-w_map = h * lon_span / lat_span
-w_spec = h * 1.0
-
-
-
 figsize, gridspec_kw = tool_fig_config.calFigParams(
-    w = [w_map,]*2 + [w_spec,],
-    h = h,
+    w = 6,
+    h = 6,
     wspace = 1.5,
-    hspace = 1.0,
+    hspace = 0.7,
     w_left = 1.0,
     w_right = 1.5,
-    h_bottom = 1.5,
+    h_bottom = 2.0,
     h_top = 1.0,
     ncol = ncol,
     nrow = nrow,
@@ -178,54 +176,24 @@ fig, ax = plt.subplots(
     gridspec_kw=gridspec_kw,
     constrained_layout=False,
     squeeze=False,
-    sharex=False,
+    sharex=True,
 )
-
-ax_flatten = ax.flatten()
 
 #fig.suptitle("File: %s" % (args.input_file,))
 
-SST_levs = np.linspace(5, 25, 41)
-SST_lp_levs = np.linspace(5, 25, 11)
-SST_hp_levs = np.linspace(-2, 2, 21)
-SST_hp_ticks = np.linspace(-2, 2, 9)
-SST_hp_cntr_levs = np.array([-1, 1]) * 0.5
-
-_ax = ax_flatten[0]
-mappable = _ax.contourf(coords["lon"], coords["lat"], SST, SST_levs, cmap="gnuplot", extend="both")
-cax = tool_fig_config.addAxesNextToAxes(fig, _ax, "bottom", thickness=0.03, spacing=0.17)
-cb = plt.colorbar(mappable, cax=cax, orientation="horizontal", pad=0.00)
-cb.ax.set_xlabel("SST [ K ]")
-
-
-_ax = ax_flatten[1]
-#mappable = _ax.contourf(coords["lon"], coords["lat"], SST_hp, SST_hp_levs, cmap="bwr", extend="both")
-mappable = _ax.contourf(coords["lon"], coords["lat"], SST_za, SST_hp_levs, cmap="bwr", extend="both")
-cax = tool_fig_config.addAxesNextToAxes(fig, _ax, "bottom", thickness=0.03, spacing=0.17)
-cb = plt.colorbar(mappable, cax=cax, orientation="horizontal", pad=0.00)
-cb.ax.set_xlabel("SST Anomaly [ K ]")
-
-#cs = _ax.contour(coords["lon"], coords["lat"], SST_hp, SST_hp_cntr_levs, colors="black", linewidths=0.5)
-
-for _ax in ax_flatten[:2]:
-    _ax.grid()
-    _ax.set_xlabel("Longitude [ deg ]")
-    _ax.set_ylabel("Latitude [ deg ]")
-    _ax.set_yticks(np.linspace(args.lat_rng[0], args.lat_rng[1], number_of_lat_rngs + 1))
-
-ax_flatten[0].set_title("(a) Full SST")
-ax_flatten[1].set_title("(b) Zonally detrended SST anomaly")
-
-
-
-_ax = ax_flatten[2]
+_ax = ax.flatten()[0]
 _ax2 = _ax.twiny()
+#_ax.plot(plot_wvlens, plot_specden.transpose(), color="gray", linewidth=0.5, alpha=0.5)
+#_ax.plot(plot_wvlens, np.mean(plot_specden, axis=0), "k--", linewidth=2)
 
 for i in range(number_of_lat_rngs):
     _ax.plot(np.log10(plot_freqs), np.log10(np.mean(plot_specden[lat_band_idxes[i], :], axis=0)), color=colorblind.BW8color[linecolors[i]], alpha=0.9, linestyle="dashed", linewidth=2, label="%d~%d" % (lat_band_rngs[i][0], lat_band_rngs[i][1]))
 
 _ax.plot(np.log10(plot_freqs), np.log10(np.mean(plot_specden, axis=0)), "k-", linewidth=2, label="All")
 _ax.legend()
+#_ax.set_xlim([0, args.cutoff_wvlen])
+#_ax.set_xlabel("Wavelength [deg]")
+#_ax.set_ylabel("Spectral Intensity [$ \\mathrm{K}^2 $]")
 
 xticks = np.array([-1, -.5, 0, .5, 1])
 yticks = np.array([0, 1, 2, 3])
@@ -248,9 +216,87 @@ _ax.set_xlabel("Wavenumber [cycle / deg]")
 _ax.set_ylabel("Spectral Intensity [$ \\mathrm{K}^2 $]")
 _ax.set_title("(c) Spectrum density", pad=15)
 
-if args.output != "":
-    print("Saving output: ", args.output) 
-    fig.savefig(args.output, dpi=200)
+if args.output_SSTspec != "":
+    print("Saving output: ", args.output_SSTspec)
+    fig.savefig(args.output_SSTspec, dpi=200)
+
+
+
+#===========================================
+
+print("Plotting SST map")
+
+
+ncol = 1
+nrow = 2
+w = 6.0
+h = w / lon_span * lat_span
+
+
+
+
+
+figsize, gridspec_kw = tool_fig_config.calFigParams(
+    w = w,
+    h = h,
+    wspace = 1.5,
+    hspace = 1.0,
+    w_left = 1.0,
+    w_right = 1.5,
+    h_bottom = 0.7,
+    h_top = 0.5,
+    ncol = ncol,
+    nrow = nrow,
+)
+
+
+fig, ax = plt.subplots(
+    nrow, ncol,
+    figsize=figsize,
+    subplot_kw=dict(aspect="auto"),
+    gridspec_kw=gridspec_kw,
+    constrained_layout=False,
+    squeeze=False,
+    sharex=False,
+)
+
+#fig.suptitle("File: %s" % (args.input_file,))
+
+SST_levs = np.linspace(5, 25, 41)
+SST_lp_levs = np.linspace(5, 25, 11)
+SST_hp_levs = np.linspace(-2, 2, 21)
+SST_hp_ticks = np.linspace(-2, 2, 9)
+SST_hp_cntr_levs = np.array([-1, 1]) * 0.5
+
+_ax = ax.flatten()[0]
+mappable = _ax.contourf(coords["lon"], coords["lat"], SST, SST_levs, cmap="gnuplot", extend="both")
+cax = tool_fig_config.addAxesNextToAxes(fig, _ax, "right", thickness=0.03, spacing=0.03)
+cb = plt.colorbar(mappable, cax=cax, orientation="vertical", pad=0.00)
+cb.ax.set_ylabel("SST [ K ]")
+
+
+_ax = ax.flatten()[1]
+#mappable = _ax.contourf(coords["lon"], coords["lat"], SST_hp, SST_hp_levs, cmap="bwr", extend="both")
+mappable = _ax.contourf(coords["lon"], coords["lat"], SST_za, SST_hp_levs, cmap="bwr", extend="both")
+cax = tool_fig_config.addAxesNextToAxes(fig, _ax, "right", thickness=0.03, spacing=0.03)
+cb = plt.colorbar(mappable, cax=cax, orientation="vertical", pad=0.00)
+cb.ax.set_ylabel("SST Anomaly [ K ]")
+
+#cs = _ax.contour(coords["lon"], coords["lat"], SST_hp, SST_hp_cntr_levs, colors="black", linewidths=0.5)
+
+for _ax in ax.flatten():
+    _ax.grid()
+    _ax.set_xlabel("Longitude [ deg ]")
+    _ax.set_ylabel("Latitude [ deg ]")
+
+
+
+ax.flatten()[0].set_title("(a) Full SST")
+ax.flatten()[1].set_title("(b) Zonally detrended SST anomaly")
+
+if args.output_SSTmap != "":
+    print("Saving output: ", args.output_SSTmap) 
+    fig.savefig(args.output_SSTmap, dpi=200)
 
 
 

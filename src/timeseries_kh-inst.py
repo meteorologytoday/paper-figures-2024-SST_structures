@@ -9,6 +9,7 @@ import wrf_load_helper
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--input-dir', type=str, help='Input directory.', required=True)
 parser.add_argument('--output', type=str, help='Output filename in png.', default="")
+parser.add_argument('--Ug', type=float, help='The background Ug.', required=True)
 parser.add_argument('--extra-title', type=str, help='Title', default="")
 parser.add_argument('--thumbnail-numbering', type=str, help='Thumbnail numbering', default="abcdefghijklmn")
 parser.add_argument('--no-display', action="store_true")
@@ -107,6 +108,18 @@ RHO_mean = ds["RHO"].isel(bottom_top = z_idx).mean(dim="west_east")
 WRHO_mean = (W_mean * RHO_mean).rename("WRHO_mean")
 WRHO_mix = (WRHO - WRHO_mean).rename("WRHO_mix")
 
+Ug      = args.Ug
+kappa   = 0.41
+U_MO    = ds["USTM"]
+Linv_MO = ds["RMOL"]
+L_MO = (Linv_MO ** (-1)).rename("L_MO")
+
+#H_inf = - kappa * Ug / U_MO / Linv_MO
+H_inf = (ds["USTM"] ** 2) * Ug / (- ds["HFX"]) * (300 * 1.2 * 1004 / 9.8) * 10**(-1.5)
+
+
+H_inf = H_inf.rename("H_inf")
+
 data = xr.merge([
     TOA,
     QOA,
@@ -117,6 +130,8 @@ data = xr.merge([
     WRHO_mean,
     ds["PBLH"],
     ds["HFX"],
+    H_inf,
+    L_MO,
 ]).mean(dim="west_east")
 
 print("DATA")
@@ -192,8 +207,21 @@ plot_infos = dict(
         factor = 1,
         label = "$\\overline{F_\\mathrm{sen}}$",
         unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
-        ylim = [0, 1500],
     ),
+
+    H_inf = dict(
+        factor = 1,
+        label = "$\\overline{H_{\\infty}}$",
+        unit = "$ \\mathrm{m} $",
+    ),
+
+    L_MO = dict(
+        factor = 1,
+        label = "$\\overline{L_{*}}$",
+        unit = "$ \\mathrm{m} $",
+    ),
+
+
 
 
 )
@@ -201,7 +229,9 @@ plot_infos = dict(
 
 plot_varnames = [
     ["PBLH",],
-    ["TA",],
+#    ["TA",],
+    ["L_MO",],
+    ["H_inf",],
     ["HFX",],
 ]
 
@@ -265,6 +295,13 @@ for i, varnames in enumerate(plot_varnames):
         ylim   = plot_info["ylim"] if "ylim" in plot_info else [None, None]
 
         _ax.plot(t_rel, vardata, label=plot_info["label"])
+
+        if varname == "PBLH":
+            _ax.plot(t_rel, data["H_inf"], linestyle="dashed", label="$ H_{\\infty}$")
+            _ax.plot(t_rel, data["L_MO"], "r--", label="$ L_{*}$")
+            
+
+        _ax.set_ylim(ylim)
 
     _ax.set_title("(%s)" % (args.thumbnail_numbering[i],))
     _ax.set_ylabel("%s [ %s ]" % (plot_info["label"], plot_info["unit"]))

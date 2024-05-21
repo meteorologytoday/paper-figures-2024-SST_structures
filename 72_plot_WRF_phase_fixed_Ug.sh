@@ -5,12 +5,13 @@ source 00_setup.sh
 flux_dir=$gendata_dir/flux_decomposition
 dhr=24
 bl_scheme="MYNN25"
+bl_scheme="YSU"
 
                
  
 for day in 1 2; do
 
-    for Ug in 5 10 20; do
+    for Ug in 20; do
         
         hrs_beg=$( printf "%02d" $(( $day * $dhr )) )
         hrs_end=$( printf "%02d" $(( ($day + 1) * $dhr )) )
@@ -18,7 +19,7 @@ for day in 1 2; do
         input_dir="${flux_dir}/hr${hrs_beg}-${hrs_end}"
         input_file="${input_dir}/case_mph-off_${bl_scheme}.nc"
 
-        output_file=${fig_dir}/param_space_WRF_Ug${Ug}_hr${hrs_beg}-${hrs_end}.svg
+        output_file=${fig_dir}/param_space_WRF_Ug${Ug}_hr${hrs_beg}-${hrs_end}_${bl_scheme}.svg
 
         eval "python3 src/plot_param_space_WRF_new.py  \
             --input $input_file  \
@@ -28,7 +29,7 @@ for day in 1 2; do
             --param2-rng 0 1 \
             --fixed-params Ug \
             --fixed-param-values $Ug \
-            --title 'Time: ${hrs_beg}-${hrs_end} hr' \
+            --title 'Time: ${hrs_beg}-${hrs_end} hr ${bl_scheme}' \
             --no-display
         "
     done
