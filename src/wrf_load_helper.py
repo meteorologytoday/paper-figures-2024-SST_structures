@@ -9,6 +9,7 @@ from datetime import datetime
 engine = "netcdf4"
 wrfout_time_fmt="%Y-%m-%d_%H:%M:%S"
 wrfout_prefix="wrfout_d01_"
+wrfout_suffix=""
 
 class WRFSimMetadata:
 
@@ -278,7 +279,7 @@ def loadWRFDataFromDir(wsm, input_dir, beg_time, end_time=None, prefix=wrfout_pr
     if verbose:
         print("Loaded time: ")
         for i, _t in enumerate(pd.DatetimeIndex(ds.time)):
-            print("[%d] %s" % (i, _t.strftime("%Y-%m-%d %H:%M:%S")))
+            print("[%d] %s" % (i, _t.strftime("%Y-%m-%d_%H:%M:%S")))
 
     if avg is not None:
 

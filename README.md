@@ -37,7 +37,7 @@ This is the code to generate the figures of the paper "Examining the SST Tendenc
 
 1. SST map and spectrum
 2. Exp design + vertical profile
-3. Chec steady state of WET and DRY
+3. Check steady state of WET and DRY
 4. WET and DRY timeseries (H\_{pbl}, T\_A, F\_sen ... etc)
 5. WET Hovmoeller (RAINNC and QCLOUD)
 6. DRY sensible heat flux decomposition

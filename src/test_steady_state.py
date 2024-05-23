@@ -151,22 +151,26 @@ data = dict(
 )
 
 plot_infos = dict(
+
     dU10dt = dict(
         factor = 1e4,
         label = "$\\partial U_\\mathrm{10m} / \\partial t$",
         unit = "$ \\times 10^{-4} \\, \\mathrm{m} / \\mathrm{s}^2 $",
         ylim = [0, 8],
     ),
+
     dWdt = dict(
         factor = 1e7,
         label = "$\\partial w_{%d \\mathrm{hPa}} / \\partial t$" % (args.diag_press_lev,),
         unit = "$ \\times 10^{-5} \\, \\mathrm{cm} / \\mathrm{s}^2 $",
         ylim = [0, 10],
     ),
+
 )
 
 
-plot_varnames = ["dU10dt", "dWdt"]
+#plot_varnames = ["dU10dt", "dWdt"]
+plot_varnames = ["dWdt"]
 
 print("Shape of max_absdU10dt: ", max_absdU10dt.shape)
 print("Shape of rms_dU10dt: ", rms_dU10dt.shape)

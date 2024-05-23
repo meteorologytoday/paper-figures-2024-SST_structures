@@ -1,0 +1,57 @@
+#!/bin/bash
+
+source 00_setup.sh
+
+nproc=1
+output_fig_dir=$fig_dir/timeseries
+cache_dir=$gendata_dir/timeseries_see_steady_state
+
+for _dir in $output_fig_dir $cache_dir ; do
+    echo "mkdir -p $_dir"
+    mkdir -p $_dir
+done
+
+
+offset=0
+dhr=480
+
+
+
+#dhr=6
+trap "exit" INT TERM
+trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
+
+
+input_dirs=(
+    $data_dir/lab_sine_dry/case_mph-off_Lx100_U20_dT100_MYNN25
+    $data_dir/lab_sine_wet/case_mph-on_Lx100_U20_dT100_MYNN25
+)
+
+
+cache_files=(
+    $cache_dir/dry.nc
+    $cache_dir/wet.nc
+)
+
+
+
+hrs_beg=$( printf "%03d" $(( $offset )) )
+hrs_end=$( printf "%03d" $(( $offset + $dhr )) )
+
+output="$output_fig_dir/timeseries_${hrs_beg}-${hrs_end}.png"
+extra_title=""
+
+
+python3 src/plot_timeseries_see_steady_state.py \
+    --input-dirs "${input_dirs[@]}"  \
+    --cache-files "${cache_files[@]}"  \
+    --linestyles "solid" "dashed"                \
+    --exp-beg-time "2001-01-01 00:00:00" \
+    --wrfout-data-interval 60            \
+    --frames-per-wrfout-file 60          \
+    --time-rng $hrs_beg $hrs_end         \
+    --extra-title "$extra_title"         \
+    --coarse-grained-time 3600           \
+    --no-display \
+    --output $output 
+
