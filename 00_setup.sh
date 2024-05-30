@@ -5,6 +5,7 @@ sh=bash
 
 src_dir=src
 data_dir=./data
+data_sim_dir=$data_dir/sim_data
 data_SQ15_dir=./data/data_SQ15
 fig_dir=figures
 finalfig_dir=final_figures

@@ -244,6 +244,9 @@ def loadWRFDataFromDir(wsm, input_dir, beg_time, end_time=None, prefix=wrfout_pr
             YMD = t_str[0:10]
             HMS = t_str[11:19]
 
+            #print("tstr = ", t_str)
+            #print("YMD HMS = ", YMD, "; ", HMS)
+
             t.append(pd.Timestamp("%s %s" % (YMD, HMS)))
 
         ts = xr.DataArray(

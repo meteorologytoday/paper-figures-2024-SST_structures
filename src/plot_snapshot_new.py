@@ -134,7 +134,7 @@ if args.tke_analysis == "TRUE":
 
 # Virtual temperature
 THETA  = (300 + ds["T"]).rename("THETA")
-THETAV = THETA * (1 + 0.61*ds["QVAPOR"])
+THETAV = THETA * (1 + 0.61*ds["QVAPOR"] - ds["QCLOUD"])
 THETAV = THETAV.rename("THETAV")
 
 ds = xr.merge([ds, THETAV, THETA])
@@ -486,7 +486,7 @@ for _ax in ax[:, 0].flatten():
 
 
 ax[1, 0].set_ylim([-2.5, 2.5])
-ax[2, 0].set_ylim([13.5, 16.5])
+ax[2, 0].set_ylim(args.SST_rng)
 
 
 for _ax in ax[1:, 1:].flatten():

@@ -1,3 +1,9 @@
+import traceback
+from multiprocessing import Pool
+import multiprocessing
+from pathlib import Path
+import os
+
 import xarray as xr
 import pandas as pd
 import numpy as np
@@ -14,7 +20,79 @@ def onlyPos(x):
     return 0.0 if x < 0.0 else x
 
 
+
 def genAnalysis(
+    input_dir,
+    output_filename,
+    exp_beg_time,
+    wrfout_data_interval,
+    frames_per_wrfout_file,
+    reltime_rngs,
+    avg_before_analysis,
+    x_rng,
+):
+    
+    result = dict(output_filename=output_filename, status='UNKNOWN')
+
+    try:
+    
+        exp_beg_time = pd.Timestamp(exp_beg_time)
+    
+        merge_data = []
+
+
+        for i, reltime_rng in enumerate(reltime_rngs):
+            
+            selected_time_beg = exp_beg_time + reltime_rng[0]
+            selected_time_end = exp_beg_time + reltime_rng[1]
+
+            print("[%d] Analyzing time inverval: %s ~ %s" % (
+                i,
+                selected_time_beg.strftime("%Y-%m-%d_%H:%M:%S"), 
+                selected_time_end.strftime("%Y-%m-%d_%H:%M:%S"),           
+            ))
+             
+            ds = genAnalysis_subset(
+                input_dir,
+                exp_beg_time,
+                wrfout_data_interval,
+                frames_per_wrfout_file,
+                reltime_rng,
+                avg_before_analysis,
+                x_rng,
+            )
+    
+            merge_data.append(ds)
+
+
+
+        print("Merging data...")
+        new_ds = xr.merge(merge_data)
+
+            
+        full_range_time_beg = exp_beg_time + reltime_rngs[0][0]
+        full_range_time_end = exp_beg_time + reltime_rngs[-1][1]
+        new_ds.attrs["time_beg"] = full_range_time_beg.strftime("%Y-%m-%d_%H:%M:%S"),
+        new_ds.attrs["time_end"] = full_range_time_end.strftime("%Y-%m-%d_%H:%M:%S"),
+ 
+        print("Writing file: %s" % (output_filename,))
+        new_ds.to_netcdf(
+            output_filename,
+            unlimited_dims="time",
+            encoding={'time':{'units':'hours since 2001-01-01'}}
+        )
+
+        
+        result['status'] = 'OK'
+
+    
+    except Exception as e:
+        result['status'] = 'ERROR'
+        traceback.print_exc()
+
+    return result
+
+def genAnalysis_subset(
     input_dir,
     exp_beg_time,
     wrfout_data_interval,
@@ -24,13 +102,14 @@ def genAnalysis(
     x_rng,
 ):
 
-    exp_beg_time = pd.Timestamp(exp_beg_time)
+
+
     time_beg = exp_beg_time + reltime_rng[0]
     time_end = exp_beg_time + reltime_rng[1]
     
     time_beg_str = time_beg.strftime("%Y-%m-%dT%H:%M:%S")
     time_end_str = time_end.strftime("%Y-%m-%dT%H:%M:%S")
-    
+
     time_bnd = xr.DataArray(
         name="time_bnd",
         data=[time_beg, time_end],
@@ -270,10 +349,9 @@ def genAnalysis(
     new_ds.attrs["time_beg"] = time_beg_str
     new_ds.attrs["time_end"] = time_end_str
 
-    ds.close()
+    new_ds = new_ds.compute()
 
     return new_ds
-
 
 
 if __name__ == "__main__":
@@ -287,8 +365,10 @@ if __name__ == "__main__":
 
     parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
     parser.add_argument('--time-avg-interval', type=int, help="The interval of time to do the average. Unit is in minutes. If it is not specified or 0 then all data is averaged.", default=0)
+    parser.add_argument('--output-count', type=int, help="The numbers of output in a file.", default=1)
     parser.add_argument('--x-rng', type=float, nargs=2, help="X range in km", required=True)
     parser.add_argument('--avg-before-analysis', type=str, help="If set true, then the program will average first before analysis. This might affect the correlation terms.", choices=["TRUE", "FALSE"], required=True)
+    parser.add_argument('--nproc', type=int, help="Number of parallel CPU.", default=1)
     
     args = parser.parse_args()
 
@@ -308,56 +388,97 @@ if __name__ == "__main__":
     reltime_end = pd.Timedelta(hours=args.time_rng[1])
     time_avg_interval = pd.Timedelta(minutes=args.time_avg_interval)
     
+
+
+
     if time_avg_interval / pd.Timedelta(seconds=1) == 0:  # if not specified or 0
         print("The parameter `--time-avg-interval` is zero, assume the average is the entire interval.")
         time_avg_interval = time_end - time_beg
-    
+   
+    print("Create dir: %s" % (args.output_dir,))
+    Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+
+ 
+
+    input_args = []
     
     number_of_intervals = (reltime_end - reltime_beg) / time_avg_interval
     if number_of_intervals % 1 != 0:
-        print("Warning: the interval of time_rng is not a multiple of time_avg_interval. Ratio: %.f" % (number_of_intervals,)) 
+        raise Exception("Error: the interval of time_rng is not a multiple of time_avg_interval. Ratio: %.f" % (number_of_intervals,)) 
 
     number_of_intervals = int( np.ceil(number_of_intervals) ) 
-    for i in range(number_of_intervals):
-
-        selected_time_beg = exp_beg_time + reltime_beg + time_avg_interval * i
-        selected_time_end = selected_time_beg + time_avg_interval
-
-        selected_reltime_beg = selected_time_beg - exp_beg_time
-        selected_reltime_end = selected_time_end - exp_beg_time
-
-        print("Analyzing time inverval: %s ~ %s" % (
-            selected_time_beg.strftime("%Y-%m-%d_%H:%M:%S"), 
-            selected_time_end.strftime("%Y-%m-%d_%H:%M:%S"),           
+    
+    number_of_output_files = number_of_intervals / args.output_count
+    if number_of_intervals % 1 != 0:
+        raise Exception("Error: the number_of_intervals = %d is not a multiple of number_of_output_files = %d " % (
+            number_of_intervals,
+            number_of_output_files,
         ))
+    number_of_output_files = int(number_of_output_files)
+    
+    print("There will be %d output files. Each contains %d data points" % (number_of_output_files, args.output_count,))
+    
+    time_interval_per_file = time_avg_interval * args.output_count
+    for i in range(number_of_output_files):
+
+        reltime_rngs = []
+            
+        reltime_beg_of_file = reltime_beg + i * time_interval_per_file
+        time_beg_of_file = exp_beg_time + reltime_beg_of_file
+
+        for j in range(args.output_count):
+            
+            reltime_rngs.append(
+                [ 
+                    reltime_beg_of_file + j     * time_avg_interval,
+                    reltime_beg_of_file + (j+1) * time_avg_interval,
+                ]
+            )
 
         filename = os.path.join(
             args.output_dir,
             "analysis_{timestr:s}.nc".format(
-                timestr = selected_time_beg.strftime("%Y-%m-%d_%H:%M:%S"),
+                timestr = time_beg_of_file.strftime("%Y-%m-%d_%H:%M:%S"),
             )
         )
-
 
         if os.path.exists(filename):
             print("File %s already exists. Skip it." % (filename,))
             continue
 
-        _ds = genAnalysis(
-            args.input_dir,
-            args.exp_beg_time,
-            args.wrfout_data_interval,
-            args.frames_per_wrfout_file,
-            [selected_reltime_beg, selected_reltime_end],
-            avg_before_analysis,
-            x_rng,
+       
+        input_args.append(
+            (
+                args.input_dir,
+                filename,
+                args.exp_beg_time,
+                args.wrfout_data_interval,
+                args.frames_per_wrfout_file,
+                reltime_rngs,
+                avg_before_analysis,
+                x_rng,
+            )
         )
-        
-        print("[%d] Writing file: %s" % (i, filename,))
-        _ds.to_netcdf(
-            filename,
-            unlimited_dims="time",
-        )
+    
+    
+    
+    failed_files = []
+    with Pool(processes=args.nproc) as pool:
+
+        results = pool.starmap(genAnalysis, input_args)
+
+        for i, result in enumerate(results):
+            if result['status'] != 'OK':
+                print('!!! Failed to generate output : %s.' % (result['output_filename'],))
+                failed_files.append(result['output_filename'])
+
+
+    print("Tasks finished.")
+
+    print("Failed files: ")
+    for i, failed_file in enumerate(failed_files):
+        print("%d : %s" % (i+1, failed_file,))
+
 
     print("Done")
     

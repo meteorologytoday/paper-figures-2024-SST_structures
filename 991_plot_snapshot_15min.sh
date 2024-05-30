@@ -8,22 +8,34 @@ nproc=50
 
 proc_cnt=0
 
-dmin=6
+dmin=$(( 24 * 60 ))
 
 trap "exit" INT TERM
 trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 
-for dT in "100"; do
-    for Lx in "100" ; do
-        for U in "30" "20" "10" ; do
+for target_lab in lab_sine_semiwet lab_sine_wet lab_sine_dry ; do
+for dT in 100; do
+    for Lx in 500 100 ; do
+        for U in 20; do
             for _bl_scheme in "MYNN25" ; do
                 
-                input_dir=$data_dir/$target_lab/case_mph-off_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
+                
+                if [[ "$target_lab" =~ "semiwet" ]]; then
+                    mph=off
+                elif [[ "$target_lab" =~ "wet" ]]; then
+                    mph=on
+                elif [[ "$target_lab" =~ "dry" ]]; then
+                    mph=off
+                fi
+
+
+
+                input_dir=$data_sim_dir/$target_lab/case_mph-${mph}_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
                 output_dir=$output_fig_dir/$target_lab/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
 
                 mkdir -p $output_dir
 
-                for t in $( seq $(( 0 * 60 / $dmin )) $(( ( 120 * 60 / $dmin ) - 1 )) ) ; do
+                for t in $( seq $(( ( 0 * 24 ) * 60 / $dmin )) $(( ( ( 20 * 24 ) * 60 / $dmin ) - 1 )) ) ; do
                  
                     min_beg=$( printf "%05d" $(( $t * $dmin )) )
                     min_end=$( printf "%05d" $(( ($t + 1) * $dmin )) )
@@ -50,6 +62,7 @@ for dT in "100"; do
                             --time-rng $min_beg $min_end         \
                             --extra-title "$extra_title"         \
                             --z-rng 0 2000 \
+                            --SST-rng  11.5 18.5         \
                             --U-rng 10 30  \
                             --V-rng -1 4   \
                             --DTKE-rng   -0.01 0.01    \
@@ -72,5 +85,5 @@ for dT in "100"; do
         done
     done
 done
-
+done
 wait
