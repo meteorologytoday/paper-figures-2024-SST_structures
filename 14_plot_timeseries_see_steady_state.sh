@@ -22,58 +22,69 @@ trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 analysis_root=$gendata_dir/analysis_timeseries
 
 
+for smooth in 1 25 49 ; do
 for Lx in 100 500 ; do
 
 
     input_dirs=(
         $analysis_root/lab_sine_dry/case_mph-off_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
         $analysis_root/lab_sine_dry/case_mph-off_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
-        $analysis_root/lab_sine_semiwet/case_mph-off_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
-        $analysis_root/lab_sine_semiwet/case_mph-off_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
+#        $analysis_root/lab_sine_semiwet/case_mph-off_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
+#        $analysis_root/lab_sine_semiwet/case_mph-off_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
         $analysis_root/lab_sine_wet/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
-        $analysis_root/lab_sine_wet/case_mph-on_Lx${Lx}_U20_dT100_MYNN25/avg_before_analysis-TRUE
         $analysis_root/lab_sine_wet/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
+        $analysis_root/lab_sine_wetlw/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
+        $analysis_root/lab_sine_wetlw/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
+        $analysis_root/lab_sine_wetlwsw/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
+        $analysis_root/lab_sine_wetlwsw/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
     )
 
 
     linestyles=(
         "dashed"
         "solid"
+#        "dashed"
+#        "solid"
         "dashed"
         "solid"
         "dashed"
-        "dotted"
+        "solid"
+        "dashed"
         "solid"
     )
 
     linecolors=(
         "gray"
         "gray"
-        "red"
-        "red"
-        "blue"
-        "blue"
-        "blue"
+        "orangered"
+        "orangered"
+        "dodgerblue"
+        "dodgerblue"
+#        "green"
+#        "green"
+        "magenta"
+        "magenta"
     )
 
     labels=(
         "DRY-000"
         "DRY-300"
-        "SEMIWET-000"
-        "SEMIWET-300"
+#        "SEMIWET-000"
+#        "SEMIWET-300"
         "WET-000"
-        "WET-100"
         "WET-300"
+        "WETLW-000"
+        "WETLW-300"
+        "WETRAD-000"
+        "WETRAD-300"
     )
-
-
 
 
     hrs_beg=$( printf "%03d" $(( $offset )) )
     hrs_end=$( printf "%03d" $(( $offset + $dhr )) )
 
     echo "Doing diagnostic simple"
-    output="$output_fig_dir/SIMPLE_Lx${Lx}_timeseries_${hrs_beg}-${hrs_end}.png"
+    output="$output_fig_dir/SIMPLE_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
     extra_title=""
     python3 src/plot_timeseries_see_steady_state.py \
         --input-dirs "${input_dirs[@]}"      \
@@ -86,15 +97,16 @@ for Lx in 100 500 ; do
         --time-rng $hrs_beg $hrs_end         \
         --extra-title "$extra_title"         \
         --tick-interval-hour 24              \
-        --ncols 3                            \
+        --ncols 4                            \
+        --smooth $smooth                     \
         --no-display                         \
-        --varnames    PBLH TA QA PRECIP HFX LH \
+        --varnames    PBLH TA QA WND_m PRECIP HFX LH \
         --output $output & 
 
 
 
     echo "Doing diagnostic HEATFLX"
-    output="$output_fig_dir/HEATFLX_Lx${Lx}_timeseries_${hrs_beg}-${hrs_end}.png"
+    output="$output_fig_dir/HEATFLX_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
     extra_title=""
     python3 src/plot_timeseries_see_steady_state.py \
         --input-dirs "${input_dirs[@]}"      \
@@ -108,12 +120,16 @@ for Lx in 100 500 ; do
         --extra-title "$extra_title"         \
         --tick-interval-hour 24              \
         --ncols 5                            \
+        --smooth $smooth                     \
         --no-display                         \
         --varnames      HFX     C_H_WND_TOA  WND_TOA_cx_mul_C_H  C_H_TOA_cx_mul_WND  C_H_WND_cx_mul_TOA  \
                         LH      C_Q_WND_QOA  WND_QOA_cx_mul_C_Q  C_Q_QOA_cx_mul_WND  C_Q_WND_cx_mul_QOA  \
         --output $output &
 
 
-    wait
-
 done
+done
+
+wait
+
+echo "PLOTTING DONE."

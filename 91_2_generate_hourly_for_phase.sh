@@ -7,8 +7,8 @@ exp_names=""
 
 output_dir_root=$gendata_dir/analysis_timeseries
 
-hrs_beg=$(( 24 * 9 ))
-hrs_end=$(( 24 * 10 ))
+hrs_beg=$(( 24 * 8 ))
+hrs_end=$(( 24 * 17 ))
 
 
 time_avg_interval=60   # minutes
@@ -22,7 +22,8 @@ trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 
 for avg_before_analysis in "TRUE" ; do
 for target_lab in  lab_sine_wet lab_sine_semiwet lab_sine_dry ; do 
-    for Lx in 500 400 350 200 180 160 140 120 100 080 060 040 020 ; do
+#    for Lx in 500 400 350 200 180 160 140 120 100 080 060 040 020 ; do
+    for Lx in 500 100 ; do
         for U in 20 ; do
             for _bl_scheme in "MYNN25" ; do
                 for dT in 000 020 040 060 080 100 150 200 250 300 ; do

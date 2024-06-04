@@ -3,95 +3,63 @@ import pandas as pd
 import numpy as np
 import argparse
 import tool_fig_config
-import datetime
 import wrf_load_helper 
-import os
+import datetime
 
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--input-dirs', nargs="+", type=str, help='Input directories.', required=True)
-parser.add_argument('--linestyles', nargs="+", type=str, help='Line styles.', default=None)
-parser.add_argument('--linecolors', nargs="+", type=str, help='Line styles.', required=True)
-parser.add_argument('--labels', nargs="+", type=str, help='Exp names.', default=None)
-parser.add_argument('--ncols', type=int, help='Columns of figures.', default=1)
-parser.add_argument('--varnames', type=str, nargs="+", help='Variable names.', required=True)
+parser.add_argument('--input-file', type=str, help='Input file.', required=True)
 parser.add_argument('--output', type=str, help='Output filename in png.', default="")
-parser.add_argument('--extra-title', type=str, help='Title', default="")
-parser.add_argument('--smooth', type=int, help='Smooth points. Should be an even number', default=1)
-parser.add_argument('--thumbnail-numbering', type=str, help='Thumbnail numbering', default="abcdefghijklmn")
+parser.add_argument('--title', type=str, help='Title', default="")
+
 parser.add_argument('--no-display', action="store_true")
-parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
-parser.add_argument('--tick-interval-hour', type=int, help="Ticks interval in hours.", default=12)
-parser.add_argument('--time-unit', type=str, help="Unit of time. ", choices=["day", "hour"], default="day")
-parser.add_argument('--exp-beg-time', type=str, help='analysis beg time', required=True)
-parser.add_argument('--wrfout-data-interval', type=int, help='Time interval between each adjacent record in wrfout files in seconds.', required=True)
-parser.add_argument('--frames-per-wrfout-file', type=int, help='Number of frames in each wrfout file.', required=True)
+parser.add_argument('--varnames', type=str, nargs="+", help='Variable names.', required=True)
+parser.add_argument('--varying-param', type=str, help='Parameters. The first and second parameters will be the varying parameters while the rest stays fixed.', required=True, choices=["dSST", "Ug", "Lx"])
+parser.add_argument('--fixed-params', type=str, nargs='*', help='Parameters that stay fixed.', required=True, choices=["dSST", "Ug", "Lx"])
+parser.add_argument('--thumbnail-numbering', type=str, help='Thumbnail numbering.', default="abcdefghijklmn")
+parser.add_argument('--fixed-param-values', type=float, nargs="*", help='The values of the fixed parameters', default=[])
+parser.add_argument('--ncols', type=int, help='The number of thumbnail columns', default=1)
+parser.add_argument('--ref-exp-order', type=int, help='The reference case (start from 0) to perform decomposition', default=0)
+
 
 args = parser.parse_args()
 
 print(args)
 
-
 Nvars = len(args.varnames)
 ncols = args.ncols
 nrows = int(np.ceil( Nvars / ncols))
 
+sel_dict = {}
+for i, param in enumerate(args.fixed_params):
+    sel_dict[param] = args.fixed_param_values[i]
 
+    if param == "dSST":
+        sel_dict[param] /= 1e2
 
+print("sel_dict = ", str(sel_dict))
+ 
 
-exp_beg_time = pd.Timestamp(args.exp_beg_time)
-wrfout_data_interval = pd.Timedelta(seconds=args.wrfout_data_interval)
-time_beg = exp_beg_time + pd.Timedelta(hours=args.time_rng[0])
-time_end = exp_beg_time + pd.Timedelta(hours=args.time_rng[1])
+print("Start loading data.")
+ds = xr.open_dataset(args.input_file)#, engine="scipy")
+ds = ds.sel(**sel_dict)
+print(ds)
 
-def relTimeInHrs(t):
-    return (t - exp_beg_time.to_datetime64()) / np.timedelta64(1, 'h')
+coord_x = ds.coords[args.varying_param]
 
-wsm = wrf_load_helper.WRFSimMetadata(
-    start_datetime  = exp_beg_time,
-    data_interval   = wrfout_data_interval,
-    frames_per_file = args.frames_per_wrfout_file,
-)
-
-# Loading data
-data = []
-for i, input_dir in enumerate(args.input_dirs):
-
-    print("Loading wrf dir: %s" % (input_dir,))
-    ds = wrf_load_helper.loadWRFDataFromDir(
-        wsm, 
-        input_dir,
-        beg_time = time_beg,
-        end_time = time_end,
-        prefix="analysis_",
-        suffix=".nc",
-        avg=None,
-        verbose=False,
-        inclusive="left",
-    )
-
-    TTL_RAIN = ds["RAINNC"] + ds["RAINC"]
-    PRECIP = ( TTL_RAIN - TTL_RAIN.shift(time=1) ) / wrfout_data_interval.total_seconds()
-    PRECIP = PRECIP.rename("PRECIP") 
-    
-    ds = xr.merge([ds, PRECIP])
-    ds = xr.merge( [ ds[varname] for varname in args.varnames ] ).load()
-
-    ds = ds.rolling(time=args.smooth, center=True).mean()
-
-    data.append(ds)
-
-    
-
-
-
-t = data[0].coords["time"].to_numpy()
-t_rel = relTimeInHrs(t) + wrfout_data_interval.total_seconds() / 3600.0
 
 HFX_rng = [ -15, 45]
 LH_rng  = [ -10, 200 ]
 
 LH_corr_rng = [-0.5, 15]
 HFX_corr_rng = [-1.0, 4.5]
+
+
+HFX_rng = [ -10, 10]
+LH_rng  = [ -10, 10 ]
+
+LH_corr_rng = LH_rng
+HFX_corr_rng = HFX_rng
+
 
 plot_infos = dict(
 
@@ -273,8 +241,13 @@ plot_infos = dict(
 )
 
 
-plot_varnames = args.varnames
 
+# =================================================================
+# Figure: HFX decomposition
+# =================================================================
+
+
+# =================================================================
 print("Loading matplotlib...")
 import matplotlib
 if args.no_display:
@@ -283,6 +256,10 @@ else:
     matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 print("Done")
+
+
+print("Plotting decomposition...")
+
 
 figsize, gridspec_kw = tool_fig_config.calFigParams(
     w = 5,
@@ -308,72 +285,60 @@ fig, ax = plt.subplots(
     sharex=False,
 )
 
-#time_fmt="%y/%m/%d %Hh"
-#fig.suptitle("%sTime: %s ~ %s" % (args.extra_title, time_beg.strftime(time_fmt), time_end.strftime(time_fmt)))
 
-fig.suptitle("%sTime: %d ~ %d hr" % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end),))
+ax_flattened = ax.flatten()
 
-for k, _ds in enumerate(data):
-   
-    print("Plotting the %d-th dataset." % (k,)) 
+for i, varname in enumerate(args.varnames):
+
+    if varname == "BLANK":
+        print("BLANK detected. Remove axis.")
+        fig.delaxes(_ax)
+        continue
+
+
+
+
+
+    _ax = ax_flattened[i]
+    _plot_info = plot_infos[varname]
+
+
+    factor = _plot_info["factor"] if "factor" in _plot_info else 1.0
+    offset = _plot_info["offset"] if "offset" in _plot_info else 0.0
+    ylim   = _plot_info["ylim"] if "ylim" in _plot_info else None
+
+
+    _plot_data = (ds[varname] + offset) * factor
+
+    _ref_m = _plot_data.sel(stat="mean")[0].to_numpy()
+    print("_ref = ", _ref_m)
     
-    for i, varname in enumerate(plot_varnames):
+    d_m = _plot_data.sel(stat="mean") - _ref_m
+    d_s = _plot_data.sel(stat="std")
+
+    for j in range(len(d_s)):
+        _ax.plot([coord_x[j], coord_x[j]], [d_m[j] - d_s[j], d_m[j] + d_s[j]], color="gray", linestyle="solid")
         
-        _ax = ax.flatten()[i]
+    _ax.scatter(coord_x, d_m, s=20)
+    _ax.scatter(coord_x, d_m, s=20)
+    _ax.plot(coord_x, d_m)
 
-        if varname == "BLANK":
-            print("BLANK detected. Remove axis.")
-            fig.delaxes(_ax)
-            continue
-
-        print("Plotting variable: ", varname)
-        plot_info = plot_infos[varname]
-
-        factor = plot_info["factor"] if "factor" in plot_info else 1.0
-        offset = plot_info["offset"] if "offset" in plot_info else 0.0
-        ylim   = plot_info["ylim"] if "ylim" in plot_info else None
-
-
-        vardata = (_ds[varname] - offset) * factor
-        _ax.plot(t_rel, vardata, label=plot_info["label"], color=args.linecolors[k], linestyle=args.linestyles[k])
-
-        _ax.set_title("(%s) %s" % (args.thumbnail_numbering[i], plot_info["label"],))
-        _ax.set_ylabel("[ %s ]" % (plot_info["unit"],))
     
-        if ylim is not None:
-            _ax.set_ylim(ylim)
-
-"""
-for varname in varnames:
-    plot_info = plot_infos[varname]
-    _ax.set_ylim(ylim)
-"""
-
-
-total_time = relTimeInHrs(time_end) - relTimeInHrs(time_beg)
         
+    _ax.set_title("(%s) %s (ref = %.2f %s)" % (args.thumbnail_numbering[i], _plot_info["label"], _ref_m, _plot_info["unit"]))
+    _ax.set_ylabel("[ %s ] " % (_plot_info["unit"]))
+    _ax.grid(visible=True)
 
-xticks = args.tick_interval_hour * np.arange(np.ceil(total_time / args.tick_interval_hour)+1)
+    if ylim is not None:
+        _ax.set_ylim(ylim)
 
+    if args.varying_param == "dT":
+        _ax.set_xlabel("Amplitude [ $\\mathrm{K}$ ]")
+    elif args.varying_param == "Ug":
+        _ax.set_xlabel("$U_\\mathrm{g}$ [ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
+    elif args.varying_param == "Lx":
+        _ax.set_xlabel("$ L_x $ [ $\\mathrm{km} $ ]")
 
-for _ax in ax.flatten():
-    #_ax.legend()
-    _ax.grid()
-
-    if args.time_unit == "hr":
-
-        _ax.set_xlabel("[ hr ]")
-        _ax.set_xticks(xticks)
-
-    elif args.time_unit == "day":
-
-        _ax.set_xlabel("[ day ]")
-        _ax.set_xticks(xticks, labels=["%d" % xtick for xtick in xticks/24 ])
-
-    _ax.set_xlim([relTimeInHrs(time_beg), relTimeInHrs(time_end)])
-
-for _ax in ax.flatten()[Nvars:]:
-    fig.delaxes(_ax)
 
 
 if args.output != "":
@@ -383,4 +348,6 @@ if args.output != "":
 if not args.no_display:
     print("Showing figure...")
     plt.show()
+
+
 

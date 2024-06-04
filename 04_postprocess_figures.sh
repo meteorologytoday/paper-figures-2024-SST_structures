@@ -20,8 +20,12 @@ echo "Making final figures... "
 
 
 name_pairs=(
-    sst_analysis_20170101.svg                fig01
-    input_sounding_woML.svg                  fig02
+    sst_analysis_20170101.svg                                                        fig01
+    input_sounding_woML.svg                                                          fig02
+    snapshots_dhr-120/lab_sine_dry/Lx500_U20_dT300_MYNN25/snapshot-part1_120-240.svg fig03
+    snapshots_dhr-120/lab_sine_dry/Lx500_U20_dT300_MYNN25/snapshot-part2_120-240.svg fig04
+    timeseries/SIMPLE_Lx500_timeseries_smooth-25_000-360.svg                         fig05
+    timeseries/HEATFLX_Lx500_timeseries_smooth-25_000-360.svg                        fig06
 )
 
 N=$(( ${#name_pairs[@]} / 2 ))
@@ -37,7 +41,7 @@ for i in $( seq 1 $N ) ; do
     cairosvg $fig_dir/$src_file -o $finalfig_pdf_dir/$dst_file_pdf
 
     echo "$src_file => $dst_file_png"
-    convert $finalfig_pdf_dir/$dst_file_pdf $finalfig_png_dir/$dst_file_png
+    magick $finalfig_pdf_dir/$dst_file_pdf $finalfig_png_dir/$dst_file_png
     } &
 done
 

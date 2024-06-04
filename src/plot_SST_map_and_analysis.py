@@ -187,8 +187,8 @@ ax_flatten = ax.flatten()
 
 SST_levs = np.linspace(5, 25, 41)
 SST_lp_levs = np.linspace(5, 25, 11)
-SST_hp_levs = np.linspace(-2, 2, 21)
-SST_hp_ticks = np.linspace(-2, 2, 9)
+SST_hp_levs = np.linspace(-1, 1, 21) * 3
+SST_hp_ticks = np.linspace(-1, 1, 9) * 3
 SST_hp_cntr_levs = np.array([-1, 1]) * 0.5
 
 _ax = ax_flatten[0]

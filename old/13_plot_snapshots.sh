@@ -5,12 +5,17 @@ source 00_setup.sh
 dhr=$(( 24 * 5 ))
 output_fig_dir=$fig_dir/snapshots_dhr-${dhr}
 
-nproc=5
+nproc=20
 
 proc_cnt=0
 
+
+
 target_labs=(
     lab_sine_dry
+    lab_sine_wet
+    lab_sine_wetlw
+    lab_sine_wetlwsw
 )
 
 bl_schemes=(
@@ -19,6 +24,7 @@ bl_schemes=(
 
 trap "exit" INT TERM
 trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
+
 
 for dT in 300; do
     for Lx in 500 100 ; do
@@ -38,37 +44,38 @@ for dT in 300; do
                     fi
 
 
+
+
                     input_dir=$data_sim_dir/$target_lab/case_mph-${mph}_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
                     output_dir=$output_fig_dir/$target_lab/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
 
                     mkdir -p $output_dir
 
+                    #for t in $( seq 0 14 ); do
                     for t in 0 1 2; do
+                    #for t in 2 ; do
                      
                         hrs_beg=$( printf "%02d" $(( $t * $dhr )) )
                         hrs_end=$( printf "%02d" $(( ($t + 1) * $dhr )) )
 
-                        output1_name="$output_dir/snapshot-part1_${hrs_beg}-${hrs_end}.svg"
-                        output2_name="$output_dir/snapshot-part2_${hrs_beg}-${hrs_end}.svg"
+                        output_name="$output_dir/snapshot_${hrs_beg}-${hrs_end}.png"
                         extra_title=""
 
                         extra_title="$_bl_scheme. "
                  
-                        python3 src/plot_snapshot_split_frame.py  \
+                        python3 src/plot_snapshot_new.py  \
                             --input-dir $input_dir  \
                             --exp-beg-time "2001-01-01 00:00:00" \
                             --wrfout-data-interval 60            \
                             --frames-per-wrfout-file 60          \
                             --time-rng $(( $hrs_beg * 60 )) $(( $hrs_end * 60 ))  \
                             --extra-title "$extra_title"         \
-                            --z1-rng 0 5000 \
-                            --z2-rng 0 2000 \
+                            --z-rng 0 5000 \
                             --U10-rng -5 5 \
                             --Q-rng -2 15 \
                             --W-levs "${W_levs[@]}" \
                             --SST-rng 11 19 \
-                            --output1 $output1_name \
-                            --output2 $output2_name \
+                            --output $output_name \
                             --tke-analysis TRUE \
                             --no-display &
 
@@ -85,5 +92,3 @@ for dT in 300; do
         done
     done
 done
-
-wait

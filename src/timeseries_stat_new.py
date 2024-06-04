@@ -8,8 +8,7 @@ import wrf_load_helper
 import os
 
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--input-dirs', nargs="+", type=str, help='Input directories.', required=True)
-parser.add_argument('--labels', nargs="+", type=str, help='Input directories.', required=True)
+parser.add_argument('--input-dir', type=str, help='Input directories.', required=True)
 parser.add_argument('--varnames', type=str, nargs="+", help='Variable names.', required=True)
 parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
 parser.add_argument('--exp-beg-time', type=str, help='analysis beg time', required=True)
@@ -36,32 +35,28 @@ wsm = wrf_load_helper.WRFSimMetadata(
     frames_per_file = args.frames_per_wrfout_file,
 )
 
+input_dir = args.input_dir
 # Loading data
-data = []
-for i, input_dir in enumerate(args.input_dirs):
+print("Loading wrf dir: %s" % (input_dir,))
+ds = wrf_load_helper.loadWRFDataFromDir(
+    wsm, 
+    input_dir,
+    beg_time = time_beg,
+    end_time = time_end,
+    prefix="analysis_",
+    suffix=".nc",
+    avg=None,
+    verbose=False,
+    inclusive="left",
+)
 
-    print("Loading wrf dir: %s" % (input_dir,))
-    ds = wrf_load_helper.loadWRFDataFromDir(
-        wsm, 
-        input_dir,
-        beg_time = time_beg,
-        end_time = time_end,
-        prefix="analysis_",
-        suffix=".nc",
-        avg=None,
-        verbose=False,
-        inclusive="left",
-    )
+TTL_RAIN = ds["RAINNC"] + ds["RAINC"]
+PRECIP = ( TTL_RAIN - TTL_RAIN.shift(time=1) ) / wrfout_data_interval.total_seconds()
+PRECIP = xr.where(np.isnan(PRECIP), 0.0, PRECIP)
+PRECIP = PRECIP.rename("PRECIP") 
 
-    TTL_RAIN = ds["RAINNC"] + ds["RAINC"]
-    PRECIP = ( TTL_RAIN - TTL_RAIN.shift(time=1) ) / wrfout_data_interval.total_seconds()
-    PRECIP = xr.where(np.isnan(PRECIP), 0.0, PRECIP)
-    PRECIP = PRECIP.rename("PRECIP") 
-    
-    ds = xr.merge([ds, PRECIP])
-    ds = xr.merge( [ ds[varname] for varname in args.varnames ] )
-
-    data.append(ds)
+ds = xr.merge([ds, PRECIP])
+ds = xr.merge( [ ds[varname] for varname in args.varnames ] )
 
 stat_infos = dict(
 
@@ -146,41 +141,28 @@ stat_infos = dict(
 print("Doing statistics")
 
 df_data = dict(
-    label = [],
+    varname = [],
+    mean = [],
+    std  = [],
 )
 
 for varname in args.varnames:
-    df_data["%s_mean" % varname] = []
-    df_data["%s_std" % varname]  = []
 
-for i, ds in enumerate(data):
 
-    print("# Doing the %d-th data. Label : %s" % (i, args.labels[i]))
+    stat_info = stat_infos[varname]
+    factor = stat_info["factor"] if "factor" in stat_info else 1.0
+    d = ds[varname] * factor
+    d = d.to_numpy()
+    
+    df_data["varname"].append(varname)
+    df_data["mean"].append(np.mean(d))
+    df_data["std"].append(np.std(d)) 
 
-        
-    df_data["label"].append(args.labels[i])
-    for j, varname in enumerate(args.varnames):
 
-        stat_info = stat_infos[varname]
-        factor = stat_info["factor"] if "factor" in stat_info else 1.0
-        d = ds[varname] * factor
-        d = d.to_numpy()
-        
-        df_data["%s_mean" % varname].append(np.mean(d))
-        df_data["%s_std"  % varname].append(np.std(d)) 
-
- 
-        #print('{varname:s} : {mean:f} (+- {std:f})'.format(
-        #print('{varname:s} : {std:f} )'.format(
-        #    varname = varname,
-        #    mean = result['mean'],
-        #    std  = result['std'],
-        #))
- 
-        print('%s : %f (+- %f)' % (varname,
-            df_data['%s_mean' % varname][-1],
-            df_data['%s_std' % varname][-1],
-        ))
+    print('%s : %f (+- %f)' % (varname,
+        df_data['mean'][-1],
+        df_data['std'][-1],
+    ))
 
 
 df = pd.DataFrame(df_data)

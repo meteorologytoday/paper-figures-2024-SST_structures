@@ -9,7 +9,8 @@ import cmocean
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--input-dir', type=str, help='Input directory.', required=True)
-parser.add_argument('--output', type=str, help='Output filename in png.', default="")
+parser.add_argument('--output1', type=str, help='Output filename in png.', default="")
+parser.add_argument('--output2', type=str, help='Output filename in png.', default="")
 parser.add_argument('--extra-title', type=str, help='Title', default="")
 parser.add_argument('--overwrite-title', type=str, help='If set then title will be set to this.', default="")
 parser.add_argument('--blh-method', type=str, help='Method to determine boundary layer height', default=[], nargs='+', choices=['bulk', 'grad'])
@@ -21,26 +22,25 @@ parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours a
 parser.add_argument('--exp-beg-time', type=str, help='analysis beg time', required=True)
 parser.add_argument('--wrfout-data-interval', type=int, help='Time interval between each adjacent record in wrfout files in seconds.', required=True)
 parser.add_argument('--frames-per-wrfout-file', type=int, help='Number of frames in each wrfout file.', required=True)
-parser.add_argument('--z-rng', type=float, nargs=2, help='The plotted height rng in meters.', default=[0, 2000.0])
+parser.add_argument('--z1-rng', type=float, nargs=2, help='The plotted height rng in meters.', default=[0, 5000.0])
+parser.add_argument('--z2-rng', type=float, nargs=2, help='The plotted height rng in meters.', default=[0, 2000.0])
 parser.add_argument('--x-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
 parser.add_argument('--U-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
 parser.add_argument('--V-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
 parser.add_argument('--Q-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
 parser.add_argument('--W-levs', type=float, nargs=3, help='The plotted W contours. Three parameters will be fed into numpy.linspace', default=[-8, 8, 17])
+parser.add_argument('--TKE-levs', type=float, nargs=3, help='The plotted W contours. Three parameters will be fed into numpy.linspace', default=[0.2, 1, 5])
 parser.add_argument('--U10-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
 parser.add_argument('--TKE-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
 parser.add_argument('--DTKE-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
 
 parser.add_argument('--tke-analysis', type=str, help='analysis beg time', choices=["TRUE", "FALSE"], required=True)
+parser.add_argument('--thumbnail-skip', type=int, help='Skip of thumbnail numbering.', default=0)
+parser.add_argument('--thumbnail-numbering', type=str, help='Skip of thumbnail numbering.', default="abcdefghijklmn")
 
 args = parser.parse_args()
 
 print(args)
-
-Ri_c = dict(
-    bulk = 0.25,
-    grad = 0.25,
-)
 
 exp_beg_time = pd.Timestamp(args.exp_beg_time)
 wrfout_data_interval = pd.Timedelta(seconds=args.wrfout_data_interval)
@@ -48,13 +48,8 @@ wrfout_data_interval = pd.Timedelta(seconds=args.wrfout_data_interval)
 time_beg = exp_beg_time + pd.Timedelta(minutes=args.time_rng[0])
 time_end = exp_beg_time + pd.Timedelta(minutes=args.time_rng[1])
 
-#ref_time_beg = exp_beg_time + pd.Timedelta(minutes=args.ref_time_rng[0])
-#ref_time_end = exp_beg_time + pd.Timedelta(minutes=args.ref_time_rng[1])
-
-
 def relTimeInHrs(t):
     return (t - exp_beg_time.to_datetime64()) / np.timedelta64(1, 'h')
-
 
 
 def horDecomp(da, name_m="mean", name_p="prime"):
@@ -260,15 +255,10 @@ import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 print("Done")
 
-ncol = 5
+ncol = 1
 nrow = 4
 
-w = [6,] + [2, ] + [1,] * (ncol-2)
-
-if args.tke_analysis == "TRUE":
-
-    ncol += 2 
-    w = w + [1, 2,]
+w = [6,]
 
 figsize, gridspec_kw = tool_fig_config.calFigParams(
     w = w,
@@ -304,95 +294,36 @@ else:
 u_levs = np.linspace(-1, 1, 11)
 v_levs = np.linspace(-1, 1, 11)
 w_levs = np.linspace(args.W_levs[0], args.W_levs[1], int(args.W_levs[2]))
-#theta_levs = np.arange(273, 500, 2)
-theta_levs = np.concatenate( 
-    (
-        np.arange(-10, 0, 0.2),
-        np.arange(0.2, 10, 0.2),
-    )
-)
+tke_levs = np.linspace(args.TKE_levs[0], args.TKE_levs[1], int(args.TKE_levs[2]))
 
-spacing = 0.2
-theta_levs = np.arange(-10, 10, spacing) + spacing / 2.0
+cmap_diverge = cmocean.cm.balance 
+cmap_linear = cmocean.cm.matter
 
-cmap_diverge = cmocean.cm.balance
+# Version 1: shading = TKE, contour = W
 
-mappable1 = ax[0, 0].contourf(X_W, Z_W, ds.W * 1e2, levels=w_levs, cmap=cmap_diverge, extend="both")
-
-#cax = tool_fig_config.addAxesNextToAxes(fig, ax[0, 0], "right", thickness=0.03, spacing=0.05)
-#cbar0 = plt.colorbar(mappable1, cax=cax, orientation="vertical")
+"""
+tke = ds.QKE.to_numpy() / 2
+tke[tke < 0.1] = np.nan
+mappable1 = ax[0, 0].contourf(X_T, Z_T, tke, levels=tke_levs, cmap=cmap_linear, extend="max")
+cax = tool_fig_config.addAxesNextToAxes(fig, ax[0, 0], "right", thickness=0.03, spacing=0.05)
+cbar0 = plt.colorbar(mappable1, cax=cax, orientation="vertical")
 
 cs = ax[0, 0].contour(X_W, Z_W, ds.W * 1e2, levels=w_levs, colors="black")
 plt.clabel(cs)
+"""
+
+# Version 2: shading = W, contour = TKE
+mappable1 = ax[0, 0].contourf(X_W, Z_W, ds.W*1e2, levels=w_levs, cmap=cmap_diverge, extend="both")
+cax = tool_fig_config.addAxesNextToAxes(fig, ax[0, 0], "right", thickness=0.03, spacing=0.05)
+cbar0 = plt.colorbar(mappable1, cax=cax, orientation="vertical")
+
+tke = ds.QKE.to_numpy() / 2
+cs = ax[0, 0].contour(X_T, Z_T, tke, levels=tke_levs, colors="black")
+plt.clabel(cs)
+
 
 for _ax in ax[0:1, 0].flatten():
-    #cs = _ax.contour(X_T, Z_T, theta_prime, levels=theta_levs, colors='k')
-    #plt.clabel(cs)
     _ax.plot(X_sT, ds.PBLH, color="pink", linestyle="-.")
-
-iii = 1
-
-# Temperature
-_ax = ax[0, iii]; iii+=1
-_ax.plot(ds_ref_stat["T"] + 300, ref_Z_T, 'k-', label="$\\overline{\\theta}$")
-_ax.plot(ds_ref_stat["THETAV"], ref_Z_T, 'r--', label="$\\overline{\\theta_v}$")
-_ax.set_title("(d) $\\overline{\\theta}$ and $\\overline{\\theta_v}$")
-_ax.set_xlabel("[ $\\mathrm{K}$ ]")
-_ax.set_xlim([285, 300])
-_ax.legend(loc="upper right")
-
-
-# Stability
-_ax = ax[0, iii]; iii+=1
-_ax.plot(ds_ref_stat["Nfreq"], ref_Z_W, 'k-', label="$N$")
-_ax.plot(ds_ref_stat["NVfreq"], ref_Z_W, 'r--', label="$N_v$")
-_ax.set_title("(e) $N$ and $N_v$")
-_ax.set_xlabel("[ $\\mathrm{s}^{-1}$ ]")
-_ax.set_xlim([0, 0.02])
-_ax.legend(loc="upper right")
-
-# U
-_ax = ax[0, iii]; iii+=1
-_ax.plot(ds_ref_stat["U"], ref_Z_T)
-
-_ax.set_title("(f) $U$")
-_ax.set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
-_ax.set_xlim(args.U_rng)
-
-
-# V
-_ax = ax[0, iii]; iii+=1
-_ax.plot(ds_ref_stat["V"], ref_Z_T)
-
-_ax.set_title("(g) $V$")
-_ax.set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
-_ax.set_xlim(args.V_rng)
-
-
-if args.tke_analysis == "TRUE":
-    # TKE
-    _ax = ax[0, iii]; iii+=1
-    _ax.plot(ds_ref_stat["QKE"]/2, ref_Z_T)
-    _ax.set_title("(h) TKE")
-    _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
-    _ax.set_xlim(args.TKE_rng)
-
-    # TKE budget
-    _ax = ax[0, iii]; iii+=1
-    _ax.set_title("(i) TKE budget")
-    _ax.plot(ds_ref_stat["DQKE_T"] * 1e1 / 2, ref_Z_T,   color="black", linestyle='solid', label="$10 \\times \\partial q / \\partial t$")
-    _ax.plot(ds_ref_stat["QSHEAR_T"]/2, ref_Z_T, color="red", linestyle='solid',   label="$q_{sh}$")
-    _ax.plot(ds_ref_stat["QBUOY_T"]/2, ref_Z_T,  color="blue", linestyle='solid',  label="$q_{bu}$")
-    _ax.plot(ds_ref_stat["QWT_T"]/2 , ref_Z_T,    color="red", linestyle='dashed',  label="$q_{vt}$")
-    _ax.plot(ds_ref_stat["QDISS_T"]/2, ref_Z_T,  color="blue", linestyle='dashed', label="$q_{ds}$")
-    _ax.plot(ds_ref_stat["QRES_T"]/2, ref_Z_T,   color="#aaaaaa", linestyle='dashed',label="$res$")
-
-    #_ax.plot(ds_ref_stat["QWT_T"]/2 + ds_ref_stat["QADV_T"]/2, ref_Z_T,    color="red", linestyle='dashed',  label="$q_{vt} + q_{adv}$")
-
-    _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
-    _ax.set_xlim(args.DTKE_rng)
-
-    _ax.legend(loc="upper right")
 
 for _ax in ax[0, 1:]:
     trans = transforms.blended_transform_factory(_ax.transAxes, _ax.transData)
@@ -414,17 +345,165 @@ ax[3, 0].plot(X_sT, SST, color='blue', label="SST")
 ax[3, 0].plot(X_sT, ds.T2 - zerodegC, color='red', label="$T_{\\mathrm{2m}}$")
 
 
+for i, _ax in enumerate(ax[:, 0]):
+    
+    _ax.set_xlabel("$x$ [km]")
+    _ax.set_xlim(np.array(args.x_rng))
+
+    if i == 0:
+        
+        _ax.set_ylim(args.z1_rng)
+        
+        _ax.set_ylabel("$z$ [ km ]")
+        yticks = np.array(_ax.get_yticks())
+        _ax.set_yticks(yticks, ["%d" % _y for _y in yticks/1e3])
+        
+    _ax.grid(visible=True, which='major', axis='both')
+        
+        
+        
+ax[0, 0].set_title("(a) $W$ [$\\mathrm{cm} / \\mathrm{s}$]")
+ax[2, 0].set_title("(c) $Q_O$ (blue) and $Q_A$ (red)")
+ax[3, 0].set_title("(d) SST (blue) and $T_\\mathrm{2m}$ (red)")
+
+ax[1, 0].legend(loc="upper right")
+ax[1, 0].set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
+ax[1, 0].set_title("(b) $\\left( \\overline{U}_{\\mathrm{10m}}, \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right)$, $\\overline{\\vec{U}_{\\mathrm{10m}}} = %.2f $." % (U10_mean, V10_mean, WND10_mean))
+
+ax[2, 0].set_ylabel("[ $ \\mathrm{g} \\, / \\, \\mathrm{kg}$ ]", color="black")
+ax[3, 0].set_ylabel("[ $ \\mathrm{K}$ ]", color="black")
 
 
-#cbar0.ax.set_ylabel("W [$\\mathrm{cm} / \\mathrm{s}$]")
-#cbar1.ax.set_ylabel("U [$\\mathrm{m} / \\mathrm{s}$]")
-#cbar2.ax.set_ylabel("V [$\\mathrm{m} / \\mathrm{s}$]")
+ax[1, 0].set_ylim(args.U10_rng)
+ax[2, 0].set_ylim(args.Q_rng)
+ax[3, 0].set_ylim(args.SST_rng)
 
+if args.output1 != "":
+    print("Saving output: ", args.output1)
+    fig.savefig(args.output1, dpi=300)
+
+if not args.no_display:
+    print("Showing figure...")
+    plt.show()
+
+# =====================================================================
+
+print("Generating vertical profile")
+
+ncol = 4
+nrow = 1
+
+w = [2, 1, 1, 1]
+
+if args.tke_analysis == "TRUE":
+
+    ncol += 2 
+    w = w + [1, 2,]
+
+figsize, gridspec_kw = tool_fig_config.calFigParams(
+    w = w,
+    h = [4, ],
+    wspace = 1.0,
+    hspace = 1.0,
+    w_left = 1.0,
+    w_right = 1.0,
+    h_bottom = 1.0,
+    h_top = 1.0,
+    ncol = ncol,
+    nrow = nrow,
+)
+
+fig, ax = plt.subplots(
+    nrow, ncol,
+    figsize=figsize,
+    subplot_kw=dict(aspect="auto"),
+    gridspec_kw=gridspec_kw,
+    constrained_layout=False,
+    squeeze=False,
+)
+
+
+if args.overwrite_title == "":
+    fig.suptitle("%sTime: %.2f ~ %.2f hr" % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end),))
+    
+else:
+    fig.suptitle(args.overwrite_title)
+
+
+iii = 0
+# Temperature
+_ax = ax[0, iii]
+_ax.plot(ds_ref_stat["T"] + 300, ref_Z_T, 'k-', label="$\\overline{\\theta}$")
+_ax.plot(ds_ref_stat["THETAV"], ref_Z_T, 'r--', label="$\\overline{\\theta_v}$")
+_ax.set_title("(%s) $\\overline{\\theta}$ and $\\overline{\\theta_v}$" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
+_ax.set_xlabel("[ $\\mathrm{K}$ ]")
+_ax.set_xlim([285, 300])
+_ax.legend(loc="upper right")
+iii += 1
+
+# Stability
+_ax = ax[0, iii]
+_ax.plot(ds_ref_stat["Nfreq"], ref_Z_W, 'k-', label="$N$")
+_ax.plot(ds_ref_stat["NVfreq"], ref_Z_W, 'r--', label="$N_v$")
+_ax.set_title("(%s) $N$ and $N_v$" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
+_ax.set_xlabel("[ $\\mathrm{s}^{-1}$ ]")
+_ax.set_xlim([0, 0.02])
+_ax.legend(loc="upper right")
+iii += 1
+
+# U
+_ax = ax[0, iii]
+_ax.plot(ds_ref_stat["U"], ref_Z_T)
+
+_ax.set_title("(%s) $U$" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
+_ax.set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
+_ax.set_xlim(args.U_rng)
+iii += 1
+
+
+# V
+_ax = ax[0, iii]
+_ax.plot(ds_ref_stat["V"], ref_Z_T)
+
+_ax.set_title("(%s) $V$" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
+_ax.set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
+_ax.set_xlim(args.V_rng)
+iii += 1
+
+
+if args.tke_analysis == "TRUE":
+    # TKE
+    _ax = ax[0, iii]; iii+=1
+    _ax.plot(ds_ref_stat["QKE"]/2, ref_Z_T)
+    _ax.set_title("(%s) TKE" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
+    _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
+    _ax.set_xlim(args.TKE_rng)
+
+    # TKE budget
+    _ax = ax[0, iii]; iii+=1
+    _ax.set_title("(%s) TKE budget" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
+    _ax.plot(ds_ref_stat["DQKE_T"] * 1e1 / 2, ref_Z_T,   color="black", linestyle='solid', label="$10 \\times \\partial q / \\partial t$")
+    _ax.plot(ds_ref_stat["QSHEAR_T"]/2, ref_Z_T, color="red", linestyle='solid',   label="$q_{sh}$")
+    _ax.plot(ds_ref_stat["QBUOY_T"]/2, ref_Z_T,  color="blue", linestyle='solid',  label="$q_{bu}$")
+    _ax.plot(ds_ref_stat["QWT_T"]/2 , ref_Z_T,    color="red", linestyle='dashed',  label="$q_{vt}$")
+    _ax.plot(ds_ref_stat["QDISS_T"]/2, ref_Z_T,  color="blue", linestyle='dashed', label="$q_{ds}$")
+    _ax.plot(ds_ref_stat["QRES_T"]/2, ref_Z_T,   color="#aaaaaa", linestyle='dashed',label="$res$")
+
+    #_ax.plot(ds_ref_stat["QWT_T"]/2 + ds_ref_stat["QADV_T"]/2, ref_Z_T,    color="red", linestyle='dashed',  label="$q_{vt} + q_{adv}$")
+
+    _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
+    _ax.set_xlim(args.DTKE_rng)
+
+    _ax.legend(loc="upper right")
+
+for _ax in ax[0, :]:
+    trans = transforms.blended_transform_factory(_ax.transAxes, _ax.transData)
+    _ax.plot([0, 1], [ds_ref_stat["PBLH"].to_numpy()]*2, color="pink", linestyle="-.", transform=trans)
 
 
 for i, _ax in enumerate(ax[0, :]):
 
-    _ax.set_ylim(args.z_rng)
+    _ax.set_ylim(args.z2_rng)
      
     _ax.set_ylabel("$z$ [ km ]")
     yticks = np.array(_ax.get_yticks())
@@ -433,40 +512,12 @@ for i, _ax in enumerate(ax[0, :]):
     _ax.grid(visible=True, which='major', axis='both')
 
 
-
-ax[0, 0].set_title("(a) $W$ [$\\mathrm{cm} / \\mathrm{s}$]")
-ax[2, 0].set_title("(c) $Q_O$ (blue) and $Q_A$ (red)")
-ax[3, 0].set_title("(d) SST (blue) and $T_\\mathrm{2m}$ (red)")
-
-
-ax[1, 0].legend(loc="upper right")
-ax[1, 0].set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
-ax[1, 0].set_title("(b) $\\left( \\overline{U}_{\\mathrm{10m}}, \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right)$, $\\overline{\\vec{U}_{\\mathrm{10m}}} = %.2f $." % (U10_mean, V10_mean, WND10_mean))
-
-#ax[2, 0].legend()
-ax[2, 0].set_ylabel("[ $ \\mathrm{g} \\, / \\, \\mathrm{kg}$ ]", color="black")
-ax[3, 0].set_ylabel("[ $ \\mathrm{K}$ ]", color="black")
-
-for _ax in ax[:, 0].flatten():
-    _ax.grid(visible=True)
-    _ax.set_xlabel("$x$ [km]")
-    _ax.set_xlim(np.array(args.x_rng))
-
-
-
-ax[1, 0].set_ylim(args.U10_rng)
-ax[2, 0].set_ylim(args.Q_rng)
-ax[3, 0].set_ylim(args.SST_rng)
-
-
-for _ax in ax[1:, 1:].flatten():
-    plt.delaxes(_ax)
-
-if args.output != "":
-    print("Saving output: ", args.output)
-    fig.savefig(args.output, dpi=300)
+if args.output2 != "":
+    print("Saving output: ", args.output2)
+    fig.savefig(args.output2, dpi=300)
 
 if not args.no_display:
     print("Showing figure...")
     plt.show()
+
 
