@@ -190,23 +190,35 @@ def genAnalysis_subset(
 
     merge_data = [ds,]
 
-    PRES = ds.PB + ds.P
-    SFC_PRES = PRES.isel(bottom_top=0)
+    # Cannot use the following to get surface pressure:
+    #PRES = ds.PB + ds.P
+    #SFC_PRES = PRES.isel(bottom_top=0)
+    
+    # This is the correct one
+    SFC_PRES = ds["PSFC"]
+
     PRES1000hPa=1e5
-    R_over_cp = 287/1004.0 #2.0 / 7.0
+
+    R_over_cp = 2.0 / 7.0
 
     dT = (np.amax(ds["TSK"].to_numpy()) - np.amin(ds["TSK"].to_numpy())) / 2 
 
     TA = ( 300.0 + ds["T"].isel(bottom_top=0) ).rename("TA")
     TOA    = ( ds["TSK"] * (PRES1000hPa/SFC_PRES)**R_over_cp - TA ).rename("TOA")
 
-    # Bolton (1980)
-    E1 = 0.6112e3 * np.exp(17.67 * (ds["TSK"] - 273.15) / (ds["TSK"] - 29.65) )
-    QSFCMR = 0.62175 * E1 / (ds["PSFC"] - E1)
+    #  e1=svp1*exp(svp2*(tgdsa(i)-svpt0)/(tgdsa(i)-svp3)) 
+
+
+    # Bolton (1980). But the formula is read from 
+    # phys/physics_mmm/sf_sfclayrev.F90 Lines 281-285 (WRFV4.6.0)
+    salinity_factor = 0.98
+    E1 = 0.6112e3 * np.exp(17.67 * (ds["TSK"] - 273.15) / (ds["TSK"] - 29.65) ) * salinity_factor
+    QSFCMR = (287/461.6) * E1 / (SFC_PRES - E1)
+    
     QA  = ds["QVAPOR"].isel(bottom_top=0).rename("QA")
 
     QOA = QSFCMR - ds["QVAPOR"].isel(bottom_top=0)
-    QOA = xr.where(QOA > 0, QOA, 0.0)
+    #QOA = xr.where(QOA > 0, QOA, 0.0)
     QOA = QOA.rename("QOA")
  
     #merge_data.append(WIND10)
@@ -226,6 +238,17 @@ def genAnalysis_subset(
     WND_sfc = (U_sfc**2 + V_sfc**2)**0.5
     WND_sfc = WND_sfc.rename("WND_sfc")
 
+    HFX_from_FLHC = ds["FLHC"] * TOA
+    QFX_from_FLQC = ds["FLQC"] * QOA
+    LH_from_FLQC = Lq * QFX_from_FLQC
+
+    HFX_from_FLHC = HFX_from_FLHC.rename("HFX_from_FLHC")
+    QFX_from_FLQC = QFX_from_FLQC.rename("QFX_from_FLQC")
+    LH_from_FLQC  = LH_from_FLQC.rename("LH_from_FLQC")
+
+    merge_data.append(HFX_from_FLHC)
+    merge_data.append(QFX_from_FLQC)
+    merge_data.append(LH_from_FLQC)
 
     C_H = ds["FLHC"] / WND_sfc
     C_H = C_H.rename("C_H")
@@ -245,24 +268,6 @@ def genAnalysis_subset(
             (ds.coords["west_east"] <= x_rng[1]) 
         )
         
-    # Surface flux approximation comes from 
-    # the file : module_sf_mynn.F    
-    #Ulev1 = ds["U_T"].isel(bottom_top=0).to_numpy()
-    #Vlev1 = ds["V"].isel(bottom_top=0).to_numpy()
-    
-
-    HFX_approx = ds["C_H"] * ds["WND_sfc"] * ds["TOA"]
-    HFX_approx = HFX_approx.rename("HFX_approx")
-    
-    QFX_approx = ds["C_Q"] * ds["WND_sfc"] * ds["QOA"]
-    _tmp = QFX_approx.to_numpy()
-    _tmp[_tmp <= -0.02] = -0.02
-    QFX_approx[:] = _tmp
-    LH_approx = Lq * QFX_approx
-    LH_approx = LH_approx.rename("LH_approx")
-   
-    ds = xr.merge([ds, HFX_approx, LH_approx])
-    
     WND_sfc_mean = ds["WND_sfc"].mean(dim="west_east").rename("WND_sfc_mean")
 
     def horDecomp(da, name_m="mean", name_p="prime"):
@@ -284,13 +289,7 @@ def genAnalysis_subset(
     C_H_WND_cx_mul_TOA = (C_H_WND_cx * TOA_m).rename("C_H_WND_cx_mul_TOA")
     WND_TOA_cx_mul_C_H = (WND_TOA_cx * C_H_m).rename("WND_TOA_cx_mul_C_H")
     C_H_TOA_cx_mul_WND = (C_H_TOA_cx * WND_m).rename("C_H_TOA_cx_mul_WND")
-    F_SEN_res = (
-        (C_H_WND_TOA + C_H_WND_cx_mul_TOA + WND_TOA_cx_mul_C_H + C_H_TOA_cx_mul_WND + C_H_WND_TOA_cx)
-        - HFX_approx
-    ).rename("F_SEN_res")
    
-
-
     C_Q_m, C_Q_p = horDecomp(ds["C_Q"], "C_Q_m", "C_Q_p")
     QOA_m, QOA_p = horDecomp(ds["QOA"], "QOA_m", "QOA_p")
 
@@ -305,21 +304,22 @@ def genAnalysis_subset(
     C_Q_QOA_cx_mul_WND = (C_Q_QOA_cx * WND_m).rename("C_Q_QOA_cx_mul_WND")
 
 
+    HFX_approx = C_H_WND_TOA + C_H_WND_cx_mul_TOA + WND_TOA_cx_mul_C_H + C_H_TOA_cx_mul_WND + C_H_WND_TOA_cx
+    QFX_approx = C_Q_WND_QOA + C_Q_WND_cx_mul_QOA + WND_QOA_cx_mul_C_Q + C_Q_QOA_cx_mul_WND + C_Q_WND_QOA_cx
+    LH_approx = Lq * QFX_approx
+    
+    HFX_approx = HFX_approx.rename("HFX_approx")
+    QFX_approx = QFX_approx.rename("QFX_approx")
+    LH_approx = LH_approx.rename("LH_approx")
+ 
     HFX = ds["HFX"].mean(dim="west_east")
+    QFX = ds["QFX"].mean(dim="west_east")
     LH  = ds["LH"].mean(dim="west_east")
 
-    """
-    TTL_RAIN = ds["RAINNC"] + ds["RAINC"]
-    dt = ds.coords["time"]
-    PRECIP = ( xr.shift(TTL_RAIN, time=1) - TTL_RAIN ) / ()
-    
-    PRECIP[1:] = (tmp[1:] - tmp[:-1]) / coarse_grained_time.total_seconds()
-    PRECIP = PRECIP.rename("PRECIP") 
-    """
-
+  
     merge_data = [
-        HFX, LH, 
-        HFX_approx, LH_approx,
+        HFX, QFX, LH, 
+        HFX_approx, QFX_approx, LH_approx,
         
         WND_m, WND_p,
         TA, QA,       
@@ -348,8 +348,6 @@ def genAnalysis_subset(
         WND_QOA_cx_mul_C_Q,
         C_Q_QOA_cx_mul_WND,
  
-        F_SEN_res,
-
         ds["RAINC"],        
         ds["RAINNC"],        
         ds["RAINSH"],        
@@ -361,6 +359,9 @@ def genAnalysis_subset(
     
         ds["PBLH"],
 
+        ds["HFX_from_FLHC"],
+        ds["QFX_from_FLQC"],
+        ds["LH_from_FLQC"],
     ]
 
 
@@ -389,7 +390,7 @@ def genAnalysis_subset(
   
     if avg_before_analysis is False:
         new_ds = new_ds.mean(dim="time", skipna=True, keep_attrs=True).expand_dims(
-            dim = {"time": [selected_time_beg,]},
+            dim = {"time": [time_beg,]},
             axis = 0,
         )
         

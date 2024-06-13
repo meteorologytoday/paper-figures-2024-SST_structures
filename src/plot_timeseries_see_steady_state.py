@@ -18,7 +18,7 @@ parser.add_argument('--varnames', type=str, nargs="+", help='Variable names.', r
 parser.add_argument('--output', type=str, help='Output filename in png.', default="")
 parser.add_argument('--extra-title', type=str, help='Title', default="")
 parser.add_argument('--smooth', type=int, help='Smooth points. Should be an even number', default=1)
-parser.add_argument('--thumbnail-numbering', type=str, help='Thumbnail numbering', default="abcdefghijklmn")
+parser.add_argument('--thumbnail-numbering', type=str, help='Thumbnail numbering', default="abcdefghijklmnopqrstu")
 parser.add_argument('--no-display', action="store_true")
 parser.add_argument('--show-labels', action="store_true")
 parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
@@ -89,14 +89,23 @@ def loadData(input_dir):
 
     if "ACLHF" in ds: 
         ACLQFX = ds["ACLHF"] / 2.5e6
-        QFX = (ACLQFX - ACLQFX.shift(time=1)) / wrfout_data_interval.total_seconds()
+        QFX = ds["QFX"]#(ACLQFX - ACLQFX.shift(time=1)) / wrfout_data_interval.total_seconds()
         WATER_BUDGET_RES = dWATER_TTLdt - ( QFX - PRECIP )
         WATER_BUDGET_RES = WATER_BUDGET_RES.rename("WATER_BUDGET_RES")
-        QFX = QFX.rename("QFX")
+        #QFX = QFX.rename("QFX")
 
         merge_data.append(WATER_BUDGET_RES)
         merge_data.append(QFX)
-     
+    
+    HFX_res = (ds["HFX_approx"] - ds["HFX"]).rename("HFX_res")
+    LH_res = (ds["LH_approx"] - ds["LH"]).rename("LH_res")
+ 
+    HFX_res = (ds["HFX_from_FLHC"] - ds["HFX"]).rename("HFX_res")
+    LH_res = (ds["LH_from_FLQC"] - ds["LH"]).rename("LH_res")
+    
+    merge_data.append(HFX_res)
+    merge_data.append(LH_res)
+ 
     ds = xr.merge(merge_data)
 
     merge_data = []
@@ -334,18 +343,57 @@ plot_infos = dict(
         ylim_diff = LH_diff_rng,
     ),
 
- 
+    HFX_from_FLHC = dict(
+        factor = 1,
+        label = "$\\overline{F}_\\mathrm{sen}$ from FLHC",
+        unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+        ylim = HFX_rng,
+        ylim_diff = HFX_diff_rng,
+    ),
+
+
+    LH_from_FLQC = dict(
+        factor = 1,
+        label = "$\\overline{F}_\\mathrm{lat}$ from FLQC",
+        unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+#        ylim = LH_rng,
+#        ylim_diff = LH_diff_rng,
+    ),
+
+
+    HFX_res = dict(
+        factor = 1,
+        label = "residual $\\overline{F_\\mathrm{sen}}$",
+        unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+        ylim = [-15, 15],
+        ylim_diff = HFX_diff_rng,
+    ),
+
+    LH_res = dict(
+        factor = 1,
+        label = "residual $\\overline{F_\\mathrm{lat}}$",
+        unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+        ylim = [-15, 15],
+        ylim_diff = HFX_diff_rng,
+    ),
+
+
+
     HFX_approx = dict(
         factor = 1,
         label = "$Approx \\overline{F_\\mathrm{sen}}$",
         unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+        ylim = HFX_rng,
+        ylim_diff = HFX_diff_rng,
     ),
 
     LH_approx = dict(
         factor = 1,
         label = "Approx $\\overline{F_\\mathrm{lat}}$",
         unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
-        ylim = [0, 100],
+        ylim = LH_rng,
+        ylim_diff = LH_diff_rng,
+
         #ylim = [0, None],
     ),
 

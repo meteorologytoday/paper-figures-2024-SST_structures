@@ -7,13 +7,13 @@ exp_names=""
 
 output_dir_root=$gendata_dir/analysis_timeseries
 
-hrs_beg=$(( 24 * 0 ))
-hrs_end=$(( 24 * 16 ))
+hrs_beg=$(( 24 * 4 ))
+hrs_end=$(( 24 * 5 ))
 
 
 time_avg_interval=60   # minutes
 
-batch_cnt_limit=6
+batch_cnt_limit=2
 nproc=10
 
 #batch_cnt_limit=3
@@ -25,21 +25,20 @@ trap "exit" INT TERM
 trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 
 for avg_before_analysis in "TRUE" ; do
-for target_lab in  lab_sine_wetlwsw lab_sine_wetlw lab_sine_wet lab_sine_dry ; do 
-#for target_lab in lab_sine_dry ; do 
-#for target_lab in lab_sine_wet ; do 
+#for target_lab in  lab_sine_WETLWSW lab_sine_WETLW lab_sine_WET lab_sine_DRY ; do 
+for target_lab in  lab_sine_WETLWSW ; do 
 #    for Lx in 050 100 200 300 400 500 ; do
     for Lx in 100 500 ; do
         for U in 20 ; do
             for _bl_scheme in "MYNN25" ; do
 #                for dT in 000 050 100 150 200 250 300 ; do
-                for dT in 000  300 ; do
+                for dT in 300 ; do
  
-                    if [[ "$target_lab" =~ "semiwet" ]]; then
+                    if [[ "$target_lab" =~ "SEMIWET" ]]; then
                         mph=off
-                    elif [[ "$target_lab" =~ "wet" ]]; then
+                    elif [[ "$target_lab" =~ "WET" ]]; then
                         mph=on
-                    elif [[ "$target_lab" =~ "dry" ]]; then
+                    elif [[ "$target_lab" =~ "DRY" ]]; then
                         mph=off
                     fi
 

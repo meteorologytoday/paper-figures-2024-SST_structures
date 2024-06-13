@@ -3,7 +3,7 @@
 source 00_setup.sh
 
 nproc=1
-output_fig_dir=$fig_dir/timeseries
+output_fig_dir=$fig_dir/timeseries_WRFV4.6.0
 
 for _dir in $output_fig_dir $cache_dir ; do
     echo "mkdir -p $_dir"
@@ -11,8 +11,8 @@ for _dir in $output_fig_dir $cache_dir ; do
 done
 
 
-offset=$(( 24 * 0 ))
-dhr=$(( 24 * 15 ))
+offset=$(( 24 * 4 ))
+dhr=$(( 24 * 1 ))
 
 
 
@@ -21,9 +21,9 @@ trap "exit" INT TERM
 trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 analysis_root=$gendata_dir/analysis_timeseries
 
-
-for smooth in 1 25 49 ; do
-for Lx in 100 ; do
+for avg in TRUE ; do
+for smooth in 1 25 ; do
+for Lx in 100 500 ; do
 
 
     input_dirs=(
@@ -33,8 +33,8 @@ for Lx in 100 ; do
 #        $analysis_root/lab_sine_wet/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
 #        $analysis_root/lab_sine_wetlw/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
 #        $analysis_root/lab_sine_wetlw/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
-#        $analysis_root/lab_sine_wetlwsw/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
-        $analysis_root/lab_sine_wetlwsw/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
+#        $analysis_root/lab_sine_WETLWSW/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
+        $analysis_root/lab_sine_WETLWSW/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-${avg}
     )
 
 
@@ -75,8 +75,9 @@ for Lx in 100 ; do
     hrs_beg=$( printf "%03d" $(( $offset )) )
     hrs_end=$( printf "%03d" $(( $offset + $dhr )) )
 
+    if [ ] ; then
     echo "Doing diagnostic AUX"
-    output="$output_fig_dir/AUX_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
+    output="$output_fig_dir/AUX_avg-${avg}_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
     extra_title=""
     python3 src/plot_timeseries_see_steady_state.py \
         --input-dirs "${input_dirs[@]}"      \
@@ -101,7 +102,7 @@ for Lx in 100 ; do
 
 
     echo "Doing diagnostic simple"
-    output="$output_fig_dir/SIMPLE_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
+    output="$output_fig_dir/SIMPLE_avg-${avg}_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
     extra_title=""
     python3 src/plot_timeseries_see_steady_state.py \
         --input-dirs "${input_dirs[@]}"      \
@@ -121,9 +122,10 @@ for Lx in 100 ; do
         --output $output & 
 
 
+    fi
 
     echo "Doing diagnostic HEATFLX"
-    output="$output_fig_dir/HEATFLX_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
+    output="$output_fig_dir/HEATFLX_avg-${avg}_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
     extra_title=""
     python3 src/plot_timeseries_see_steady_state.py \
         --input-dirs "${input_dirs[@]}"      \
@@ -136,14 +138,15 @@ for Lx in 100 ; do
         --time-rng $hrs_beg $hrs_end         \
         --extra-title "$extra_title"         \
         --tick-interval-hour 24              \
-        --ncols 5                            \
+        --ncols 9                            \
         --smooth $smooth                     \
         --no-display                         \
-        --varnames      HFX     C_H_WND_TOA  WND_TOA_cx_mul_C_H  C_H_TOA_cx_mul_WND  C_H_WND_cx_mul_TOA  \
-                        LH      C_Q_WND_QOA  WND_QOA_cx_mul_C_Q  C_Q_QOA_cx_mul_WND  C_Q_WND_cx_mul_QOA  \
+        --varnames      HFX HFX_from_FLHC     HFX_approx HFX_res C_H_WND_TOA  WND_TOA_cx_mul_C_H  C_H_TOA_cx_mul_WND  C_H_WND_cx_mul_TOA  C_H_WND_TOA_cx \
+                        LH LH_from_FLQC     LH_approx  LH_res C_Q_WND_QOA  WND_QOA_cx_mul_C_Q  C_Q_QOA_cx_mul_WND  C_Q_WND_cx_mul_QOA  C_Q_WND_QOA_cx \
         --output $output &
 
 
+done
 done
 done
 
