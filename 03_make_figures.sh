@@ -5,10 +5,12 @@ source 00_setup.sh
 mkdir -p $fig_dir
 
 plot_codes=(
-    $sh 11_plot_ocean_SST_analysis.sh "BLANK"
-    $sh 12_plot_sounding.sh "BLANK"
-    $sh 13_plot_snapshot.sh "BLANK"
-    $sh 14_plot_timeseries_see_steady_state.sh "BLANK"
+    $sh 11_plot_ocean_SST_analysis.sh            "BLANK"
+    $sh 12_plot_sounding.sh                      "BLANK"
+    $sh 13_plot_snapshot.sh                      "BLANK"
+    $sh 14_plot_timeseries_see_steady_state.sh   "BLANK"
+    $sh 16-3_plot_flux_deomposition_vary_dSST.sh "BLANK"
+    $sh 16-4_plot_flux_deomposition_vary_Lx.sh   "BLANK"
 )
 #    $sh 13_plot_snapshot.sh "BLANK"
 #    $sh 14_plot_spatial_anoamly.sh "BLANK"
@@ -26,7 +28,7 @@ for i in $( seq 1 $(( ${#plot_codes[@]} / 3 )) ) ; do
     OPTS="${plot_codes[$(( (i-1) * 3 + 2 ))]}"
     echo "=====[ Running file: $FILE ]====="
     set -x
-    eval "$PROG $FILE $OPTS" & 
+    eval "$PROG $FILE $OPTS"  
 done
 
 

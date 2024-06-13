@@ -9,6 +9,7 @@ import os
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--input-dirs', nargs="+", type=str, help='Input directories.', required=True)
+parser.add_argument('--input-dirs-base', nargs="*", type=str, help='Input directories for baselines. They can be empty.', default=None)
 parser.add_argument('--linestyles', nargs="+", type=str, help='Line styles.', default=None)
 parser.add_argument('--linecolors', nargs="+", type=str, help='Line styles.', required=True)
 parser.add_argument('--labels', nargs="+", type=str, help='Exp names.', default=None)
@@ -19,6 +20,7 @@ parser.add_argument('--extra-title', type=str, help='Title', default="")
 parser.add_argument('--smooth', type=int, help='Smooth points. Should be an even number', default=1)
 parser.add_argument('--thumbnail-numbering', type=str, help='Thumbnail numbering', default="abcdefghijklmn")
 parser.add_argument('--no-display', action="store_true")
+parser.add_argument('--show-labels', action="store_true")
 parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
 parser.add_argument('--tick-interval-hour', type=int, help="Ticks interval in hours.", default=12)
 parser.add_argument('--time-unit', type=str, help="Unit of time. ", choices=["day", "hour"], default="day")
@@ -31,12 +33,15 @@ args = parser.parse_args()
 print(args)
 
 
+base_exists = args.input_dirs_base is not None
+if base_exists:
+    if len(args.input_dirs_base) != len(args.input_dirs):
+        raise Exception("Error: If `--input-dirs-base` is non-empty, it should have the same number of elements as `--input-dirs`.")
+
+
 Nvars = len(args.varnames)
 ncols = args.ncols
 nrows = int(np.ceil( Nvars / ncols))
-
-
-
 
 exp_beg_time = pd.Timestamp(args.exp_beg_time)
 wrfout_data_interval = pd.Timedelta(seconds=args.wrfout_data_interval)
@@ -53,9 +58,9 @@ wsm = wrf_load_helper.WRFSimMetadata(
 )
 
 # Loading data
-data = []
-for i, input_dir in enumerate(args.input_dirs):
 
+def loadData(input_dir):
+    
     print("Loading wrf dir: %s" % (input_dir,))
     ds = wrf_load_helper.loadWRFDataFromDir(
         wsm, 
@@ -69,18 +74,61 @@ for i, input_dir in enumerate(args.input_dirs):
         inclusive="left",
     )
 
-    TTL_RAIN = ds["RAINNC"] + ds["RAINC"]
+    merge_data = [ds, ]   
+ 
+    TTL_RAIN = ds["RAINNC"] + ds["RAINC"] + ds["RAINSH"] + ds["SNOWNC"] + ds["HAILNC"] + ds["GRAUPELNC"]
     PRECIP = ( TTL_RAIN - TTL_RAIN.shift(time=1) ) / wrfout_data_interval.total_seconds()
     PRECIP = PRECIP.rename("PRECIP") 
     
-    ds = xr.merge([ds, PRECIP])
-    ds = xr.merge( [ ds[varname] for varname in args.varnames ] ).load()
+    WATER_TTL = ds["QVAPOR_TTL"] + ds["QRAIN_TTL"] + ds["QICE_TTL"] + ds["QSNOW_TTL"] + ds["QCLOUD_TTL"]
+    dWATER_TTLdt = ( WATER_TTL - WATER_TTL.shift(time=1) ) / wrfout_data_interval.total_seconds()
+    dWATER_TTLdt = dWATER_TTLdt.rename("dWATER_TTLdt") 
 
+    merge_data.append(PRECIP)
+    merge_data.append(dWATER_TTLdt)
+
+    if "ACLHF" in ds: 
+        ACLQFX = ds["ACLHF"] / 2.5e6
+        QFX = (ACLQFX - ACLQFX.shift(time=1)) / wrfout_data_interval.total_seconds()
+        WATER_BUDGET_RES = dWATER_TTLdt - ( QFX - PRECIP )
+        WATER_BUDGET_RES = WATER_BUDGET_RES.rename("WATER_BUDGET_RES")
+        QFX = QFX.rename("QFX")
+
+        merge_data.append(WATER_BUDGET_RES)
+        merge_data.append(QFX)
+     
+    ds = xr.merge(merge_data)
+
+    merge_data = []
+
+    for varname in args.varnames:
+        if varname == "BLANK":
+            continue
+        merge_data.append(ds[varname])
+    ds = xr.merge( merge_data ).load()
     ds = ds.rolling(time=args.smooth, center=True).mean()
 
-    data.append(ds)
-
+    return ds
+   
     
+
+data = []
+for i, input_dir in enumerate(args.input_dirs):
+        
+    print("[%d] Loading ... " % (i,))
+
+    ds = loadData(input_dir)
+    
+    if base_exists:
+    
+        print("[%d] Loading base... " % (i,)) 
+        ds_base = loadData(args.input_dirs_base[i])
+        
+
+        print("[%d] Take difference... " % (i,))
+        ds = ds - ds_base
+
+    data.append(ds)
 
 
 
@@ -93,90 +141,130 @@ LH_rng  = [ -10, 200 ]
 LH_corr_rng = [-0.5, 15]
 HFX_corr_rng = [-1.0, 4.5]
 
+HFX_diff_rng = [-20, 20]
+HFX_corr_diff_rng = [-1, 6]
+LH_diff_rng = [-35, 45]
+LH_corr_diff_rng = [-1, 15]
+
 plot_infos = dict(
 
 
     C_Q_WND_QOA_cx = dict(
         factor = 2.5e6,
-        label = "$L_q \\, \\overline{ C'_Q \\, U' \\, Q'_{OA} }$",
+        label = "$L_Q \\, \\overline{ C'_Q \\, U'_A \\, Q'_{OA} }$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ylim = LH_corr_rng,
+        ylim_diff = LH_corr_diff_rng,
     ),
 
     WND_QOA_cx_mul_C_Q = dict(
         factor = 2.5e6,
-        label = "$L_q \\, \\overline{C}_Q \\, \\overline{ U' Q'_{OA} }$",
+        label = "$L_Q \\, \\overline{C}_Q \\, \\overline{ U'_A Q'_{OA} }$",
+        label_diff = "$\\delta \\left( L_Q \\, \\overline{C}_Q \\, \\overline{ U'_A Q'_{OA} } \\right)$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ylim = LH_corr_rng,
+        ylim_diff = LH_corr_diff_rng,
     ),
 
 
 
     C_Q_QOA_cx_mul_WND = dict(
         factor = 2.5e6,
-        label = "$L_q \\, \\overline{U} \\, \\overline{ C_Q' Q'_{OA} }$",
+        label = "$L_Q \\, \\overline{U}_A \\, \\overline{ C_Q' Q'_{OA} }$",
+        label_diff = "$\\delta \\left( L_Q \\, \\overline{U}_A \\, \\overline{ C_Q' Q'_{OA} }\\right)$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ylim = LH_corr_rng,
+        ylim_diff = LH_corr_diff_rng,
     ),
 
 
     C_Q_WND_cx_mul_QOA = dict(
         factor = 2.5e6,
-        label = "$L_q \\, \\overline{Q}_{OA} \\, \\overline{ C_Q' U' }$",
+        label = "$L_Q \\, \\overline{Q}_{OA} \\, \\overline{ C_Q' U'_A }$",
+        label_diff = "$\\delta \\left( L_Q \\, \\overline{Q}_{OA} \\, \\overline{ C_Q' U'_A } \\right)$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ylim = LH_corr_rng,
+        ylim_diff = LH_corr_diff_rng,
     ),
 
     C_Q_WND_QOA = dict(
         factor = 2.5e6,
-        label = "$L_q \\overline{C}_Q \\, \\overline{U} \\, \\overline{Q}_{OA}$",
+        label = "$L_Q \\overline{C}_Q \\, \\overline{U}_A \\, \\overline{Q}_{OA}$",
+        label_diff = "$\\delta \\left( L_Q \\overline{C}_Q \\, \\overline{U}_A \\, \\overline{Q}_{OA} \\right)$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ylim = LH_rng,
+        ylim_diff = LH_diff_rng,
     ),
 
     C_H_WND_TOA = dict(
         factor = 1.0,
-        label = "$\\overline{C}_H \\, \\overline{U} \\, \\overline{T}_{OA}$",
+        label = "$\\overline{C}_H \\, \\overline{U}_A \\, \\overline{T}_{OA}$",
+        label_diff = "$\\delta \\left( \\overline{C}_H \\, \\overline{U}_A \\, \\overline{T}_{OA} \\right)$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ylim = HFX_rng,
+        ylim_diff = HFX_diff_rng,
     ),
 
 
     WND_TOA_cx_mul_C_H = dict(
-        label = "$\\overline{C}_T \\, \\overline{ U' T'_{OA} }$",
+        label = "$\\overline{C}_T \\, \\overline{ U'_A T'_{OA} }$",
+        label_diff = "$\\delta \\left( \\overline{C}_T \\, \\overline{ U'_A T'_{OA} } \\right)$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ylim = HFX_corr_rng,
+        ylim_diff = HFX_corr_diff_rng,
     ),
 
 
     C_H_WND_TOA_cx = dict(
-        label = "$\\overline{ C'_H \\, U' \\, T'_{OA} }$",
+        label = "$\\overline{ C'_H \\, U'_A \\, T'_{OA} }$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         #ylim = [-0.2 , 3.6,],
         ylim = HFX_corr_rng,
+        ylim_diff = HFX_corr_diff_rng,
     ),
 
     C_H_TOA_cx_mul_WND = dict(
-        label = "$\\overline{U} \\, \\overline{ C_H' T'_{OA} }$",
+        label = "$\\overline{U}_A \\, \\overline{ C_H' T'_{OA} }$",
+        label_diff = "$\\delta \\left( \\overline{U}_A \\, \\overline{ C_H' T'_{OA} } \\right)$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         #ylim = [-0.2 , 3.6,],
         ylim = HFX_corr_rng,
+        ylim_diff = HFX_corr_diff_rng,
     ),
 
 
     C_H_WND_cx_mul_TOA = dict(
-        label = "$\\overline{T}_{OA} \\, \\overline{ C_H' U' }$",
+        label = "$\\overline{T}_{OA} \\, \\overline{ C_H' U'_A }$",
+        label_diff = "$\\delta \\left( \\overline{T}_{OA} \\, \\overline{ C_H' U'_A } \\right)$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         #ylim = [-0.2 , 3.6,],
         ylim = HFX_corr_rng,
+        ylim_diff = HFX_corr_diff_rng,
     ),
+
+    WATER_BUDGET_RES = dict(
+        factor = 86400.0,
+        label = "Water budget residue",
+        unit = "$ \\mathrm{mm} / \\mathrm{day} $",
+        ylim_diff = [-5, 5],
+    ),
+
+    QFX = dict(
+        factor = 86400.0,
+        label = "$\\overline{Q}_{\\mathrm{flx}}$",
+        unit = "$ \\mathrm{mm} / \\mathrm{day} $",
+        ylim = [-1, 20],
+        ylim_diff = [-5, 5],
+    ),
+
 
 
     PRECIP = dict(
         factor = 86400.0,
-        label = "Precip",
+        label = "$\\overline{P}$",
         unit = "$ \\mathrm{mm} / \\mathrm{day} $",
-        ylim = [-1, 10],
+        ylim = [-1, 25],
+        ylim_diff = [-5, 5],
     ),
 
 
@@ -190,7 +278,7 @@ plot_infos = dict(
     TA = dict(
         factor = 1,
         offset = 273.15,
-        label = "$\\overline{T_A}$",
+        label = "$\\overline{T}_A$",
         unit = "$ \\mathrm{K} $",
         ylim = [12, 17],
     ),
@@ -211,7 +299,7 @@ plot_infos = dict(
 
     QA = dict(
         factor = 1e3,
-        label = "$Q_A$",
+        label = "$\\overline{Q}_A$",
         unit = "$ \\mathrm{g} / \\mathrm{kg} $",
         ylim = [-1, 12],
     ),
@@ -225,23 +313,25 @@ plot_infos = dict(
 
     PBLH = dict(
         factor = 1,
-        label = "$\\overline{H_\\mathrm{PBL}}$",
+        label = "$\\overline{H}_\\mathrm{PBL}$",
         unit = "$ \\mathrm{m} $",
         ylim = [0, 2500],
     ),
 
     HFX = dict(
         factor = 1,
-        label = "$\\overline{F_\\mathrm{sen}}$",
+        label = "$\\overline{F}_\\mathrm{sen}$",
         unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
         ylim = HFX_rng,
+        ylim_diff = HFX_diff_rng,
     ),
 
     LH = dict(
         factor = 1,
-        label = "$\\overline{F_\\mathrm{lat}}$",
+        label = "$\\overline{F}_\\mathrm{lat}$",
         unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
         ylim = LH_rng,
+        ylim_diff = LH_diff_rng,
     ),
 
  
@@ -269,6 +359,44 @@ plot_infos = dict(
         label = "$\\overline{C_H} $",
         unit = "$ \\mathrm{m} / \\mathrm{s} $",
     ),
+
+
+    QVAPOR_TTL = dict(
+        factor = 1.0,
+        label = "Integrated Water Vapor",
+        unit = "$ \\mathrm{mm} \\, / \\, \\mathrm{m}^2 $",
+        ylim = [0, 30],
+    ),
+
+    QCLOUD_TTL = dict(
+        factor = 1.0,
+        label = "Total Cloud Water",
+        unit = "$ \\mathrm{mm} \\, / \\, \\mathrm{m}^2 $",
+        ylim = [0, 30],
+    ),
+
+    QRAIN_TTL = dict(
+        factor = 1.0,
+        label = "Total Rain Water",
+        unit = "$ \\mathrm{mm} \\, / \\, \\mathrm{m}^2 $",
+        ylim = [0, 30],
+    ),
+
+    THETA_MEAN = dict(
+        factor = 1.0,
+        offset = 273.15,
+        label = "Mean Potential Temperature",
+        unit = "$ {}^\\circ \\mathrm{C} $",
+        #ylim = [10, 20],
+    ),
+
+    TKE_TTL = dict(
+        factor = 1.0,
+        label = "Integrated TKE",
+        unit = "$ \\mathrm{J} \\, / \\, \\mathrm{m}^2 $",
+    ),
+
+
 
 )
 
@@ -318,12 +446,11 @@ for k, _ds in enumerate(data):
     print("Plotting the %d-th dataset." % (k,)) 
     
     for i, varname in enumerate(plot_varnames):
-        
+    
         _ax = ax.flatten()[i]
 
         if varname == "BLANK":
-            print("BLANK detected. Remove axis.")
-            fig.delaxes(_ax)
+
             continue
 
         print("Plotting variable: ", varname)
@@ -331,13 +458,22 @@ for k, _ds in enumerate(data):
 
         factor = plot_info["factor"] if "factor" in plot_info else 1.0
         offset = plot_info["offset"] if "offset" in plot_info else 0.0
-        ylim   = plot_info["ylim"] if "ylim" in plot_info else None
+
+        if base_exists:
+            ylim   = plot_info["ylim_diff"] if "ylim_diff" in plot_info else None
+            label = plot_info["label_diff"] if "label_diff" in plot_info else "$\\delta$%s" % (plot_info["label"],)
+        else:
+            ylim   = plot_info["ylim"] if "ylim" in plot_info else None
+            label = plot_info["label"]
 
 
         vardata = (_ds[varname] - offset) * factor
-        _ax.plot(t_rel, vardata, label=plot_info["label"], color=args.linecolors[k], linestyle=args.linestyles[k])
+        _ax.plot(t_rel, vardata, label=args.labels[k], color=args.linecolors[k], linestyle=args.linestyles[k])
 
-        _ax.set_title("(%s) %s" % (args.thumbnail_numbering[i], plot_info["label"],))
+        _ax.set_title("(%s) %s" % (
+            args.thumbnail_numbering[i],
+            label,
+        ))
         _ax.set_ylabel("[ %s ]" % (plot_info["unit"],))
     
         if ylim is not None:
@@ -358,6 +494,7 @@ xticks = args.tick_interval_hour * np.arange(np.ceil(total_time / args.tick_inte
 
 for _ax in ax.flatten():
     #_ax.legend()
+
     _ax.grid()
 
     if args.time_unit == "hr":
@@ -372,8 +509,18 @@ for _ax in ax.flatten():
 
     _ax.set_xlim([relTimeInHrs(time_beg), relTimeInHrs(time_end)])
 
-for _ax in ax.flatten()[Nvars:]:
-    fig.delaxes(_ax)
+    if args.show_labels:
+        _ax.legend()
+
+
+
+for i, varname in enumerate(args.varnames):
+
+    _ax = ax.flatten()[i]
+
+    if varname == "BLANK":
+        print("BLANK detected. Remove axis.")
+        plt.delaxes(_ax)
 
 
 if args.output != "":

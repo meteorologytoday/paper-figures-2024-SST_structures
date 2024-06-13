@@ -19,7 +19,7 @@ for hr in 240-360 ; do
 
     input_file=$gendata_dir/collected_flux/$target_lab/collected_flux_${bl_scheme}_hr${hr}.nc
     output_dir=$fig_dir/flux_decomposition_varying_Lx/$target_lab
-    output_file=$output_dir/flux_decomposition_varying_Lx_${bl_scheme}_hr${hr}.png
+    output_file=$output_dir/flux_decomposition_varying_Lx_${bl_scheme}_hr${hr}.svg
 
     mkdir -p $output_dir
 

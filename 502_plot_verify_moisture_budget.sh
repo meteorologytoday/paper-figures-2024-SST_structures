@@ -2,8 +2,9 @@
 
 source 00_setup.sh
 
+
 nproc=1
-output_fig_dir=$fig_dir/timeseries
+output_fig_dir=$fig_dir/verify_moisture_budget/timeseries
 
 for _dir in $output_fig_dir $cache_dir ; do
     echo "mkdir -p $_dir"
@@ -12,63 +13,46 @@ done
 
 
 offset=$(( 24 * 0 ))
-dhr=$(( 24 * 15 ))
+dhr=$(( 24 * 9 ))
 
 
 
 #dhr=6
 trap "exit" INT TERM
 trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
-analysis_root=$gendata_dir/analysis_timeseries
+analysis_root=data_verify_moisture/analysis_timeseries
 
 
-for smooth in 1 25 49 ; do
-for Lx in 100 ; do
+PREFIX=WRF46-
+
+
+for smooth in 1 25 ; do
+for Lx in 002 ; do
 
 
     input_dirs=(
-#        $analysis_root/lab_sine_dry/case_mph-off_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
-#        $analysis_root/lab_sine_dry/case_mph-off_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
-#        $analysis_root/lab_sine_wet/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
-#        $analysis_root/lab_sine_wet/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
-#        $analysis_root/lab_sine_wetlw/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
-#        $analysis_root/lab_sine_wetlw/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
-#        $analysis_root/lab_sine_wetlwsw/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
-        $analysis_root/lab_sine_wetlwsw/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
+        $analysis_root/lab_verify_moisture_budget/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
+        $analysis_root/lab_verify_moisture_budget/case_mph-on_Lx${Lx}_U20_dT000_YSU/avg_before_analysis-TRUE
+        $analysis_root/lab_verify_moisture_budget/case_mph-on_Lx${Lx}_U20_dT000_MYJ/avg_before_analysis-TRUE
     )
 
 
     linestyles=(
-        "dashed"
         "solid"
-        "dashed"
         "solid"
-        "dashed"
-        "solid"
-        "dashed"
         "solid"
     )
 
     linecolors=(
-        "gray"
-        "gray"
-        "orangered"
-        "orangered"
-        "dodgerblue"
-        "dodgerblue"
-        "magenta"
-        "magenta"
+        "black"
+        "red"
+        "blue"
     )
 
     labels=(
-        "DRY-000"
-        "DRY-300"
-        "WET-000"
-        "WET-300"
-        "WETLW-000"
-        "WETLW-300"
-        "WETRAD-000"
-        "WETRAD-300"
+        "MYNN25"
+        "YSU"
+        "MYJ"
     )
 
 
@@ -76,7 +60,7 @@ for Lx in 100 ; do
     hrs_end=$( printf "%03d" $(( $offset + $dhr )) )
 
     echo "Doing diagnostic AUX"
-    output="$output_fig_dir/AUX_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
+    output="$output_fig_dir/${PREFIX}AUX_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.png"
     extra_title=""
     python3 src/plot_timeseries_see_steady_state.py \
         --input-dirs "${input_dirs[@]}"      \
@@ -89,17 +73,18 @@ for Lx in 100 ; do
         --time-rng $hrs_beg $hrs_end         \
         --extra-title "$extra_title"         \
         --tick-interval-hour 24              \
-        --ncols 4                            \
+        --ncols 2                            \
         --smooth $smooth                     \
         --no-display                         \
-        --varnames    QVAPOR_TTL        THETA_MEAN   \
-                      WATER_BUDGET_RES  TKE_TTL      \
+        --show-labels                        \
+        --varnames    QVAPOR_TTL        PRECIP              \
+                      QFX               WATER_BUDGET_RES    \
         --output $output & 
 
 #        --varnames    QVAPOR_TTL QCLOUD_TTL QRAIN_TTL  THETA_MEAN \
 #                      TKE_TTL    WATER_BUDGET_RES     BLANK      BLANK      \
 
-
+    if [ ] ; then
     echo "Doing diagnostic simple"
     output="$output_fig_dir/SIMPLE_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
     extra_title=""
@@ -123,7 +108,7 @@ for Lx in 100 ; do
 
 
     echo "Doing diagnostic HEATFLX"
-    output="$output_fig_dir/HEATFLX_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
+    output="$output_fig_dir/HEATFLX_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.png"
     extra_title=""
     python3 src/plot_timeseries_see_steady_state.py \
         --input-dirs "${input_dirs[@]}"      \
@@ -143,7 +128,7 @@ for Lx in 100 ; do
                         LH      C_Q_WND_QOA  WND_QOA_cx_mul_C_Q  C_Q_QOA_cx_mul_WND  C_Q_WND_cx_mul_QOA  \
         --output $output &
 
-
+    fi
 done
 done
 

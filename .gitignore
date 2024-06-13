@@ -23,3 +23,4 @@ data/*
 gendata/*
 !figures_static/*
 .nfs*
+*.svg

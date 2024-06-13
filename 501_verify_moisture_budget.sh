@@ -5,35 +5,34 @@ source 00_setup.sh
 input_dirs=""
 exp_names=""
 
+
+gendata_dir=./data_verify_moisture
+
 output_dir_root=$gendata_dir/analysis_timeseries
 
 hrs_beg=$(( 24 * 0 ))
-hrs_end=$(( 24 * 16 ))
+hrs_end=$(( 24 * 10 ))
 
 
 time_avg_interval=60   # minutes
 
-batch_cnt_limit=6
-nproc=10
-
-#batch_cnt_limit=3
-#nproc=4
-
-
+batch_cnt_limit=5
+nproc=5
 
 trap "exit" INT TERM
 trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 
 for avg_before_analysis in "TRUE" ; do
-for target_lab in  lab_sine_wetlwsw lab_sine_wetlw lab_sine_wet lab_sine_dry ; do 
+for target_lab in  lab_verify_moisture_budget ; do 
 #for target_lab in lab_sine_dry ; do 
 #for target_lab in lab_sine_wet ; do 
 #    for Lx in 050 100 200 300 400 500 ; do
-    for Lx in 100 500 ; do
+    for Lx in 002 ; do
         for U in 20 ; do
-            for _bl_scheme in "MYNN25" ; do
-#                for dT in 000 050 100 150 200 250 300 ; do
-                for dT in 000  300 ; do
+            for _bl_scheme in "MYJ" "YSU" "MYNN25" ; do
+                for dT in 000 ; do
+
+                    mph=on
  
                     if [[ "$target_lab" =~ "semiwet" ]]; then
                         mph=off

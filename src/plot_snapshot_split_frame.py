@@ -323,11 +323,11 @@ plt.clabel(cs)
 
 
 for _ax in ax[0:1, 0].flatten():
-    _ax.plot(X_sT, ds.PBLH, color="pink", linestyle="-.")
+    _ax.plot(X_sT, ds.PBLH, color="magenta", linestyle="--")
 
 for _ax in ax[0, 1:]:
     trans = transforms.blended_transform_factory(_ax.transAxes, _ax.transData)
-    _ax.plot([0, 1], [ds_ref_stat["PBLH"].to_numpy()]*2, color="pink", linestyle="-.", transform=trans)
+    _ax.plot([0, 1], [ds_ref_stat["PBLH"].to_numpy()]*2, color="magenta", linestyle="-.", transform=trans)
 
 U10_mean = np.mean(ds.U10)
 V10_mean = np.mean(ds.V10)
@@ -368,7 +368,7 @@ ax[3, 0].set_title("(d) SST (blue) and $T_\\mathrm{2m}$ (red)")
 
 ax[1, 0].legend(loc="upper right")
 ax[1, 0].set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
-ax[1, 0].set_title("(b) $\\left( \\overline{U}_{\\mathrm{10m}}, \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right)$, $\\overline{\\vec{U}_{\\mathrm{10m}}} = %.2f $." % (U10_mean, V10_mean, WND10_mean))
+ax[1, 0].set_title("(b) $\\left( \\overline{U}_{\\mathrm{10m}}, \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right)$, $\\overline{\\left|\\vec{U}_{\\mathrm{10m}}\\right|} = %.2f $." % (U10_mean, V10_mean, WND10_mean))
 
 ax[2, 0].set_ylabel("[ $ \\mathrm{g} \\, / \\, \\mathrm{kg}$ ]", color="black")
 ax[3, 0].set_ylabel("[ $ \\mathrm{K}$ ]", color="black")
@@ -435,7 +435,7 @@ iii = 0
 _ax = ax[0, iii]
 _ax.plot(ds_ref_stat["T"] + 300, ref_Z_T, 'k-', label="$\\overline{\\theta}$")
 _ax.plot(ds_ref_stat["THETAV"], ref_Z_T, 'r--', label="$\\overline{\\theta_v}$")
-_ax.set_title("(%s) $\\overline{\\theta}$ and $\\overline{\\theta_v}$" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
+_ax.set_title("(%s) $\\overline{\\theta}$ and $\\overline{\\theta}_v$" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
 _ax.set_xlabel("[ $\\mathrm{K}$ ]")
 _ax.set_xlim([285, 300])
 _ax.legend(loc="upper right")
@@ -473,14 +473,16 @@ iii += 1
 
 if args.tke_analysis == "TRUE":
     # TKE
-    _ax = ax[0, iii]; iii+=1
+    _ax = ax[0, iii]
     _ax.plot(ds_ref_stat["QKE"]/2, ref_Z_T)
     _ax.set_title("(%s) TKE" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
     _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
     _ax.set_xlim(args.TKE_rng)
+    iii+=1
 
     # TKE budget
-    _ax = ax[0, iii]; iii+=1
+    _ax = ax[0, iii]
+
     _ax.set_title("(%s) TKE budget" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
     _ax.plot(ds_ref_stat["DQKE_T"] * 1e1 / 2, ref_Z_T,   color="black", linestyle='solid', label="$10 \\times \\partial q / \\partial t$")
     _ax.plot(ds_ref_stat["QSHEAR_T"]/2, ref_Z_T, color="red", linestyle='solid',   label="$q_{sh}$")
@@ -495,10 +497,11 @@ if args.tke_analysis == "TRUE":
     _ax.set_xlim(args.DTKE_rng)
 
     _ax.legend(loc="upper right")
+    iii+=1
 
 for _ax in ax[0, :]:
     trans = transforms.blended_transform_factory(_ax.transAxes, _ax.transData)
-    _ax.plot([0, 1], [ds_ref_stat["PBLH"].to_numpy()]*2, color="pink", linestyle="-.", transform=trans)
+    _ax.plot([0, 1], [ds_ref_stat["PBLH"].to_numpy()]*2, color="magenta", linestyle="--", transform=trans)
 
 
 for i, _ax in enumerate(ax[0, :]):

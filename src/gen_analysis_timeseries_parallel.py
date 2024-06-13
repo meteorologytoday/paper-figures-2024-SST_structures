@@ -14,7 +14,26 @@ import datetime
 import os
 
 cp_a  = 1004.0  # J / kg / K
-Lq = 2.5e6
+Lq = 2.5e6      # J / kg
+g0 = 9.81       # m / s^2
+
+def integrateVertically(X, ds, avg=False):
+
+    MUB = ds.MUB
+    DNW = ds.DNW
+    MU_FULL = ds.MU + ds.MUB
+    MU_STAR = MU_FULL / MUB
+    integration_factor = - MUB * DNW / g0  # notice that DNW is negative, so we need to multiply by -1
+
+    X_STAR = X * MU_STAR
+    X_INT = (integration_factor * X_STAR).sum(dim="bottom_top")
+
+    if avg:
+        sum_integration_factor = integration_factor.sum(dim="bottom_top")
+        X_INT = X_INT / sum_integration_factor
+
+    return X_INT
+
 
 def onlyPos(x):
     return 0.0 if x < 0.0 else x
@@ -298,7 +317,7 @@ def genAnalysis_subset(
     PRECIP = PRECIP.rename("PRECIP") 
     """
 
-    new_ds = xr.merge([
+    merge_data = [
         HFX, LH, 
         HFX_approx, LH_approx,
         
@@ -333,10 +352,39 @@ def genAnalysis_subset(
 
         ds["RAINC"],        
         ds["RAINNC"],        
+        ds["RAINSH"],        
+        ds["SNOWNC"],        
+        ds["HAILNC"],        
+        ds["GRAUPELNC"],        
+        
+        ds["ACLHF"],        
     
-        ds["PBLH"],    
-    ])
+        ds["PBLH"],
 
+    ]
+
+
+    # Integrate water vapor, TKE
+
+    for species in ["VAPOR", "CLOUD", "RAIN", "ICE", "SNOW"]:
+        QX_varname = "Q%s" % (species,)
+        QX_TTL_varname = "Q%s_TTL" % (species,)
+
+        QX_TTL = integrateVertically(ds[QX_varname], ds, avg=False).mean(dim="west_east").rename(QX_TTL_varname)
+
+        merge_data.append(QX_TTL)
+
+    THETA_MEAN = integrateVertically(300.0 + ds.T, ds, avg=True).mean(dim="west_east").rename("THETA_MEAN")
+    merge_data.append(THETA_MEAN)
+
+
+    if "QKE" in ds:
+        TKE_TTL = integrateVertically(ds.QKE/2, ds, avg=False).mean(dim="west_east").rename("TKE_TTL")
+        merge_data.append(TKE_TTL)
+
+
+    # Merging data
+    new_ds = xr.merge(merge_data)
     new_ds = new_ds.mean(dim='west_east', skipna=True, keep_attrs=True)
   
     if avg_before_analysis is False:
