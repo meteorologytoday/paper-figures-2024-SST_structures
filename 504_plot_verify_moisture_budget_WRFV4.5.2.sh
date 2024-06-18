@@ -4,7 +4,7 @@ source 00_setup.sh
 
 
 nproc=1
-output_fig_dir=$fig_dir/lab_verify_moisture_budget_V4.5.2/timeseries
+output_fig_dir=$fig_dir/verify_moisture_budget/timeseries
 
 for _dir in $output_fig_dir $cache_dir ; do
     echo "mkdir -p $_dir"
@@ -32,7 +32,7 @@ for Lx in 002 ; do
 
     input_dirs=(
         $analysis_root/lab_verify_moisture_budget_V4.5.2/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
-        $analysis_root/lab_verify_moisture_budget_V4.5.2/lab_verify_moisture_budget_V4.5.2/case_mph-on_Lx${Lx}_U20_dT000_YSU/avg_before_analysis-TRUE
+        $analysis_root/lab_verify_moisture_budget_V4.5.2/case_mph-on_Lx${Lx}_U20_dT000_YSU/avg_before_analysis-TRUE
         $analysis_root/lab_verify_moisture_budget_V4.5.2/case_mph-on_Lx${Lx}_U20_dT000_MYJ/avg_before_analysis-TRUE
     )
 

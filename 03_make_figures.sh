@@ -9,6 +9,7 @@ plot_codes=(
     $sh 12_plot_sounding.sh                      "BLANK"
     $sh 13_plot_snapshot.sh                      "BLANK"
     $sh 14_plot_timeseries_see_steady_state.sh   "BLANK"
+    $sh 14-2_plot_timeseries_relative.sh         "BLANK"
     $sh 16-3_plot_flux_deomposition_vary_dSST.sh "BLANK"
     $sh 16-4_plot_flux_deomposition_vary_Lx.sh   "BLANK"
 )

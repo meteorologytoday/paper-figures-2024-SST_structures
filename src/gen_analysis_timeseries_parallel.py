@@ -227,14 +227,20 @@ def genAnalysis_subset(
 
     #merge_data.append( ( (ds["TSK"] - ds["T2"]) * WIND10 ).rename("WIND10TAO") )
  
+    V_T = ds["V"]
+    
     _tmp = ds["U"]
-    U_T = ds["T"].copy()
-    U_T[:, :] = (_tmp.isel(west_east_stag=slice(1, None)).to_numpy() + _tmp.isel(west_east_stag=slice(0, -1)).to_numpy()) / 2
+    U_T = ds["T"].copy().rename("U_T")
+
+    #print("Dimesion of U_T: ")
+    #print(U_T)
+
+    U_T[:, :, :] = (_tmp.isel(west_east_stag=slice(1, None)).to_numpy() + _tmp.isel(west_east_stag=slice(0, -1)).to_numpy()) / 2
     U_T = U_T.rename("U_T")
     merge_data.append(U_T) 
  
     U_sfc = U_T.isel(bottom_top=0).to_numpy()
-    V_sfc = ds["V"].isel(bottom_top=0)
+    V_sfc = V_T.isel(bottom_top=0)
     WND_sfc = (U_sfc**2 + V_sfc**2)**0.5
     WND_sfc = WND_sfc.rename("WND_sfc")
 
@@ -312,13 +318,21 @@ def genAnalysis_subset(
     QFX_approx = QFX_approx.rename("QFX_approx")
     LH_approx = LH_approx.rename("LH_approx")
  
-    HFX = ds["HFX"].mean(dim="west_east")
-    QFX = ds["QFX"].mean(dim="west_east")
-    LH  = ds["LH"].mean(dim="west_east")
 
+    merge_data = []
+    for varname in [
+        "SWDOWN",
+        "OLR",
+        "HFX",
+        "QFX",
+        "LH",
+    ]:
+        _d = ds[varname].mean(dim="west_east")
+        merge_data.append(_d)
+        
+        
   
-    merge_data = [
-        HFX, QFX, LH, 
+    merge_data.extend([
         HFX_approx, QFX_approx, LH_approx,
         
         WND_m, WND_p,
@@ -356,13 +370,14 @@ def genAnalysis_subset(
         ds["GRAUPELNC"],        
         
         ds["ACLHF"],        
-    
+        ds["ACHFX"],        
+        
         ds["PBLH"],
 
         ds["HFX_from_FLHC"],
         ds["QFX_from_FLQC"],
         ds["LH_from_FLQC"],
-    ]
+    ])
 
 
     # Integrate water vapor, TKE
@@ -371,13 +386,27 @@ def genAnalysis_subset(
         QX_varname = "Q%s" % (species,)
         QX_TTL_varname = "Q%s_TTL" % (species,)
 
-        QX_TTL = integrateVertically(ds[QX_varname], ds, avg=False).mean(dim="west_east").rename(QX_TTL_varname)
+        if not ( QX_varname in ds ):
+            print("Variable %s not in file. Skip it." % (QX_varname,))
+            continue
 
+        QX_TTL = integrateVertically(ds[QX_varname], ds, avg=False).mean(dim="west_east").rename(QX_TTL_varname)
         merge_data.append(QX_TTL)
 
     THETA_MEAN = integrateVertically(300.0 + ds.T, ds, avg=True).mean(dim="west_east").rename("THETA_MEAN")
     merge_data.append(THETA_MEAN)
 
+
+    # IVT
+    IVT_x = integrateVertically(ds["QVAPOR"] * U_T, ds, avg=False)
+    IVT_y = integrateVertically(ds["QVAPOR"] * V_T, ds, avg=False)
+    
+    # code order matters here
+    IVT = ((IVT_x**2 + IVT_y**2)**0.5).mean(dim="west_east").rename("IVT")
+    IVT_x = IVT_x.mean(dim="west_east").rename("IVT_x")
+    IVT_y = IVT_y.mean(dim="west_east").rename("IVT_y")
+
+    merge_data.extend([IVT, IVT_x, IVT_y])
 
     if "QKE" in ds:
         TKE_TTL = integrateVertically(ds.QKE/2, ds, avg=False).mean(dim="west_east").rename("TKE_TTL")

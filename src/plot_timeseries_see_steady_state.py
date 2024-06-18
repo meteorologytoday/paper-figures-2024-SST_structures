@@ -79,17 +79,29 @@ def loadData(input_dir):
     TTL_RAIN = ds["RAINNC"] + ds["RAINC"] + ds["RAINSH"] + ds["SNOWNC"] + ds["HAILNC"] + ds["GRAUPELNC"]
     PRECIP = ( TTL_RAIN - TTL_RAIN.shift(time=1) ) / wrfout_data_interval.total_seconds()
     PRECIP = PRECIP.rename("PRECIP") 
-    
-    WATER_TTL = ds["QVAPOR_TTL"] + ds["QRAIN_TTL"] + ds["QICE_TTL"] + ds["QSNOW_TTL"] + ds["QCLOUD_TTL"]
+    TTL_RAIN = TTL_RAIN.rename("TTL_RAIN")
+
+    if "QICE_TTL" in ds:   
+        WATER_TTL = ds["QVAPOR_TTL"] + ds["QRAIN_TTL"] + ds["QICE_TTL"] + ds["QSNOW_TTL"] + ds["QCLOUD_TTL"]
+    else:
+        WATER_TTL = ds["QVAPOR_TTL"] + ds["QRAIN_TTL"] + ds["QCLOUD_TTL"]
+
     dWATER_TTLdt = ( WATER_TTL - WATER_TTL.shift(time=1) ) / wrfout_data_interval.total_seconds()
     dWATER_TTLdt = dWATER_TTLdt.rename("dWATER_TTLdt") 
 
     merge_data.append(PRECIP)
+    merge_data.append(TTL_RAIN)
     merge_data.append(dWATER_TTLdt)
 
     if "ACLHF" in ds: 
-        ACLQFX = ds["ACLHF"] / 2.5e6
-        QFX = ds["QFX"]#(ACLQFX - ACLQFX.shift(time=1)) / wrfout_data_interval.total_seconds()
+
+        if "QFX" in ds:
+            QFX = ds["QFX"]
+        else:
+            ACLQFX = ds["ACLHF"] / 2.5e6
+            QFX = (ACLQFX - ACLQFX.shift(time=1)) / wrfout_data_interval.total_seconds()
+            QFX = QFX.rename("QFX")
+
         WATER_BUDGET_RES = dWATER_TTLdt - ( QFX - PRECIP )
         WATER_BUDGET_RES = WATER_BUDGET_RES.rename("WATER_BUDGET_RES")
         #QFX = QFX.rename("QFX")
@@ -100,8 +112,8 @@ def loadData(input_dir):
     HFX_res = (ds["HFX_approx"] - ds["HFX"]).rename("HFX_res")
     LH_res = (ds["LH_approx"] - ds["LH"]).rename("LH_res")
  
-    HFX_res = (ds["HFX_from_FLHC"] - ds["HFX"]).rename("HFX_res")
-    LH_res = (ds["LH_from_FLQC"] - ds["LH"]).rename("LH_res")
+    #HFX_res = (ds["HFX_from_FLHC"] - ds["HFX"]).rename("HFX_res")
+    #LH_res = (ds["LH_from_FLQC"] - ds["LH"]).rename("LH_res")
     
     merge_data.append(HFX_res)
     merge_data.append(LH_res)
@@ -276,6 +288,14 @@ plot_infos = dict(
         ylim_diff = [-5, 5],
     ),
 
+    TTL_RAIN = dict(
+        factor = 1.0,
+        label = "Accumulated Rain",
+        unit = "$ \\mathrm{mm} $",
+        ylim_diff = [-20, 20],
+    ),
+
+
 
     TO = dict(
         factor = 1,
@@ -397,6 +417,20 @@ plot_infos = dict(
         #ylim = [0, None],
     ),
 
+    SWDOWN = dict(
+        factor = 1,
+        label = "SWDOWN",
+        unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+    ),
+
+    OLR = dict(
+        factor = 1,
+        label = "Outgoing Longwave Radiation",
+        unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+    ),
+
+
+
     WND_m = dict(
         label = "$\\overline{U} $",
         unit = "$ \\mathrm{m} / \\mathrm{s} $",
@@ -404,9 +438,15 @@ plot_infos = dict(
     ),
 
     C_H_m = dict(
-        label = "$\\overline{C_H} $",
+        label = "$\\overline{C}_H $",
         unit = "$ \\mathrm{m} / \\mathrm{s} $",
     ),
+
+    C_Q_m = dict(
+        label = "$\\overline{C}_Q $",
+        unit = "$ \\mathrm{m} / \\mathrm{s} $",
+    ),
+
 
 
     QVAPOR_TTL = dict(
@@ -429,6 +469,14 @@ plot_infos = dict(
         unit = "$ \\mathrm{mm} \\, / \\, \\mathrm{m}^2 $",
         ylim = [0, 30],
     ),
+
+    IVT = dict(
+        factor = 1.0,
+        label = "Integrated Vapor Transport",
+        unit = "$ \\mathrm{kg} \\, / \\, \\mathrm{m} \\, / \\, \\mathrm{s}$",
+        ylim = [0, 600],
+    ),
+
 
     THETA_MEAN = dict(
         factor = 1.0,
@@ -507,9 +555,12 @@ for k, _ds in enumerate(data):
         factor = plot_info["factor"] if "factor" in plot_info else 1.0
         offset = plot_info["offset"] if "offset" in plot_info else 0.0
 
+
         if base_exists:
             ylim   = plot_info["ylim_diff"] if "ylim_diff" in plot_info else None
             label = plot_info["label_diff"] if "label_diff" in plot_info else "$\\delta$%s" % (plot_info["label"],)
+            offset = 0.0
+
         else:
             ylim   = plot_info["ylim"] if "ylim" in plot_info else None
             label = plot_info["label"]

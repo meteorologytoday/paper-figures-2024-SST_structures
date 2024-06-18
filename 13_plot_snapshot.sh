@@ -10,11 +10,13 @@ nproc=5
 proc_cnt=0
 
 target_labs=(
-    lab_sine_dry
+    lab_sine_DRY
 )
 
 bl_schemes=(
     MYNN25
+    MYJ
+    YSU
 )
 
 trap "exit" INT TERM
@@ -26,17 +28,24 @@ for dT in 300; do
             for target_lab in "${target_labs[@]}" ; do
                 for _bl_scheme in "${bl_schemes[@]}" ; do
                     
-                    if [[ "$target_lab" =~ "semiwet" ]]; then
+                    if [[ "$target_lab" =~ "SEMIWET" ]]; then
                         mph=off
                         W_levs=( -10 10 11 )
-                    elif [[ "$target_lab" =~ "wet" ]]; then
+                    elif [[ "$target_lab" =~ "WET" ]]; then
                         mph=on
                         W_levs=( -50 50 11 )
-                    elif [[ "$target_lab" =~ "dry" ]]; then
+                    elif [[ "$target_lab" =~ "DRY" ]]; then
                         mph=off
                         W_levs=( -2 2 21 )
                     fi
 
+                    if [[ "$_bl_scheme" = "MYNN25" ]]; then
+                        tke_analysis=TRUE 
+                    elif [[ "$_bl_scheme" = "YSU" ]]; then
+                        tke_analysis=FALSE 
+                    elif [[ "$_bl_scheme" = "MYJ" ]]; then
+                        tke_analysis=FALSE 
+                    fi 
 
                     input_dir=$data_sim_dir/$target_lab/case_mph-${mph}_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
                     output_dir=$output_fig_dir/$target_lab/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
@@ -69,7 +78,7 @@ for dT in 300; do
                             --SST-rng 11 19 \
                             --output1 $output1_name \
                             --output2 $output2_name \
-                            --tke-analysis TRUE \
+                            --tke-analysis $tke_analysis \
                             --no-display &
 
                         proc_cnt=$(( $proc_cnt + 1))

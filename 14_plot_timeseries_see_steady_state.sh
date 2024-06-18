@@ -11,8 +11,8 @@ for _dir in $output_fig_dir $cache_dir ; do
 done
 
 
-offset=$(( 24 * 4 ))
-dhr=$(( 24 * 1 ))
+offset=$(( 24 * 0 ))
+dhr=$(( 24 * 15 ))
 
 
 
@@ -21,20 +21,21 @@ trap "exit" INT TERM
 trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 analysis_root=$gendata_dir/analysis_timeseries
 
+for bl_scheme in YSU MYJ MYNN25 ; do
 for avg in TRUE ; do
-for smooth in 1 25 ; do
+for smooth in 25 49 1 ; do
 for Lx in 100 500 ; do
 
 
     input_dirs=(
-#        $analysis_root/lab_sine_dry/case_mph-off_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
-#        $analysis_root/lab_sine_dry/case_mph-off_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
-#        $analysis_root/lab_sine_wet/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
-#        $analysis_root/lab_sine_wet/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
-#        $analysis_root/lab_sine_wetlw/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
-#        $analysis_root/lab_sine_wetlw/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
-#        $analysis_root/lab_sine_WETLWSW/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
-        $analysis_root/lab_sine_WETLWSW/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-${avg}
+        $analysis_root/lab_sine_DRY/case_mph-off_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-${avg}
+        $analysis_root/lab_sine_DRY/case_mph-off_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-${avg}
+        $analysis_root/lab_sine_WET/case_mph-on_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-${avg}
+        $analysis_root/lab_sine_WET/case_mph-on_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-${avg}
+        $analysis_root/lab_sine_WETLW/case_mph-on_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-${avg}
+        $analysis_root/lab_sine_WETLW/case_mph-on_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-${avg}
+        $analysis_root/lab_sine_WETLWSW/case_mph-on_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-${avg}
+        $analysis_root/lab_sine_WETLWSW/case_mph-on_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-${avg}
     )
 
 
@@ -75,9 +76,31 @@ for Lx in 100 500 ; do
     hrs_beg=$( printf "%03d" $(( $offset )) )
     hrs_end=$( printf "%03d" $(( $offset + $dhr )) )
 
-    if [ ] ; then
+
+
+    echo "Doing diagnostic simple"
+    output="$output_fig_dir/SIMPLE_avg-${avg}_Lx${Lx}_${bl_scheme}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
+    extra_title=""
+    python3 src/plot_timeseries_see_steady_state.py \
+        --input-dirs "${input_dirs[@]}"      \
+        --linestyles "${linestyles[@]}"      \
+        --linecolors "${linecolors[@]}"      \
+        --labels "${labels[@]}"              \
+        --exp-beg-time "2001-01-01 00:00:00" \
+        --wrfout-data-interval 3600          \
+        --frames-per-wrfout-file 12          \
+        --time-rng $hrs_beg $hrs_end         \
+        --extra-title "$extra_title"         \
+        --tick-interval-hour 24              \
+        --ncols 5                            \
+        --smooth $smooth                     \
+        --no-display                         \
+        --varnames    PBLH   TA  QA WND_m BLANK \
+                      PRECIP HFX LH C_H_m C_Q_m \
+        --output $output & 
+
     echo "Doing diagnostic AUX"
-    output="$output_fig_dir/AUX_avg-${avg}_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
+    output="$output_fig_dir/AUX_avg-${avg}_Lx${Lx}_${bl_scheme}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
     extra_title=""
     python3 src/plot_timeseries_see_steady_state.py \
         --input-dirs "${input_dirs[@]}"      \
@@ -93,39 +116,18 @@ for Lx in 100 500 ; do
         --ncols 4                            \
         --smooth $smooth                     \
         --no-display                         \
-        --varnames    QVAPOR_TTL        THETA_MEAN   \
-                      WATER_BUDGET_RES  TKE_TTL      \
+        --varnames    TTL_RAIN     QVAPOR_TTL   THETA_MEAN   WATER_BUDGET_RES  \
+                      SWDOWN       OLR \
         --output $output & 
 
 #        --varnames    QVAPOR_TTL QCLOUD_TTL QRAIN_TTL  THETA_MEAN \
 #                      TKE_TTL    WATER_BUDGET_RES     BLANK      BLANK      \
 
 
-    echo "Doing diagnostic simple"
-    output="$output_fig_dir/SIMPLE_avg-${avg}_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
-    extra_title=""
-    python3 src/plot_timeseries_see_steady_state.py \
-        --input-dirs "${input_dirs[@]}"      \
-        --linestyles "${linestyles[@]}"      \
-        --linecolors "${linecolors[@]}"      \
-        --labels "${labels[@]}"              \
-        --exp-beg-time "2001-01-01 00:00:00" \
-        --wrfout-data-interval 3600          \
-        --frames-per-wrfout-file 12          \
-        --time-rng $hrs_beg $hrs_end         \
-        --extra-title "$extra_title"         \
-        --tick-interval-hour 24              \
-        --ncols 4                            \
-        --smooth $smooth                     \
-        --no-display                         \
-        --varnames    PBLH TA QA WND_m PRECIP HFX LH \
-        --output $output & 
 
-
-    fi
 
     echo "Doing diagnostic HEATFLX"
-    output="$output_fig_dir/HEATFLX_avg-${avg}_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
+    output="$output_fig_dir/HEATFLX_avg-${avg}_Lx${Lx}_${bl_scheme}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
     extra_title=""
     python3 src/plot_timeseries_see_steady_state.py \
         --input-dirs "${input_dirs[@]}"      \
@@ -138,14 +140,14 @@ for Lx in 100 500 ; do
         --time-rng $hrs_beg $hrs_end         \
         --extra-title "$extra_title"         \
         --tick-interval-hour 24              \
-        --ncols 9                            \
+        --ncols 7                            \
         --smooth $smooth                     \
         --no-display                         \
-        --varnames      HFX HFX_from_FLHC     HFX_approx HFX_res C_H_WND_TOA  WND_TOA_cx_mul_C_H  C_H_TOA_cx_mul_WND  C_H_WND_cx_mul_TOA  C_H_WND_TOA_cx \
-                        LH LH_from_FLQC     LH_approx  LH_res C_Q_WND_QOA  WND_QOA_cx_mul_C_Q  C_Q_QOA_cx_mul_WND  C_Q_WND_cx_mul_QOA  C_Q_WND_QOA_cx \
+        --varnames      HFX_res HFX C_H_WND_TOA  WND_TOA_cx_mul_C_H  C_H_TOA_cx_mul_WND  C_H_WND_cx_mul_TOA  C_H_WND_TOA_cx \
+                        LH_res  LH  C_Q_WND_QOA  WND_QOA_cx_mul_C_Q  C_Q_QOA_cx_mul_WND  C_Q_WND_cx_mul_QOA  C_Q_WND_QOA_cx \
         --output $output &
 
-
+done
 done
 done
 done

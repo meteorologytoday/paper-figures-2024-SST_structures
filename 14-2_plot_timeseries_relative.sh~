@@ -3,7 +3,7 @@
 source 00_setup.sh
 
 nproc=1
-output_fig_dir=$fig_dir/timeseries_relative_WRFV4.6.0
+output_fig_dir=$fig_dir/timeseries_relative
 
 for _dir in $output_fig_dir $cache_dir ; do
     echo "mkdir -p $_dir"
@@ -22,23 +22,22 @@ trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 analysis_root=$gendata_dir/analysis_timeseries
 
 
-for bl_scheme in MYJ MYNN25 YSU ; do
-for smooth in 25 49 ; do
+for smooth in 25 ; do
 for Lx in 100 500 ; do
 
 
     input_dirs=(
-        $analysis_root/lab_sine_DRY/case_mph-off_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-TRUE
-        $analysis_root/lab_sine_WET/case_mph-on_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-TRUE
-        $analysis_root/lab_sine_WETLW/case_mph-on_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-TRUE
-        $analysis_root/lab_sine_WETLWSW/case_mph-on_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-TRUE
+        $analysis_root/lab_sine_DRY/case_mph-off_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
+        $analysis_root/lab_sine_WET/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
+        $analysis_root/lab_sine_WETLW/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
+        $analysis_root/lab_sine_WETLWSW/case_mph-on_Lx${Lx}_U20_dT300_MYNN25/avg_before_analysis-TRUE
     )
 
     input_dirs_base=(
-        $analysis_root/lab_sine_DRY/case_mph-off_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-TRUE
-        $analysis_root/lab_sine_WET/case_mph-on_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-TRUE
-        $analysis_root/lab_sine_WETLW/case_mph-on_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-TRUE
-        $analysis_root/lab_sine_WETLWSW/case_mph-on_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-TRUE
+        $analysis_root/lab_sine_DRY/case_mph-off_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
+        $analysis_root/lab_sine_WET/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
+        $analysis_root/lab_sine_WETLW/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
+        $analysis_root/lab_sine_WETLWSW/case_mph-on_Lx${Lx}_U20_dT000_MYNN25/avg_before_analysis-TRUE
     )
 
 
@@ -70,7 +69,7 @@ for Lx in 100 500 ; do
 
 
     echo "Doing diagnostic HEATFLX"
-    output="$output_fig_dir/HEATFLX_Lx${Lx}_${bl_scheme}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
+    output="$output_fig_dir/HEATFLX_Lx${Lx}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
     extra_title=""
     python3 src/plot_timeseries_see_steady_state.py \
         --input-dirs "${input_dirs[@]}"      \
@@ -89,12 +88,11 @@ for Lx in 100 500 ; do
         --no-display                         \
         --varnames      HFX     C_H_WND_TOA  WND_TOA_cx_mul_C_H  C_H_TOA_cx_mul_WND  C_H_WND_cx_mul_TOA  \
                         LH      C_Q_WND_QOA  WND_QOA_cx_mul_C_Q  C_Q_QOA_cx_mul_WND  C_Q_WND_cx_mul_QOA  \
-                        QVAPOR_TTL IVT  THETA_MEAN SWDOWN  OLR \
+                        SWDOWN  OLR \
         --output $output &
 
 
 
-done
 done
 done
 

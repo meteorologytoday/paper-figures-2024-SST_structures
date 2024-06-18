@@ -118,6 +118,8 @@ ds = xr.merge([ds, QO, QA])
 WND10 = ((ds.U10**2 + ds.V10**2)**0.5).rename("WND10")
 ds = xr.merge([ds, WND10])
 
+has_TKE = "QKE" in ds
+
 
 # TKE variables
 def W2T(da_W):
@@ -129,7 +131,7 @@ def W2T(da_W):
 
     return da_T
 
-if args.tke_analysis == "TRUE":
+if args.tke_analysis == "TRUE" and has_TKE:
     DQKE_T = (2 * ds["DTKE"]).rename("DQKE_T")
     QSHEAR_T =   W2T(ds["QSHEAR"]).rename("QSHEAR_T")
     QBUOY_T  =   W2T(ds["QBUOY"]).rename("QBUOY_T")
@@ -317,9 +319,10 @@ mappable1 = ax[0, 0].contourf(X_W, Z_W, ds.W*1e2, levels=w_levs, cmap=cmap_diver
 cax = tool_fig_config.addAxesNextToAxes(fig, ax[0, 0], "right", thickness=0.03, spacing=0.05)
 cbar0 = plt.colorbar(mappable1, cax=cax, orientation="vertical")
 
-tke = ds.QKE.to_numpy() / 2
-cs = ax[0, 0].contour(X_T, Z_T, tke, levels=tke_levs, colors="black")
-plt.clabel(cs)
+if has_TKE:
+    tke = ds.QKE.to_numpy() / 2
+    cs = ax[0, 0].contour(X_T, Z_T, tke, levels=tke_levs, colors="black")
+    plt.clabel(cs)
 
 
 for _ax in ax[0:1, 0].flatten():
