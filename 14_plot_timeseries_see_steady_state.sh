@@ -15,25 +15,26 @@ offset=$(( 24 * 0 ))
 dhr=$(( 24 * 15 ))
 
 
+source 98_trapkill.sh
 
 #dhr=6
-trap "exit" INT TERM
-trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
+#trap "exit" INT TERM
+#trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 analysis_root=$gendata_dir/analysis_timeseries
 
-for bl_scheme in YSU MYJ MYNN25 ; do
+for bl_scheme in MYNN25 MYJ YSU ; do
 for avg in TRUE ; do
-for smooth in 25 49 1 ; do
+for smooth in 25 ; do
 for Lx in 100 500 ; do
 
 
     input_dirs=(
         $analysis_root/lab_sine_DRY/case_mph-off_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-${avg}
         $analysis_root/lab_sine_DRY/case_mph-off_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-${avg}
-        $analysis_root/lab_sine_WET/case_mph-on_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-${avg}
-        $analysis_root/lab_sine_WET/case_mph-on_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-${avg}
-        $analysis_root/lab_sine_WETLW/case_mph-on_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-${avg}
-        $analysis_root/lab_sine_WETLW/case_mph-on_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-${avg}
+#        $analysis_root/lab_sine_WET/case_mph-on_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-${avg}
+#        $analysis_root/lab_sine_WET/case_mph-on_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-${avg}
+#        $analysis_root/lab_sine_WETLW/case_mph-on_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-${avg}
+#        $analysis_root/lab_sine_WETLW/case_mph-on_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-${avg}
         $analysis_root/lab_sine_WETLWSW/case_mph-on_Lx${Lx}_U20_dT000_${bl_scheme}/avg_before_analysis-${avg}
         $analysis_root/lab_sine_WETLWSW/case_mph-on_Lx${Lx}_U20_dT300_${bl_scheme}/avg_before_analysis-${avg}
     )
@@ -42,32 +43,36 @@ for Lx in 100 500 ; do
     linestyles=(
         "dashed"
         "solid"
-        "dashed"
-        "solid"
-        "dashed"
-        "solid"
+#        "dashed"
+#        "solid"
+#        "dashed"
+#        "solid"
         "dashed"
         "solid"
     )
 
     linecolors=(
-        "gray"
-        "gray"
-        "orangered"
-        "orangered"
-        "dodgerblue"
-        "dodgerblue"
-        "magenta"
-        "magenta"
+        "red"
+        "red"
+        "black"
+        "black"
+#        "gray"
+#        "gray"
+#        "orangered"
+#        "orangered"
+#        "dodgerblue"
+#        "dodgerblue"
+#        "magenta"
+#        "magenta"
     )
 
     labels=(
         "DRY-000"
         "DRY-300"
-        "WET-000"
-        "WET-300"
-        "WETLW-000"
-        "WETLW-300"
+#        "WET-000"
+#        "WET-300"
+#        "WETLW-000"
+#        "WETLW-300"
         "WETRAD-000"
         "WETRAD-300"
     )
@@ -92,11 +97,12 @@ for Lx in 100 500 ; do
         --time-rng $hrs_beg $hrs_end         \
         --extra-title "$extra_title"         \
         --tick-interval-hour 24              \
-        --ncols 5                            \
+        --ncols 3                            \
         --smooth $smooth                     \
         --no-display                         \
-        --varnames    PBLH   TA  QA WND_m BLANK \
-                      PRECIP HFX LH C_H_m C_Q_m \
+        --varnames    PBLH    TA     QA      \
+                      PRECIP  HFX    LH      \
+                      WND_m   C_H_m  C_Q_m   \
         --output $output & 
 
     echo "Doing diagnostic AUX"
@@ -113,11 +119,11 @@ for Lx in 100 500 ; do
         --time-rng $hrs_beg $hrs_end         \
         --extra-title "$extra_title"         \
         --tick-interval-hour 24              \
-        --ncols 4                            \
+        --ncols 3                            \
         --smooth $smooth                     \
         --no-display                         \
-        --varnames    TTL_RAIN     QVAPOR_TTL   THETA_MEAN   WATER_BUDGET_RES  \
-                      SWDOWN       OLR \
+        --varnames    TTL_RAIN     QVAPOR_TTL   THETA_MEAN \
+                      SWDOWN       OLR                     \
         --output $output & 
 
 #        --varnames    QVAPOR_TTL QCLOUD_TTL QRAIN_TTL  THETA_MEAN \
@@ -143,9 +149,9 @@ for Lx in 100 500 ; do
         --ncols 7                            \
         --smooth $smooth                     \
         --no-display                         \
-        --varnames      HFX_res HFX C_H_WND_TOA  WND_TOA_cx_mul_C_H  C_H_TOA_cx_mul_WND  C_H_WND_cx_mul_TOA  C_H_WND_TOA_cx \
-                        LH_res  LH  C_Q_WND_QOA  WND_QOA_cx_mul_C_Q  C_Q_QOA_cx_mul_WND  C_Q_WND_cx_mul_QOA  C_Q_WND_QOA_cx \
-        --output $output &
+        --varnames      HFX C_H_WND_TOA  WND_TOA_cx_mul_C_H  C_H_TOA_cx_mul_WND  C_H_WND_cx_mul_TOA  C_H_WND_TOA_cx \
+                        LH  C_Q_WND_QOA  WND_QOA_cx_mul_C_Q  C_Q_QOA_cx_mul_WND  C_Q_WND_cx_mul_QOA  C_Q_WND_QOA_cx \
+        --output $output 
 
 done
 done

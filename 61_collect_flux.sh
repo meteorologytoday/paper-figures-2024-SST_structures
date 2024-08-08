@@ -21,7 +21,7 @@ fixed_Lx=500
 fixed_dSST=300
 
 
-for fixed_param in Lx dSST ; do
+for fixed_param in dSST Lx ; do
 
     echo "Fixed Param: ${fixed_param}"
     output_root=$gendata_dir/collected_flux/fixed_${fixed_param}
@@ -45,9 +45,9 @@ for fixed_param in Lx dSST ; do
 
 
 
-    for _bl_scheme in YSU MYJ MYNN25 ; do
-    #for _bl_scheme in MYNN25 YSU MYJ; do
-    for target_lab in lab_sine_WETLWSW ; do       
+    #for _bl_scheme in YSU MYJ MYNN25 ; do
+    for _bl_scheme in MYJ YSU MYNN25; do
+    for target_lab in lab_sine_WETLWSW lab_sine_DRY  ; do       
         
         if [[ "$target_lab" =~ "SEMIWET" ]]; then
             mph=off

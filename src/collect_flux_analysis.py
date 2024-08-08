@@ -75,8 +75,14 @@ if __name__ == "__main__":
                     inclusive="left",
                 )
 
-
-
+                PRECIP = _ds["RAINNC"] + _ds["RAINC"] + _ds["RAINSH"] + _ds["SNOWNC"] + _ds["HAILNC"] + _ds["GRAUPELNC"]
+                PRECIP = ( PRECIP - PRECIP.shift(time=1) ) / wrfout_data_interval.total_seconds()
+                PRECIP = PRECIP.rename("PRECIP")
+               
+                _ds = xr.merge([
+                    _ds, PRECIP,
+                ])
+ 
                 if data is None:
 
                     varnames = _ds.keys()

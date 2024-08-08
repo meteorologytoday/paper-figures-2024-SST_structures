@@ -28,21 +28,75 @@ svg_stack.py \
     $fig_dir/input_sounding_woML.svg \
     > $fig_dir/merged-exp.svg
 
+echo "Figure 3: Merge snapshots... "
+svg_stack.py \
+    --direction=h \
+    $fig_dir/snapshots_dhr-120/lab_sine_DRY/Lx500_U20_dT300_MYNN25/snapshot-part1_120-240.svg \
+    $fig_dir/snapshots_dhr-120/lab_sine_WETLWSW/Lx500_U20_dT300_MYNN25/snapshot-part1_120-240.svg \
+    > $fig_dir/merged-snapshot_part1.svg
+
+svg_stack.py \
+    --direction=v \
+    $fig_dir/snapshots_dhr-120/lab_sine_DRY/Lx500_U20_dT300_MYNN25/snapshot-part2_120-240.svg \
+    $fig_dir/snapshots_dhr-120/lab_sine_WETLWSW/Lx500_U20_dT300_MYNN25/snapshot-part2_120-240.svg \
+    > $fig_dir/merged-snapshot_part2.svg
+
+
+
+
+svg_stack.py \
+    --direction=h \
+    $fig_dir/snapshots_dhr-120/lab_sine_DRY/Lx100_U20_dT300_MYNN25/snapshot-part1_120-240.svg \
+    $fig_dir/snapshots_dhr-120/lab_sine_WETLWSW/Lx100_U20_dT300_MYNN25/snapshot-part1_120-240.svg \
+    > $fig_dir/merged-snapshot_100km_part1.svg
+
+
+svg_stack.py \
+    --direction=v \
+    $fig_dir/snapshots_dhr-120/lab_sine_DRY/Lx100_U20_dT300_MYNN25/snapshot-part2_120-240.svg \
+    $fig_dir/snapshots_dhr-120/lab_sine_WETLWSW/Lx100_U20_dT300_MYNN25/snapshot-part2_120-240.svg \
+    > $fig_dir/merged-snapshot_100km_part2.svg
+
+svg_stack.py \
+    --direction=v \
+    $fig_dir/flux_decomposition_varying_dSST/lab_sine_WETLWSW/flux_decomposition_onefig_varying_dSST_MYNN25_hr120-240.svg  \
+    $fig_dir/flux_decomposition_varying_Lx/lab_sine_WETLWSW/flux_decomposition_onefig_varying_Lx_MYNN25_hr120-240.svg \
+    > $fig_dir/merged-flux_decomposition_varying_dSST_Lx_MYNN25_hr120-240.svg
+
+svg_stack.py \
+    --direction=v \
+    $fig_dir/snapshots_vertical_timeseries_WRFV4.6.0_avg-60/VERTICAL_avg-TRUE_Lx500_MYJ_120-240.svg \
+    $fig_dir/snapshots_vertical_timeseries_WRFV4.6.0_avg-60/VERTICAL_avg-TRUE_Lx500_YSU_120-240.svg \
+    > $fig_dir/merged-snapshots_vertical_timeseres_MYJ-YSU_120-240.svg
+
+
+svg_stack.py \
+    --direction=h \
+    $fig_dir/AR_dependency/lab_sine_WETLWSW/AR_dependency_varying_dSST_hr120-240.svg  \
+    $fig_dir/AR_dependency/lab_sine_WETLWSW/AR_dependency_varying_Lx_hr120-240.svg    \
+    > $fig_dir/merged-AR_dependency_hr120-240.svg
+
+
 name_pairs=(
-    sst_analysis_20170101.svg                                                        fig01
-    merged-exp.svg                                                                   fig02
-    snapshots_dhr-120/lab_sine_dry/Lx500_U20_dT300_MYNN25/snapshot-part1_120-240.svg fig03
-    snapshots_dhr-120/lab_sine_dry/Lx500_U20_dT300_MYNN25/snapshot-part2_120-240.svg fig04
-    timeseries/SIMPLE_Lx500_timeseries_smooth-25_000-360.svg                         fig05
-    timeseries_relative/HEATFLX_Lx500_timeseries_smooth-25_000-360.svg               fig06
-    flux_decomposition_varying_dSST/lab_sine_wetlwsw/flux_decomposition_varying_dSST_MYNN25_hr240-360.svg fig07
-    flux_decomposition_varying_Lx/lab_sine_wetlwsw/flux_decomposition_varying_Lx_MYNN25_hr240-360.svg     fig08
-    snapshots_dhr-120/lab_sine_dry/Lx100_U20_dT300_MYNN25/snapshot-part1_120-240.svg figS01
-    snapshots_dhr-120/lab_sine_dry/Lx100_U20_dT300_MYNN25/snapshot-part2_120-240.svg figS02
-    timeseries/AUX_Lx500_timeseries_smooth-25_000-360.svg                            figS03
-    timeseries/AUX_Lx100_timeseries_smooth-25_000-360.svg                            figS04
-    timeseries/HEATFLX_Lx500_timeseries_smooth-25_000-360.svg                        figS05
-    timeseries/HEATFLX_Lx100_timeseries_smooth-25_000-360.svg                        figS06
+    sst_analysis_20170101.svg                                                                     fig01
+    merged-exp.svg                                                                                fig02
+    merged-snapshot_part1.svg                                                                     fig03
+    merged-snapshot_part2.svg                                                                     fig04
+    timeseries_WRFV4.6.0/SIMPLE_avg-TRUE_Lx500_MYNN25_timeseries_smooth-25_000-360.svg            fig05
+    merged-flux_decomposition_varying_dSST_Lx_MYNN25_hr120-240.svg                                fig06
+    merged-AR_dependency_hr120-240.svg                                                            fig07 
+    snapshots_vertical_timeseries_WRFV4.6.0_avg-60/VERTICAL_rel_avg-TRUE_Lx100_120-240.svg        fig08
+    snapshots_vertical_timeseries_WRFV4.6.0_avg-60/VERTICAL_abs_avg-TRUE_Lx100_120-240.svg        fig09
+    merged-snapshot_100km_part1.svg                                                               figS01
+    merged-snapshot_100km_part2.svg                                                               figS02
+    merged-snapshots_vertical_timeseres_MYJ-YSU_120-240.svg                                       figS03
+    timeseries_relative_WRFV4.6.0/HEATFLX_avg-TRUE_Lx500_MYNN25_timeseries_smooth-25_000-360.svg  figS04
+
+#    snapshots_dhr-120/lab_sine_DRY/Lx100_U20_dT300_MYNN25/snapshot-part2_120-240.svg figS02
+#    timeseries/AUX_Lx500_timeseries_smooth-25_000-360.svg                            figS03
+#    timeseries/AUX_Lx100_timeseries_smooth-25_000-360.svg                            figS04
+#    timeseries/HEATFLX_Lx500_timeseries_smooth-25_000-360.svg                        figS05
+#    timeseries/HEATFLX_Lx100_timeseries_smooth-25_000-360.svg                        figS06
  
 )
 

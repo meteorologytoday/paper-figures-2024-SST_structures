@@ -25,8 +25,9 @@ trap "exit" INT TERM
 trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 
 for avg_before_analysis in "TRUE" ; do
-for _bl_scheme in MYJ YSU MYNN25  ; do
-for target_lab in  lab_sine_WETLWSW lab_sine_WETLW lab_sine_WET lab_sine_DRY ; do 
+for _bl_scheme in MYJ YSU MYNN25 ; do
+#for target_lab in  lab_sine_WETLWSW lab_sine_WETLW lab_sine_WET lab_sine_DRY ; do 
+for target_lab in  lab_sine_WETLWSW lab_sine_DRY ; do 
 #for target_lab in  lab_sine_WET ; do 
 for Lx in 500 400 300 200 100 050 ; do
 for dT in 000 050 100 150 200 250 300 ; do

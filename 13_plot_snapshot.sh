@@ -5,11 +5,12 @@ source 00_setup.sh
 dhr=$(( 24 * 5 ))
 output_fig_dir=$fig_dir/snapshots_dhr-${dhr}
 
-nproc=5
+nproc=1
 
 proc_cnt=0
 
 target_labs=(
+    lab_sine_WETLWSW
     lab_sine_DRY
 )
 
@@ -19,21 +20,29 @@ bl_schemes=(
     YSU
 )
 
-trap "exit" INT TERM
-trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
+source 98_trapkill.sh
 
 for dT in 300; do
     for Lx in 500 100 ; do
         for U in "20" ; do
             for target_lab in "${target_labs[@]}" ; do
                 for _bl_scheme in "${bl_schemes[@]}" ; do
-                    
+ 
+                    thumbnail_skip_part1=0
+                    thumbnail_skip_part2=0
+               
                     if [[ "$target_lab" =~ "SEMIWET" ]]; then
                         mph=off
-                        W_levs=( -10 10 11 )
+                        #W_levs=( -10 10 11 )
+                        W_levs=( -2 2 21 )
+                        thumbnail_skip_part1=4
+                        thumbnail_skip_part2=6
                     elif [[ "$target_lab" =~ "WET" ]]; then
                         mph=on
-                        W_levs=( -50 50 11 )
+                        #W_levs=( -50 50 11 )
+                        W_levs=( -2 2 21 )
+                        thumbnail_skip_part1=4
+                        thumbnail_skip_part2=6
                     elif [[ "$target_lab" =~ "DRY" ]]; then
                         mph=off
                         W_levs=( -2 2 21 )
@@ -47,12 +56,20 @@ for dT in 300; do
                         tke_analysis=FALSE 
                     fi 
 
+                    if [[ "$target_lab" = "lab_sine_WETLWSW" ]]; then
+                        exp_name="FULL."
+                    elif [[ "$target_lab" =~ "lab_sine_DRY" ]]; then
+                        exp_name="SIMPLE."
+                    fi
+
                     input_dir=$data_sim_dir/$target_lab/case_mph-${mph}_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
                     output_dir=$output_fig_dir/$target_lab/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
+                    
+                    input_dir_base=$data_sim_dir/$target_lab/case_mph-${mph}_Lx${Lx}_U${U}_dT000_${_bl_scheme}
 
                     mkdir -p $output_dir
 
-                    for t in 0 1 2; do
+                    for t in 1 ; do #2 1 0; do
                      
                         hrs_beg=$( printf "%02d" $(( $t * $dhr )) )
                         hrs_end=$( printf "%02d" $(( ($t + 1) * $dhr )) )
@@ -61,10 +78,11 @@ for dT in 300; do
                         output2_name="$output_dir/snapshot-part2_${hrs_beg}-${hrs_end}.svg"
                         extra_title=""
 
-                        extra_title="$_bl_scheme. "
+                        extra_title="${exp_name}${_bl_scheme}."
                  
                         python3 src/plot_snapshot_split_frame.py  \
                             --input-dir $input_dir  \
+                            --input-dir-base $input_dir_base  \
                             --exp-beg-time "2001-01-01 00:00:00" \
                             --wrfout-data-interval 60            \
                             --frames-per-wrfout-file 60          \
@@ -78,6 +96,8 @@ for dT in 300; do
                             --SST-rng 11 19 \
                             --output1 $output1_name \
                             --output2 $output2_name \
+                            --thumbnail-skip-part1 $thumbnail_skip_part1 \
+                            --thumbnail-skip-part2 $thumbnail_skip_part2 \
                             --tke-analysis $tke_analysis \
                             --no-display &
 

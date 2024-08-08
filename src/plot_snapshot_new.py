@@ -32,6 +32,7 @@ parser.add_argument('--TKE-rng', type=float, nargs=2, help='The plotted surface 
 parser.add_argument('--DTKE-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
 
 parser.add_argument('--tke-analysis', type=str, help='analysis beg time', choices=["TRUE", "FALSE"], required=True)
+parser.add_argument('--skip', type=int, help='How many sets of skip.', default=0)
 
 args = parser.parse_args()
 

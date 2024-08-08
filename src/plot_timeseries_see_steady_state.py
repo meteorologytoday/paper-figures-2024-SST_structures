@@ -101,7 +101,7 @@ def loadData(input_dir):
             ACLQFX = ds["ACLHF"] / 2.5e6
             QFX = (ACLQFX - ACLQFX.shift(time=1)) / wrfout_data_interval.total_seconds()
             QFX = QFX.rename("QFX")
-
+        
         WATER_BUDGET_RES = dWATER_TTLdt - ( QFX - PRECIP )
         WATER_BUDGET_RES = WATER_BUDGET_RES.rename("WATER_BUDGET_RES")
         #QFX = QFX.rename("QFX")
@@ -439,12 +439,12 @@ plot_infos = dict(
 
     C_H_m = dict(
         label = "$\\overline{C}_H $",
-        unit = "$ \\mathrm{m} / \\mathrm{s} $",
+        unit = "$ \\mathrm{J} \\, / \\, \\mathrm{K} \\, / \\, \\mathrm{m}^3 $",
     ),
 
     C_Q_m = dict(
         label = "$\\overline{C}_Q $",
-        unit = "$ \\mathrm{m} / \\mathrm{s} $",
+        unit = "$ \\mathrm{kg} \\, / \\, \\mathrm{m}^3 $",
     ),
 
 

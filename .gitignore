@@ -24,3 +24,4 @@ gendata/*
 !figures_static/*
 .nfs*
 *.svg
+*.pdf

@@ -7,7 +7,7 @@ import wrf_load_helper
 import datetime
 
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--input-file', type=str, help='Input file.', required=True)
+parser.add_argument('--input-files', type=str, nargs="+", help='Input file.', required=True)
 parser.add_argument('--output', type=str, help='Output filename in png.', default="")
 parser.add_argument('--title', type=str, help='Title', default="")
 
@@ -19,10 +19,13 @@ parser.add_argument('--thumbnail-numbering', type=str, help='Thumbnail numbering
 parser.add_argument('--fixed-param-values', type=float, nargs="*", help='The values of the fixed parameters', default=[])
 parser.add_argument('--ncols', type=int, help='The number of thumbnail columns', default=1)
 parser.add_argument('--ref-exp-order', type=int, help='The reference case (start from 0) to perform decomposition', default=0)
+parser.add_argument('--colors', type=str, nargs="+", help='The reference case (start from 0) to perform decomposition', required=True)
 parser.add_argument('--LH-rng', type=float, nargs=2, help='The values of the LH range', default=None)
 parser.add_argument('--LH-corr-rng', type=float, nargs=2, help='The values of the LH range', default=None)
 parser.add_argument('--HFX-rng', type=float, nargs=2, help='The values of the HFX range', default=None)
 parser.add_argument('--HFX-corr-rng', type=float, nargs=2, help='The values of the HFX range', default=None)
+parser.add_argument('--spacing', type=float, help='The small separation between different variables', default=0.02)
+parser.add_argument('--labels', type=str, nargs="+", help='', required=True)
 
 
 
@@ -33,6 +36,14 @@ print(args)
 Nvars = len(args.varnames)
 ncols = args.ncols
 nrows = int(np.ceil( Nvars / ncols))
+
+
+if len(args.colors) < len(args.input_files):
+    raise Exception("Not enough colors in `--colors`.")
+
+if len(args.labels) < len(args.input_files):
+    raise Exception("Not enough labels in `--labels`.")
+
 
 sel_dict = {}
 for i, param in enumerate(args.fixed_params):
@@ -45,11 +56,27 @@ print("sel_dict = ", str(sel_dict))
  
 
 print("Start loading data.")
-ds = xr.open_dataset(args.input_file)#, engine="scipy")
-ds = ds.sel(**sel_dict)
+data = []
+
+for input_file in args.input_files:
+    ds = xr.open_dataset(input_file)#, engine="scipy")
+    ds = ds.sel(**sel_dict)
+    data.append(ds)
+
+
+#PRECIP = ds["RAINNC"] + ds["RAINC"] + ds["RAINSH"]
+#PRECIP = PRECIP.rename("PRECIP")
+
+#merge_data = [ds, PRECIP]
+
+#ds = xr.merge(merge_data)
+
 print(ds)
 
-coord_x = ds.coords[args.varying_param]
+
+
+
+coord_x = data[0].coords[args.varying_param]
 
 
 HFX_rng = [ -15, 45]
@@ -163,7 +190,7 @@ plot_infos = dict(
         factor = 86400.0,
         label = "Precip",
         unit = "$ \\mathrm{mm} / \\mathrm{day} $",
-        ylim = [-1, 10],
+        #ylim = [-1, 10],
     ),
 
 
@@ -257,6 +284,18 @@ plot_infos = dict(
         unit = "$ \\mathrm{m} / \\mathrm{s} $",
     ),
 
+    IVT = dict(
+        label = "IVT",
+        unit = "$ \\mathrm{kg} \\, / \\, \\mathrm{m} \\, / \\, \\mathrm{s} $",
+        #ylim = [010, 20],
+    ),
+
+    IWV = dict(
+        label = "IWV",
+        unit = "$ \\mathrm{kg} \\, / \\, \\mathrm{m}^2 $",
+        #ylim = [010, 20],
+    ),
+
 )
 
 
@@ -327,37 +366,58 @@ for i, varname in enumerate(args.varnames):
     ylim   = _plot_info["ylim"] if "ylim" in _plot_info else None
 
 
-    _plot_data = (ds[varname] + offset) * factor
+    for j, _ in enumerate(args.input_files):
 
-    _ref_m = _plot_data.sel(stat="mean")[0].to_numpy()
-    print("_ref = ", _ref_m)
-    
-    d_m = _plot_data.sel(stat="mean") - _ref_m
-    d_s = _plot_data.sel(stat="std")
-
-    for j in range(len(d_s)):
-        _ax.plot([coord_x[j], coord_x[j]], [d_m[j] - d_s[j], d_m[j] + d_s[j]], color="gray", linestyle="solid")
+        ds = data[j]
+        color = args.colors[j]
         
-    _ax.scatter(coord_x, d_m, s=20)
-    _ax.scatter(coord_x, d_m, s=20)
-    _ax.plot(coord_x, d_m)
 
-    
+
+
+        _plot_data = (ds[varname] + offset) * factor
+
+        _ref_m = _plot_data.sel(stat="mean")[0].to_numpy()
+        print("_ref = ", _ref_m)
         
-    _ax.set_title("(%s) %s (ref = %.2f %s)" % (args.thumbnail_numbering[i], _plot_info["label"], _ref_m, _plot_info["unit"]))
+        label = "%s (%.2f %s)" % (args.labels[j], _ref_m, _plot_info["unit"])
+        
+        d_m = _plot_data.sel(stat="mean") - _ref_m
+        d_s = _plot_data.sel(stat="std")
+
+        _coord_x = coord_x + args.spacing * j
+
+        _ax.errorbar(_coord_x, d_m, yerr=d_s, fmt='o-', markersize=6, capsize=5, color=color, linewidth=1.5, elinewidth=1.5, linestyle="solid", label=label)
+
+        #for j in range(len(d_s)):
+        #    _ax.plot([coord_x[j], coord_x[j]], [d_m[j] - d_s[j], d_m[j] + d_s[j]], color="gray", linestyle="solid")
+            
+        #_ax.scatter(coord_x, d_m, s=20)
+        #_ax.scatter(coord_x, d_m, s=20)
+        #_ax.plot(coord_x, d_m)
+
+ 
+    if args.varying_param == "dSST":
+        title_param = "$\\Delta \\mathrm{SST}$"
+    elif args.varying_param == "Ug":
+        title_param = "$U_g$"
+    elif args.varying_param == "Lx":
+        title_param = "$L$"
+ 
+    _ax.set_title("(%s) %s as a function of %s" % (args.thumbnail_numbering[i], _plot_info["label"], title_param, ) )
     _ax.set_ylabel("[ %s ] " % (_plot_info["unit"]))
     _ax.grid(visible=True)
 
     if ylim is not None:
         _ax.set_ylim(ylim)
 
-    if args.varying_param == "dT":
-        _ax.set_xlabel("Amplitude [ $\\mathrm{K}$ ]")
+    if args.varying_param == "dSST":
+        _ax.set_xlabel("$\\Delta \\mathrm{SST}$ [ $\\mathrm{K}$ ]")
     elif args.varying_param == "Ug":
         _ax.set_xlabel("$U_\\mathrm{g}$ [ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
     elif args.varying_param == "Lx":
-        _ax.set_xlabel("$ L_x $ [ $\\mathrm{km} $ ]")
+        _ax.set_xlabel("$ L $ [ $\\mathrm{km} $ ]")
 
+    _ax.legend()
 
 
 if args.output != "":

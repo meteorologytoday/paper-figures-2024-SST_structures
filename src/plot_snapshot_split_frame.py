@@ -9,6 +9,7 @@ import cmocean
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--input-dir', type=str, help='Input directory.', required=True)
+parser.add_argument('--input-dir-base', type=str, help='Input directory for base.', default="")
 parser.add_argument('--output1', type=str, help='Output filename in png.', default="")
 parser.add_argument('--output2', type=str, help='Output filename in png.', default="")
 parser.add_argument('--extra-title', type=str, help='Title', default="")
@@ -35,12 +36,24 @@ parser.add_argument('--TKE-rng', type=float, nargs=2, help='The plotted surface 
 parser.add_argument('--DTKE-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
 
 parser.add_argument('--tke-analysis', type=str, help='analysis beg time', choices=["TRUE", "FALSE"], required=True)
-parser.add_argument('--thumbnail-skip', type=int, help='Skip of thumbnail numbering.', default=0)
+parser.add_argument('--thumbnail-skip-part1', type=int, help='Skip of thumbnail numbering.', default=0)
+parser.add_argument('--thumbnail-skip-part2', type=int, help='Skip of thumbnail numbering.', default=0)
 parser.add_argument('--thumbnail-numbering', type=str, help='Skip of thumbnail numbering.', default="abcdefghijklmn")
 
 args = parser.parse_args()
 
 print(args)
+
+    
+g0 = 9.81
+zerodegC = 273.15
+
+
+
+if args.input_dir_base != "":
+    print("Base exists: ", args.input_dir_base)
+    base_exists = True
+
 
 exp_beg_time = pd.Timestamp(args.exp_beg_time)
 wrfout_data_interval = pd.Timedelta(seconds=args.wrfout_data_interval)
@@ -61,191 +74,172 @@ def horDecomp(da, name_m="mean", name_p="prime"):
 # Loading data
 print("Loading wrf dir: %s" % (args.input_dir,))
 
-wsm = wrf_load_helper.WRFSimMetadata(
-    start_datetime  = exp_beg_time,
-    data_interval   = wrfout_data_interval,
-    frames_per_file = args.frames_per_wrfout_file,
-)
 
 
 
-ds = wrf_load_helper.loadWRFDataFromDir(
-    wsm, 
-    args.input_dir,
-    beg_time = time_beg,
-    end_time = time_beg,#time_end,
-    prefix="wrfout_d01_",
-    avg = "ALL",
-#    avg = None,
-    verbose=False,
-    inclusive="both",
-)
-
-g0 = 9.81
-
-# Compute TKE stuff
-"""
-U_U = ds["U"].to_numpy()
-W_W = ds["W"].to_numpy()
-U_T = ds["T"].copy()
-W_T = ds["T"].copy()
-
-U_T[:, :, :, :] = (U_U[:, :, :, 1:] + U_U[:, :, :, :-1]) / 2.0
-W_T[:, :, :, :] = (W_W[:, 1:, :, :]  + W_W[:, :-1, :, :]) / 2.0
-U_T_mean, U_T_prime = horDecomp( U_T, name_m="U_T_mean", name_p="U_T_prime")
-V_T_mean, V_T_prime = horDecomp( ds["V"], name_m="V_T_mean", name_p="V_T_prime")
-_, W_T_prime = horDecomp( W_T, name_m="W_T_mean", name_p="W_T_prime")
-_, RHO_T_prime = horDecomp( ds["RHO"], name_m="RHO_T_mean", name_p="RHO_T_prime")
 
 
-U_W_prime = (U_T_prime * W_T_prime).rename("U_W_prime")
-V_W_prime = (V_T_prime * W_T_prime).rename("V_W_prime")
-RHO_T_prime = (RHO_T_prime * W_T_prime).rename("RHO_T_prime")
-TKE = ((U_T_prime**2 + V_T_prime**2 + W_T_prime**2)/2.0).rename("TKE")
+def loadData(input_dir):
 
-ds = xr.merge([ds, U_W_prime, V_W_prime, RHO_T_prime, TKE])
-ds = ds.mean(dim=['time', 'south_north', 'south_north_stag'], keep_attrs=True)
-"""
-# Bolton (1980)
-E1 = 0.6112e3 * np.exp(17.67 * (ds["TSK"] - 273.15) / (ds["TSK"] - 29.65) )
-QSFCMR = 0.62175 * E1 / (ds["PSFC"] - E1)
-QA  = ds["QVAPOR"].isel(bottom_top=0).rename("QA")
-QO = QSFCMR.rename("QO")
+    #print("Loading dir: ", input_dir)
 
-ds = xr.merge([ds, QO, QA])
+    wsm = wrf_load_helper.WRFSimMetadata(
+        start_datetime  = exp_beg_time,
+        data_interval   = wrfout_data_interval,
+        frames_per_file = args.frames_per_wrfout_file,
+    )
 
 
-WND10 = ((ds.U10**2 + ds.V10**2)**0.5).rename("WND10")
-ds = xr.merge([ds, WND10])
 
+    ds = wrf_load_helper.loadWRFDataFromDir(
+        wsm, 
+        input_dir,
+        beg_time = time_beg,
+        end_time = time_end,
+        prefix="wrfout_d01_",
+        avg = "ALL",
+    #    avg = None,
+        verbose=False,
+        inclusive="both",
+    )
+
+    # Compute TKE stuff
+    # Bolton (1980)
+    E1 = 0.6112e3 * np.exp(17.67 * (ds["TSK"] - 273.15) / (ds["TSK"] - 29.65) )
+    QSFCMR = 0.62175 * E1 / (ds["PSFC"] - E1)
+    QA  = ds["QVAPOR"].isel(bottom_top=0).rename("QA")
+    QO = QSFCMR.rename("QO")
+
+    ds = xr.merge([ds, QO, QA])
+
+
+    WND10 = ((ds.U10**2 + ds.V10**2)**0.5).rename("WND10")
+    ds = xr.merge([ds, WND10])
+
+    has_TKE = "QKE" in ds
+
+
+    # TKE variables
+    def W2T(da_W):
+        
+        da_T = xr.zeros_like(ds["T"])
+        
+        da_W = da_W.to_numpy()
+        da_T[:, :, :, :] = ( da_W[:, :-1, :, :] + da_W[:, 1:, :, :] ) / 2.0
+
+        return da_T
+
+    if args.tke_analysis == "TRUE" and has_TKE:
+        DQKE_T = (2 * ds["DTKE"]).rename("DQKE_T")
+        QSHEAR_T =   W2T(ds["QSHEAR"]).rename("QSHEAR_T")
+        QBUOY_T  =   W2T(ds["QBUOY"]).rename("QBUOY_T")
+        QWT_T    =   2*W2T(ds["QWT"]).rename("QWT_T")
+        QDISS_T  = - W2T(ds["QDISS"]).rename("QDISS_T")
+
+        QRES_T = (DQKE_T - (QSHEAR_T + QBUOY_T + QWT_T + QDISS_T)).rename("QRES_T")
+        ds = xr.merge([ds, QSHEAR_T, QBUOY_T, QWT_T, QDISS_T, QRES_T, DQKE_T])
+
+
+    # Virtual temperature
+    THETA  = (300 + ds["T"]).rename("THETA")
+    THETAV = THETA * (1 + 0.61*ds["QVAPOR"] - ds["QCLOUD"])
+    THETAV = THETAV.rename("THETAV")
+
+    ds = xr.merge([ds, THETAV, THETA])
+    ds = ds.mean(dim=['time', 'south_north', 'south_north_stag'], keep_attrs=True)
+
+    #ds_ref_stat.mean(dim=['time', 'south_north', 'south_north_stag', "west_east", "west_east_stag"], keep_attrs=True)
+    ds_ref_stat = ds.mean(dim=["west_east", "west_east_stag"])
+
+
+    ref_Z_W = (ds_ref_stat.PHB + ds_ref_stat.PH) / 9.81
+    ref_Z_T = (ref_Z_W[1:] + ref_Z_W[:-1]) / 2
+
+    Nx = ds.dims['west_east']
+    Nz = ds.dims['bottom_top']
+
+    X_sU = ds.DX * np.arange(Nx+1) / 1e3
+    X_sT = (X_sU[1:] + X_sU[:-1]) / 2
+    X_T = np.repeat(np.reshape(X_sT, (1, -1)), [Nz,], axis=0)
+    X_W = np.repeat(np.reshape(X_sT, (1, -1)), [Nz+1,], axis=0)
+
+    Z_W = (ds.PHB + ds.PH) / 9.81
+    Z_T = (Z_W[1:, :] + Z_W[:-1, :]) / 2
+
+
+    theta = ds.T + 300.0
+    zeta = (ds.V[:, 1:] - ds.V[:, :-1]) / ds.DX
+
+
+    theta_prime = ds["T"] - ds_ref_stat["T"]
+    U_prime = ds["U"] - ds_ref_stat["U"]
+    V_prime = ds["V"] - ds_ref_stat["V"]
+
+
+    U_prime = U_prime.rename("U_prime")
+    V_prime = V_prime.rename("V_prime")
+
+
+    def ddz(da):
+       
+        da_np = da.to_numpy() 
+        dfdz = xr.zeros_like(ds_ref_stat.PH)
+       
+        z_T = ref_Z_T.to_numpy() 
+        dz = z_T[1:] - z_T[:-1]
+        dfdz[1:-1] = (da_np[1:] - da_np[:-1]) / dz
+        dfdz[0] = np.nan
+        dfdz[-1] = np.nan
+
+        return dfdz 
+        
+    NVfreq = ((g0 / 300.0 * ddz(ds_ref_stat["THETAV"]))**0.5).rename("NVfreq")
+    Nfreq = ((g0 / 300.0 * ddz(ds_ref_stat["THETA"]))**0.5).rename("Nfreq")
+
+    ds_ref_stat = xr.merge([ds_ref_stat, NVfreq, Nfreq])
+    print("Done")
+
+    return(
+        dict(
+            ds=ds,
+            ds_ref_stat=ds_ref_stat,
+            ref_Z_W = ref_Z_W,
+            ref_Z_T = ref_Z_T,
+            X_sU = X_sU,
+            X_sT = X_sT,
+            X_T = X_T,
+            X_W = X_W,
+            Z_W = Z_W,
+            Z_T = Z_T,
+        )
+    )
+
+ 
+
+data = loadData(args.input_dir)
+
+if base_exists:
+    data_base = loadData(args.input_dir_base)
+
+print("Done loading data.")
+
+ds = data["ds"]
+ds_ref_stat = data["ds_ref_stat"]
+X_sU = data["X_sU"]
+X_sT = data["X_sT"]
+X_T = data["X_T"]
+X_W = data["X_W"]
+Z_W = data["Z_W"]
+Z_T = data["Z_T"]
+ref_Z_W = data["ref_Z_W"]
+ref_Z_T = data["ref_Z_T"]
+    
 has_TKE = "QKE" in ds
 
 
-# TKE variables
-def W2T(da_W):
-    
-    da_T = xr.zeros_like(ds["T"])
-    
-    da_W = da_W.to_numpy()
-    da_T[:, :, :, :] = ( da_W[:, :-1, :, :] + da_W[:, 1:, :, :] ) / 2.0
-
-    return da_T
-
-if args.tke_analysis == "TRUE" and has_TKE:
-    DQKE_T = (2 * ds["DTKE"]).rename("DQKE_T")
-    QSHEAR_T =   W2T(ds["QSHEAR"]).rename("QSHEAR_T")
-    QBUOY_T  =   W2T(ds["QBUOY"]).rename("QBUOY_T")
-    QWT_T    =   2*W2T(ds["QWT"]).rename("QWT_T")
-    QDISS_T  = - W2T(ds["QDISS"]).rename("QDISS_T")
-
-    QRES_T = (DQKE_T - (QSHEAR_T + QBUOY_T + QWT_T + QDISS_T)).rename("QRES_T")
-    ds = xr.merge([ds, QSHEAR_T, QBUOY_T, QWT_T, QDISS_T, QRES_T, DQKE_T])
 
 
-# Virtual temperature
-THETA  = (300 + ds["T"]).rename("THETA")
-THETAV = THETA * (1 + 0.61*ds["QVAPOR"] - ds["QCLOUD"])
-THETAV = THETAV.rename("THETAV")
 
-ds = xr.merge([ds, THETAV, THETA])
-ds = ds.mean(dim=['time', 'south_north', 'south_north_stag'], keep_attrs=True)
-
-#ds_ref_stat.mean(dim=['time', 'south_north', 'south_north_stag', "west_east", "west_east_stag"], keep_attrs=True)
-ds_ref_stat = ds.mean(dim=["west_east", "west_east_stag"])
-
-print("Done")
-
-ref_Z_W = (ds_ref_stat.PHB + ds_ref_stat.PH) / 9.81
-ref_Z_T = (ref_Z_W[1:] + ref_Z_W[:-1]) / 2
-
-Nx = ds.dims['west_east']
-Nz = ds.dims['bottom_top']
-
-X_sU = ds.DX * np.arange(Nx+1) / 1e3
-X_sT = (X_sU[1:] + X_sU[:-1]) / 2
-X_T = np.repeat(np.reshape(X_sT, (1, -1)), [Nz,], axis=0)
-X_W = np.repeat(np.reshape(X_sT, (1, -1)), [Nz+1,], axis=0)
-
-Z_W = (ds.PHB + ds.PH) / 9.81
-Z_T = (Z_W[1:, :] + Z_W[:-1, :]) / 2
-
-P_total = ds.P + ds.PB
-
-P_sfc = P_total.isel(bottom_top=3)
-dP_sfcdx = - (P_sfc[1:] - P_sfc[:-1]) / ds.DX
-
-zerodegC = 273.15
-theta = ds.T + 300.0
-zeta = (ds.V[:, 1:] - ds.V[:, :-1]) / ds.DX
-SST = ds.TSK - zerodegC
-
-delta = ds.TH2 - ds.TSK
-
-
-theta_prime = ds["T"] - ds_ref_stat["T"]
-U_prime = ds["U"] - ds_ref_stat["U"]
-V_prime = ds["V"] - ds_ref_stat["V"]
-
-def ddz(da):
-   
-    da_np = da.to_numpy() 
-    dfdz = xr.zeros_like(ds_ref_stat.PH)
-   
-    z_T = ref_Z_T.to_numpy() 
-    dz = z_T[1:] - z_T[:-1]
-    dfdz[1:-1] = (da_np[1:] - da_np[:-1]) / dz
-    dfdz[0] = np.nan
-    dfdz[-1] = np.nan
-
-    return dfdz 
-    
-NVfreq = ((g0 / 300.0 * ddz(ds_ref_stat["THETAV"]))**0.5).rename("NVfreq")
-Nfreq = ((g0 / 300.0 * ddz(ds_ref_stat["THETA"]))**0.5).rename("Nfreq")
-
-print(Nfreq)
-print(ref_Z_W)
-print(ref_Z_T)
-
-ds_ref_stat = xr.merge([ds_ref_stat, NVfreq, Nfreq])
-
-
-"""
-print("Compute boundary layer height")
-bl = dict()
-
-for method in args.blh_method:
-   
-    _Ri_c = Ri_c[method] 
-    _blh = []
-    _Ri = np.zeros((Nz+1, Nx,))
-    for i in range(Nx):
-
-        U = (ds.U[:, i+1] + ds.U[:, i]) / 2
-
-        r = diagnostics.getBoundaryLayerHeight(
-            U.to_numpy(),
-            ds.V[:, i].to_numpy(),
-            theta[:, i].to_numpy(),
-            ds.QVAPOR[:, i].to_numpy(),
-            Z_W[:, i].to_numpy(),
-            Ri_c = _Ri_c,
-            method=method,
-            skip=1,
-            debug=True,
-        )
-
-        for j, __blh in enumerate(r[0]):
-            _blh.append([X_sT[i], __blh])
-
-        _Ri[:, i] = r[1]['Ri']
-
-    _blh = np.array(_blh)
-
-    bl[method] = dict(
-        blh = _blh,
-        Ri  = _Ri,
-    )
-"""
 
 print("Loading matplotlib...")
 import matplotlib
@@ -298,6 +292,8 @@ v_levs = np.linspace(-1, 1, 11)
 w_levs = np.linspace(args.W_levs[0], args.W_levs[1], int(args.W_levs[2]))
 tke_levs = np.linspace(args.TKE_levs[0], args.TKE_levs[1], int(args.TKE_levs[2]))
 
+QVAPOR_diff_levs = np.arange(-2, 2, 0.2)
+
 cmap_diverge = cmocean.cm.balance 
 cmap_linear = cmocean.cm.matter
 
@@ -324,6 +320,11 @@ if has_TKE:
     cs = ax[0, 0].contour(X_T, Z_T, tke, levels=tke_levs, colors="black")
     plt.clabel(cs)
 
+if base_exists:
+    QVAPOR_diff = ds["QVAPOR"] - data_base["ds"]["QVAPOR"]
+    cs = ax[0, 0].contour(X_T, Z_T, QVAPOR_diff * 1e3, levels=QVAPOR_diff_levs, colors="yellow")
+    plt.clabel(cs)
+
 
 for _ax in ax[0:1, 0].flatten():
     _ax.plot(X_sT, ds.PBLH, color="magenta", linestyle="--")
@@ -344,7 +345,7 @@ ax[2, 0].plot(X_sT, ds.QO * 1e3, color='blue', label="$Q_O$")
 ax[2, 0].plot(X_sT, ds.QA * 1e3, color='red',  label="$Q_A$")
 
 # SST
-ax[3, 0].plot(X_sT, SST, color='blue', label="SST")
+ax[3, 0].plot(X_sT, ds["TSK"] - zerodegC, color='blue', label="SST")
 ax[3, 0].plot(X_sT, ds.T2 - zerodegC, color='red', label="$T_{\\mathrm{2m}}$")
 
 
@@ -359,19 +360,22 @@ for i, _ax in enumerate(ax[:, 0]):
         
         _ax.set_ylabel("$z$ [ km ]")
         yticks = np.array(_ax.get_yticks())
-        _ax.set_yticks(yticks, ["%d" % _y for _y in yticks/1e3])
+        _ax.set_yticks(yticks, ["%.1f" % _y for _y in yticks/1e3])
         
     _ax.grid(visible=True, which='major', axis='both')
         
+
+thumbnail_numbering = args.thumbnail_numbering[args.thumbnail_skip_part1:]
+
         
         
-ax[0, 0].set_title("(a) $W$ [$\\mathrm{cm} / \\mathrm{s}$]")
-ax[2, 0].set_title("(c) $Q_O$ (blue) and $Q_A$ (red)")
-ax[3, 0].set_title("(d) SST (blue) and $T_\\mathrm{2m}$ (red)")
+ax[0, 0].set_title("(%s) $W$ [$\\mathrm{cm} / \\mathrm{s}$]" % (thumbnail_numbering[0],))
+ax[2, 0].set_title("(%s) $Q_O$ (blue) and $Q_A$ (red)" % (thumbnail_numbering[2],))
+ax[3, 0].set_title("(%s) SST (blue) and $T_\\mathrm{2m}$ (red)" % (thumbnail_numbering[3],))
 
 ax[1, 0].legend(loc="upper right")
 ax[1, 0].set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
-ax[1, 0].set_title("(b) $\\left( \\overline{U}_{\\mathrm{10m}}, \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right)$, $\\overline{\\left|\\vec{U}_{\\mathrm{10m}}\\right|} = %.2f $." % (U10_mean, V10_mean, WND10_mean))
+ax[1, 0].set_title("(%s) $\\left( \\overline{U}_{\\mathrm{10m}}, \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right)$, $\\overline{\\left|\\vec{U}_{\\mathrm{10m}}\\right|} = %.2f $." % (thumbnail_numbering[1], U10_mean, V10_mean, WND10_mean))
 
 ax[2, 0].set_ylabel("[ $ \\mathrm{g} \\, / \\, \\mathrm{kg}$ ]", color="black")
 ax[3, 0].set_ylabel("[ $ \\mathrm{K}$ ]", color="black")
@@ -438,7 +442,7 @@ iii = 0
 _ax = ax[0, iii]
 _ax.plot(ds_ref_stat["T"] + 300, ref_Z_T, 'k-', label="$\\overline{\\theta}$")
 _ax.plot(ds_ref_stat["THETAV"], ref_Z_T, 'r--', label="$\\overline{\\theta_v}$")
-_ax.set_title("(%s) $\\overline{\\theta}$ and $\\overline{\\theta}_v$" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
+_ax.set_title("(%s) $\\overline{\\theta}$ and $\\overline{\\theta}_v$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{K}$ ]")
 _ax.set_xlim([285, 300])
 _ax.legend(loc="upper right")
@@ -448,9 +452,9 @@ iii += 1
 _ax = ax[0, iii]
 _ax.plot(ds_ref_stat["Nfreq"], ref_Z_W, 'k-', label="$N$")
 _ax.plot(ds_ref_stat["NVfreq"], ref_Z_W, 'r--', label="$N_v$")
-_ax.set_title("(%s) $N$ and $N_v$" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
+_ax.set_title("(%s) $N$ and $N_v$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{s}^{-1}$ ]")
-_ax.set_xlim([0, 0.02])
+_ax.set_xlim([0, 0.03])
 _ax.legend(loc="upper right")
 iii += 1
 
@@ -458,7 +462,7 @@ iii += 1
 _ax = ax[0, iii]
 _ax.plot(ds_ref_stat["U"], ref_Z_T)
 
-_ax.set_title("(%s) $U$" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
+_ax.set_title("(%s) $U$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
 _ax.set_xlim(args.U_rng)
 iii += 1
@@ -468,7 +472,7 @@ iii += 1
 _ax = ax[0, iii]
 _ax.plot(ds_ref_stat["V"], ref_Z_T)
 
-_ax.set_title("(%s) $V$" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
+_ax.set_title("(%s) $V$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
 _ax.set_xlim(args.V_rng)
 iii += 1
@@ -478,7 +482,7 @@ if args.tke_analysis == "TRUE":
     # TKE
     _ax = ax[0, iii]
     _ax.plot(ds_ref_stat["QKE"]/2, ref_Z_T)
-    _ax.set_title("(%s) TKE" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
+    _ax.set_title("(%s) TKE" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
     _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
     _ax.set_xlim(args.TKE_rng)
     iii+=1
@@ -486,7 +490,7 @@ if args.tke_analysis == "TRUE":
     # TKE budget
     _ax = ax[0, iii]
 
-    _ax.set_title("(%s) TKE budget" % (args.thumbnail_numbering[args.thumbnail_skip + iii],))
+    _ax.set_title("(%s) TKE budget" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
     _ax.plot(ds_ref_stat["DQKE_T"] * 1e1 / 2, ref_Z_T,   color="black", linestyle='solid', label="$10 \\times \\partial q / \\partial t$")
     _ax.plot(ds_ref_stat["QSHEAR_T"]/2, ref_Z_T, color="red", linestyle='solid',   label="$q_{sh}$")
     _ax.plot(ds_ref_stat["QBUOY_T"]/2, ref_Z_T,  color="blue", linestyle='solid',  label="$q_{bu}$")

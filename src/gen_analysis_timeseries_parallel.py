@@ -396,7 +396,9 @@ def genAnalysis_subset(
     THETA_MEAN = integrateVertically(300.0 + ds.T, ds, avg=True).mean(dim="west_east").rename("THETA_MEAN")
     merge_data.append(THETA_MEAN)
 
-
+    # IWV
+    IWV = integrateVertically(ds["QVAPOR"], ds, avg=False).rename("IWV")
+ 
     # IVT
     IVT_x = integrateVertically(ds["QVAPOR"] * U_T, ds, avg=False)
     IVT_y = integrateVertically(ds["QVAPOR"] * V_T, ds, avg=False)
@@ -406,7 +408,7 @@ def genAnalysis_subset(
     IVT_x = IVT_x.mean(dim="west_east").rename("IVT_x")
     IVT_y = IVT_y.mean(dim="west_east").rename("IVT_y")
 
-    merge_data.extend([IVT, IVT_x, IVT_y])
+    merge_data.extend([IWV, IVT, IVT_x, IVT_y])
 
     if "QKE" in ds:
         TKE_TTL = integrateVertically(ds.QKE/2, ds, avg=False).mean(dim="west_east").rename("TKE_TTL")
