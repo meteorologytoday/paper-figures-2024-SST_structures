@@ -21,7 +21,8 @@ final_figures/
 __pycache__/
 data/*
 gendata/*
-!figures_static/*
 .nfs*
 *.svg
 *.pdf
+*.swp
+!figures_static/*

@@ -215,6 +215,8 @@ def preprocessing(
    
     new_ds = xr.merge(merge_data)
 
+    new_ds.attrs["dT"] = dT
+
     return new_ds
 
 
@@ -256,7 +258,7 @@ def genAnalysis_subset(
 
     # Loading data
         
-    print("Loading directory: %s" % (input_dir,))
+    print("Loading directories: %s , and %s" % (input_dir, input_dir_base))
 
     wsm = wrf_load_helper.WRFSimMetadata(
         start_datetime = exp_beg_time,
@@ -277,7 +279,7 @@ def genAnalysis_subset(
 
     ds_base = wrf_load_helper.loadWRFDataFromDir(
         wsm, 
-        input_dir,
+        input_dir_base,
         beg_time = time_beg,
         end_time = time_end,
         prefix="wrfout_d01_",
@@ -287,9 +289,9 @@ def genAnalysis_subset(
     )
 
 
-    print("Processing...")
+    #print("Processing...")
 
-    ds = preprocessing(ds)
+    ds      = preprocessing(ds)
     ds_base = preprocessing(ds_base)
 
     def diffVar(varname, newname=""):
@@ -297,53 +299,122 @@ def genAnalysis_subset(
 
         if newname != "":
             da = da.rename(newname)
+        
         return da
 
 
-    def horDecomp(da, name_m="mean", name_p="prime"):
-        m = da.mean(dim="west_east").rename(name_m)
-        p = (da - m).rename(name_p) 
-        return m, p
-    
     dC_H = diffVar("C_H")
     dC_Q = diffVar("C_Q")
     dWND = diffVar("WND_sfc")
     dTOA = diffVar("TOA")
     dQOA = diffVar("QOA")
+   
+
+    #print(dC_H)
+    #print(dTOA)
+    #print(dWND)
+    #print(ds["C_H"])
+    #print(ds["WND_sfc"])
+    #print(ds["TOA"])
     
-    dC_H_WND_TOA = (dC_H * ds["WND_sfc"] * ds["TOA"]).mean(dim="west_east").rename("dC_H_WND_TOA")
-    C_H_dWND_TOA = (ds["C_H"] * dWND * ds["TOA"]).mean(dim="west_east").rename("C_H_dWND_TOA")
-    C_H_WND_dTOA = (ds["C_H"] * ds["WND_sfc"] * dTOA).mean(dim="west_east").rename("C_H_WND_dTOA")
+    #HFX_approx2      = (ds["C_H"] * ds["WND_sfc"] * ds["TOA"]).mean(dim="west_east")
+    #HFX_approx2_base = (ds_base["C_H"] * ds_base["WND_sfc"] * ds_base["TOA"]).mean(dim="west_east")
+    #dHFX_approx2 = (HFX_approx2 - HFX_approx2_base).rename("dHFX_approx2") 
 
-    dC_Q_WND_QOA = (dC_Q * ds["WND_sfc"] * ds["QOA"]).mean(dim="west_east").rename("dC_Q_WND_QOA")
-    C_Q_dWND_QOA = (ds["C_Q"] * dWND * ds["QOA"]).mean(dim="west_east").rename("C_Q_dWND_QOA")
-    C_Q_WND_dQOA = (ds["C_Q"] * ds["WND_sfc"] * dQOA).mean(dim="west_east").rename("C_Q_WND_dQOA")
 
-    dHFX_approx = dC_H_WND_TOA + C_H_dWND_TOA + C_H_WND_dTOA
-    dQFX_approx = dC_Q_WND_QOA + C_Q_dWND_QOA + C_Q_WND_dQOA
-    dLH_approx = Lq * dQFX_approx
+    dC_H_WND_TOA = (dC_H * ds_base["WND_sfc"] * ds_base["TOA"]).mean(dim="west_east").rename("dC_H_WND_TOA")
+    C_H_dWND_TOA = (ds_base["C_H"] * dWND * ds_base["TOA"]).mean(dim="west_east").rename("C_H_dWND_TOA")
+    C_H_WND_dTOA = (ds_base["C_H"] * ds_base["WND_sfc"] * dTOA).mean(dim="west_east").rename("C_H_WND_dTOA")
+
+    C_H_dWND_dTOA = (ds_base["C_H"] * dWND * dTOA).mean(dim="west_east").rename("C_H_dWND_dTOA")
+    dC_H_WND_dTOA = (dC_H * ds_base["WND_sfc"] * dTOA).mean(dim="west_east").rename("dC_H_WND_dTOA")
+    dC_H_dWND_TOA = (dC_H * dWND * ds_base["TOA"]).mean(dim="west_east").rename("dC_H_dWND_TOA")
+
+    dC_H_dWND_dTOA = (dC_H * dWND * dTOA).mean(dim="west_east").rename("dC_H_dWND_dTOA")
+    
+    
+    dC_Q_WND_QOA = (dC_Q * ds_base["WND_sfc"] * ds_base["QOA"]).mean(dim="west_east").rename("dC_Q_WND_QOA")
+    C_Q_dWND_QOA = (ds_base["C_Q"] * dWND * ds_base["QOA"]).mean(dim="west_east").rename("C_Q_dWND_QOA")
+    C_Q_WND_dQOA = (ds_base["C_Q"] * ds_base["WND_sfc"] * dQOA).mean(dim="west_east").rename("C_Q_WND_dQOA")
+    
+    dC_Q_dWND_QOA = (dC_Q * dWND * ds_base["QOA"]).mean(dim="west_east").rename("dC_Q_dWND_QOA")
+    C_Q_dWND_dQOA = (ds_base["C_Q"] * dWND * dQOA).mean(dim="west_east").rename("C_Q_dWND_dQOA")
+    dC_Q_WND_dQOA = (dC_Q * ds_base["WND_sfc"] * dQOA).mean(dim="west_east").rename("dC_Q_WND_dQOA")
+    
+    dC_Q_dWND_dQOA = (dC_Q * dWND * dQOA).mean(dim="west_east").rename("dC_Q_dWND_dQOA")
+    
+    
+    dHFX_approx = (
+
+          dC_H_WND_TOA
+        + C_H_dWND_TOA
+        + C_H_WND_dTOA
+
+        + C_H_dWND_dTOA
+        + dC_H_WND_dTOA
+        + dC_H_dWND_TOA
+
+        + dC_H_dWND_dTOA
+    
+    ).rename("dHFX_approx")
+
+
+    dQFX_approx = (
+        
+          dC_Q_WND_QOA
+        + C_Q_dWND_QOA
+        + C_Q_WND_dQOA
+
+        + C_Q_dWND_dQOA 
+        + dC_Q_WND_dQOA 
+        + dC_Q_dWND_QOA 
+
+        + dC_Q_dWND_dQOA
+
+    ).rename("dQFX_approx")
+
+    dLH_approx = (Lq * dQFX_approx).rename("dLH_approx")
     
     dHFX = diffVar("HFX", "dHFX").mean(dim="west_east")
     dQFX = diffVar("QFX", "dQFX").mean(dim="west_east")
     dLH  = diffVar("LH", "dLH").mean(dim="west_east")
+    
+    dHFX_from_FLHC = diffVar("HFX_from_FLHC", "dHFX_from_FLHC").mean(dim="west_east")
+    dQFX_from_FLQC = diffVar("QFX_from_FLQC", "dQFX_from_FLQC").mean(dim="west_east")
+    dLH_from_FLQC = (dQFX_from_FLQC * Lq).rename("dLH_from_FLQC")
    
  
-    dHFX_approx = dHFX_approx.rename("dHFX_approx")
-    dQFX_approx = dQFX_approx.rename("dQFX_approx")
-    dLH_approx  = dLH_approx.rename("dLH_approx")
+    #HFX  = ds["HFX"].mean(dim="west_east")
+    #HFX_approx  = ( ds["C_H"] * ds["WND_sfc"] * ds["TOA"] ).mean(dim="west_east").rename("HFX_approx")
+    #HFX_from_FLHC  = ds["HFX_from_FLHC"].mean(dim="west_east")
  
     merge_data = []
         
     merge_data.extend([
         dHFX_approx, dQFX_approx, dLH_approx,
+        dHFX, dQFX, dLH,
+        dHFX_from_FLHC, dQFX_from_FLQC, dLH_from_FLQC,
+
+        #dHFX_approx2,
 
         dC_H_WND_TOA,
         C_H_dWND_TOA,
-        C_H_WND_dTOA,       
+        C_H_WND_dTOA,
+
+        dC_H_dWND_TOA,
+        C_H_dWND_dTOA,
+        dC_H_WND_dTOA,
+        dC_H_dWND_dTOA,
+        
  
         dC_Q_WND_QOA,
         C_Q_dWND_QOA,
         C_Q_WND_dQOA,       
+ 
+        dC_Q_dWND_QOA,
+        C_Q_dWND_dQOA,
+        dC_Q_WND_dQOA,
+        dC_Q_dWND_dQOA,
  
     ])
 
@@ -356,7 +427,7 @@ def genAnalysis_subset(
             axis = 0,
         )
         
-    new_ds.attrs["dT"] = dT
+    new_ds.attrs["dT"] = ds.attrs["dT"]
     new_ds.attrs["time_beg"] = time_beg_str
     new_ds.attrs["time_end"] = time_end_str
 

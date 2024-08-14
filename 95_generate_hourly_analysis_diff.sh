@@ -16,8 +16,8 @@ time_avg_interval=60   # minutes
 batch_cnt_limit=3
 nproc=20
 
-#batch_cnt_limit=3
-#nproc=4
+#batch_cnt_limit=1
+#nproc=1
 
 
 
@@ -25,15 +25,17 @@ trap "exit" INT TERM
 trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 
 for avg_before_analysis in "TRUE" ; do
-for _bl_scheme in MYJ YSU MYNN25 ; do
+#for _bl_scheme in MYJ YSU MYNN25 ; do
+for _bl_scheme in MYNN25 MYJ YSU ; do
+#for _bl_scheme in MYNN25 ; do
 
-#for target_lab in  lab_sine_WETLWSW lab_sine_DRY ; do 
-#for Lx in 500 400 300 200 100 050 ; do
-#for dT in 000 050 100 150 200 250 300 ; do
-
-for target_lab in  lab_sine_WET ; do 
-for Lx in 500 ; do
+for target_lab in  lab_sine_WETLWSW lab_sine_DRY ; do 
+for Lx in 500 400 300 200 100 050 ; do
 for dT in 000 050 100 150 200 250 300 ; do
+
+#for target_lab in  lab_sine_WETLWSW ; do 
+#for Lx in 500 ; do
+#for dT in 300 ; do
 
 #for dT in 300 ; do
 for U in 20 ; do
