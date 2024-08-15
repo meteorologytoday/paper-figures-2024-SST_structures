@@ -195,7 +195,7 @@ _ax = ax_flatten[0]
 mappable = _ax.contourf(coords["lon"], coords["lat"], SST, SST_levs, cmap="gnuplot", extend="both")
 cax = tool_fig_config.addAxesNextToAxes(fig, _ax, "bottom", thickness=0.03, spacing=0.17)
 cb = plt.colorbar(mappable, cax=cax, orientation="horizontal", pad=0.00)
-cb.ax.set_xlabel("SST [ K ]")
+cb.ax.set_xlabel("SST [ ${}^\\circ\\mathrm{C}$ ]")
 
 
 _ax = ax_flatten[1]

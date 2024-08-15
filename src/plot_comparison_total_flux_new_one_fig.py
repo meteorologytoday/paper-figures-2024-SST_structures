@@ -11,6 +11,7 @@ parser.add_argument('--input-file', type=str, help='Input file.', required=True)
 parser.add_argument('--output', type=str, help='Output filename in png.', default="")
 parser.add_argument('--title', type=str, help='Title', default="")
 parser.add_argument('--no-display', action="store_true")
+parser.add_argument('--delta-analysis', action="store_true")
 parser.add_argument('--varying-param', type=str, help='Parameters. The first and second parameters will be the varying parameters while the rest stays fixed.', required=True, choices=["dSST", "Ug", "Lx"])
 parser.add_argument('--fixed-params', type=str, nargs='*', help='Parameters that stay fixed.', required=True, choices=["dSST", "Ug", "Lx"])
 parser.add_argument('--thumbnail-numbering', type=str, help='Thumbnail numbering.', default="abcdefghijklmn")
@@ -47,184 +48,304 @@ print(ds)
 coord_x = ds.coords[args.varying_param]
 
 
-plot_infos = dict(
+if args.delta_analysis:
+
+    plot_infos = dict(
 
 
-    C_Q_WND_QOA_cx = dict(
-        factor = 2.5e6,
-        label = "$L_Q \\, \\overline{ C'_Q \\, U'_A \\, Q'_{OA} }$",
-        unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
-        
-    ),
+        dC_H_WND_TOA = dict(
+            label = "$\\overline{ \\delta C_H \\, U_A \\, T_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
 
-    WND_QOA_cx_mul_C_Q = dict(
-        factor = 2.5e6,
-        label = "$L_Q \\, \\overline{C}_Q \\, \\overline{ U'_A Q'_{OA} }$",
-        unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
-        bracket = True,
-    ),
+        C_H_dWND_TOA = dict(
+            label = "$\\overline{ C_H \\, \\delta U_A \\, T_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
 
+        C_H_WND_dTOA = dict(
+            label = "$\\overline{ C_H \\, U_A \\,  \\delta T_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
 
+        C_H_dWND_dTOA = dict(
+            label = "$\\overline{ C_H \\, \\delta U_A \\, \\delta T_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
 
-    C_Q_QOA_cx_mul_WND = dict(
-        factor = 2.5e6,
-        label = "$L_Q \\, \\overline{U}_A \\, \\overline{ C_Q' Q'_{OA} }$",
-        unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
-        
-    ),
+        dC_H_WND_dTOA = dict(
+            label = "$\\overline{ \\delta C_H \\, U_A \\, \\delta T_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
 
+        dC_H_dWND_TOA = dict(
+            label = "$\\overline{ \\delta C_H \\, \\delta U_A \\, T_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
 
-    C_Q_WND_cx_mul_QOA = dict(
-        factor = 2.5e6,
-        label = "$L_Q \\, \\overline{Q}_{OA} \\, \\overline{ C_Q' U'_A }$",
-        unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
-        
-    ),
-
-    C_Q_WND_QOA = dict(
-        factor = 2.5e6,
-        label = "$L_Q \\overline{C}_Q \\, \\overline{U}_A \\, \\overline{Q}_{OA}$",
-        unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
-        
-    ),
-
-    C_H_WND_TOA = dict(
-        factor = 1.0,
-        label = "$\\overline{C}_H \\, \\overline{U}_A \\, \\overline{T}_{OA}$",
-        unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
-        
-    ),
+        dC_H_dWND_dTOA = dict(
+            label = "$\\overline{ \\delta C_Q \\, \\delta U_A \\, \\delta Q_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
 
 
-    WND_TOA_cx_mul_C_H = dict(
-        label = "$\\overline{C}_H \\, \\overline{ U'_A T'_{OA} }$",
-        unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
-        
-    ),
+        dC_Q_WND_QOA = dict(
+            factor = 2.5e6,
+            label = "$\\overline{ \\delta C_Q \\, U_A \\, Q_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        C_Q_dWND_QOA = dict(
+            factor = 2.5e6,
+            label = "$\\overline{ C_Q \\, \\delta U_A \\, Q_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        C_Q_WND_dQOA = dict(
+            factor = 2.5e6,
+            label = "$\\overline{ C_Q \\, U_A \\,  \\delta Q_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        C_Q_dWND_dQOA = dict(
+            factor = 2.5e6,
+            label = "$\\overline{ C_Q \\, \\delta U_A \\, \\delta Q_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        dC_Q_WND_dQOA = dict(
+            factor = 2.5e6,
+            label = "$\\overline{ \\delta C_Q \\, U_A \\, \\delta Q_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        dC_Q_dWND_QOA = dict(
+            factor = 2.5e6,
+            label = "$\\overline{ \\delta C_Q \\, \\delta U_A \\, Q_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        dC_Q_dWND_dQOA = dict(
+            factor = 2.5e6,
+            label = "$\\overline{ \\delta C_Q \\, \\delta U_A \\, \\delta Q_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
 
 
-    C_H_WND_TOA_cx = dict(
-        label = "$\\overline{ C'_H \\, U'_A \\, T'_{OA} }$",
-        unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
-        #
-        
-    ),
+        dHFX = dict(
+            factor = 1,
+            label = "$\\delta \\overline{F}_\\mathrm{sen}$",
+            unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+            bracket = False,
+        ),
 
-    C_H_TOA_cx_mul_WND = dict(
-        label = "$\\overline{U}_A \\, \\overline{ C_H' T'_{OA} }$",
-        unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
-        #
-        
-    ),
+        dLH = dict(
+            factor = 1,
+            label = "$\\delta \\overline{F}_\\mathrm{lat}$",
+            unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+            bracket = False,
+        ),
+
+     
+        dHFX_approx = dict(
+            factor = 1,
+            label = "Approx $\\delta \\overline{F_\\mathrm{sen}}$",
+            unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+        ),
+
+        dLH_approx = dict(
+            factor = 1,
+            label = "Approx $ \\delta \\overline{F_\\mathrm{lat}}$",
+            unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+            
+            #
+        ),
 
 
-    C_H_WND_cx_mul_TOA = dict(
-        label = "$\\overline{T}_{OA} \\, \\overline{ C_H' U'_A }$",
-        unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
-        #
-        
-    ),
+    )
 
 
-    PRECIP = dict(
-        factor = 86400.0,
-        label = "Precip",
-        unit = "$ \\mathrm{mm} / \\mathrm{day} $",
-        
-    ),
+
+else:
+
+    plot_infos = dict(
 
 
-    TO = dict(
-        factor = 1,
-        label = "$T_O$",
-        unit = "$ \\mathrm{K} $",
-        
-    ),
+        C_Q_WND_QOA_cx = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\, \\overline{ C'_Q \\, U'_A \\, Q'_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+            
+        ),
 
-    TA = dict(
-        factor = 1,
-        offset = 273.15,
-        label = "$\\overline{T_A}$",
-        unit = "$ \\mathrm{K} $",
-        
-    ),
+        WND_QOA_cx_mul_C_Q = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\, \\overline{C}_Q \\, \\overline{ U'_A Q'_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+            bracket = True,
+        ),
 
-    TOA_m = dict(
-        factor = 1,
-        label = "$T_{OA}$",
-        unit = "$ \\times 10^{-4} \\, \\mathrm{m} / \\mathrm{s}^2 $",
-        
-    ),
 
-    QO = dict(
-        factor = 1e3,
-        label = "$Q_O$",
-        unit = "$ \\mathrm{g} / \\mathrm{kg} $",
-        
-    ),
 
-    QA = dict(
-        factor = 1e3,
-        label = "$Q_A$",
-        unit = "$ \\mathrm{g} / \\mathrm{kg} $",
-        
-    ),
+        C_Q_QOA_cx_mul_WND = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\, \\overline{U}_A \\, \\overline{ C_Q' Q'_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+            
+        ),
 
-    QOA_m = dict(
-        factor = 1,
-        label = "$Q_{OA}$",
-        unit = "$ \\times 10^{-4} \\, \\mathrm{m} / \\mathrm{s}^2 $",
-        
-    ),
 
-    PBLH = dict(
-        factor = 1,
-        label = "$\\overline{H_\\mathrm{PBL}}$",
-        unit = "$ \\mathrm{m} $",
-        
-    ),
+        C_Q_WND_cx_mul_QOA = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\, \\overline{Q}_{OA} \\, \\overline{ C_Q' U'_A }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+            
+        ),
 
-    HFX = dict(
-        factor = 1,
-        label = "$\\overline{F}_\\mathrm{sen}$",
-        unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
-        bracket = False,
-    ),
+        C_Q_WND_QOA = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\overline{C}_Q \\, \\overline{U}_A \\, \\overline{Q}_{OA}$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+            
+        ),
 
-    LH = dict(
-        factor = 1,
-        label = "$\\overline{F}_\\mathrm{lat}$",
-        unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
-        bracket = False,
-    ),
+        C_H_WND_TOA = dict(
+            factor = 1.0,
+            label = "$\\overline{C}_H \\, \\overline{U}_A \\, \\overline{T}_{OA}$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+            
+        ),
 
- 
-    HFX_approx = dict(
-        factor = 1,
-        label = "$Approx \\overline{F_\\mathrm{sen}}$",
-        unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
-    ),
 
-    LH_approx = dict(
-        factor = 1,
-        label = "Approx $\\overline{F_\\mathrm{lat}}$",
-        unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
-        
-        #
-    ),
+        WND_TOA_cx_mul_C_H = dict(
+            label = "$\\overline{C}_H \\, \\overline{ U'_A T'_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+            
+        ),
 
-    WND_m = dict(
-        label = "$\\overline{U} $",
-        unit = "$ \\mathrm{m} / \\mathrm{s} $",
-        
-    ),
 
-    C_H_m = dict(
-        label = "$\\overline{C_H} $",
-        unit = "$ \\mathrm{m} / \\mathrm{s} $",
-    ),
+        C_H_WND_TOA_cx = dict(
+            label = "$\\overline{ C'_H \\, U'_A \\, T'_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+            #
+            
+        ),
 
-)
+        C_H_TOA_cx_mul_WND = dict(
+            label = "$\\overline{U}_A \\, \\overline{ C_H' T'_{OA} }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+            #
+            
+        ),
+
+
+        C_H_WND_cx_mul_TOA = dict(
+            label = "$\\overline{T}_{OA} \\, \\overline{ C_H' U'_A }$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+            #
+            
+        ),
+
+
+        PRECIP = dict(
+            factor = 86400.0,
+            label = "Precip",
+            unit = "$ \\mathrm{mm} / \\mathrm{day} $",
+            
+        ),
+
+
+        TO = dict(
+            factor = 1,
+            label = "$T_O$",
+            unit = "$ \\mathrm{K} $",
+            
+        ),
+
+        TA = dict(
+            factor = 1,
+            offset = 273.15,
+            label = "$\\overline{T_A}$",
+            unit = "$ \\mathrm{K} $",
+            
+        ),
+
+        TOA_m = dict(
+            factor = 1,
+            label = "$T_{OA}$",
+            unit = "$ \\times 10^{-4} \\, \\mathrm{m} / \\mathrm{s}^2 $",
+            
+        ),
+
+        QO = dict(
+            factor = 1e3,
+            label = "$Q_O$",
+            unit = "$ \\mathrm{g} / \\mathrm{kg} $",
+            
+        ),
+
+        QA = dict(
+            factor = 1e3,
+            label = "$Q_A$",
+            unit = "$ \\mathrm{g} / \\mathrm{kg} $",
+            
+        ),
+
+        QOA_m = dict(
+            factor = 1,
+            label = "$Q_{OA}$",
+            unit = "$ \\times 10^{-4} \\, \\mathrm{m} / \\mathrm{s}^2 $",
+            
+        ),
+
+        PBLH = dict(
+            factor = 1,
+            label = "$\\overline{H_\\mathrm{PBL}}$",
+            unit = "$ \\mathrm{m} $",
+            
+        ),
+
+        HFX = dict(
+            factor = 1,
+            label = "$\\overline{F}_\\mathrm{sen}$",
+            unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+            bracket = False,
+        ),
+
+        LH = dict(
+            factor = 1,
+            label = "$\\overline{F}_\\mathrm{lat}$",
+            unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+            bracket = False,
+        ),
+
+     
+        HFX_approx = dict(
+            factor = 1,
+            label = "$Approx \\overline{F_\\mathrm{sen}}$",
+            unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+        ),
+
+        LH_approx = dict(
+            factor = 1,
+            label = "Approx $\\overline{F_\\mathrm{lat}}$",
+            unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+            
+            #
+        ),
+
+        WND_m = dict(
+            label = "$\\overline{U} $",
+            unit = "$ \\mathrm{m} / \\mathrm{s} $",
+            
+        ),
+
+        C_H_m = dict(
+            label = "$\\overline{C_H} $",
+            unit = "$ \\mathrm{m} / \\mathrm{s} $",
+        ),
+
+    )
 
 
 
@@ -279,10 +400,20 @@ for k, heatflx in enumerate(["Sensible", "Latent"]):
 
     _ax = ax_flattened[k]
 
-    varnames = dict(
-        Sensible = ["HFX", "C_H_WND_TOA", "WND_TOA_cx_mul_C_H", "C_H_TOA_cx_mul_WND", "C_H_WND_cx_mul_TOA"],
-        Latent   = ["LH",  "C_Q_WND_QOA", "WND_QOA_cx_mul_C_Q", "C_Q_QOA_cx_mul_WND", "C_Q_WND_cx_mul_QOA"],
-    )[heatflx]
+
+    if args.delta_analysis:
+
+        varnames = dict(
+            Sensible = ["dHFX", "dC_H_WND_TOA", "C_H_dWND_TOA", "C_H_WND_dTOA", "C_H_dWND_dTOA", "dC_H_WND_dTOA", "dC_H_dWND_TOA", "dC_H_dWND_dTOA",],
+            Latent   = ["dLH", "dC_Q_WND_QOA", "C_Q_dWND_QOA", "C_Q_WND_dQOA", "C_Q_dWND_dQOA", "dC_Q_WND_dQOA", "dC_Q_dWND_QOA", "dC_Q_dWND_dQOA",],
+        )[heatflx]
+
+
+    else:
+        varnames = dict(
+            Sensible = ["HFX", "C_H_WND_TOA", "WND_TOA_cx_mul_C_H", "C_H_TOA_cx_mul_WND", "C_H_WND_cx_mul_TOA"],
+            Latent   = ["LH",  "C_Q_WND_QOA", "WND_QOA_cx_mul_C_Q", "C_Q_QOA_cx_mul_WND", "C_Q_WND_cx_mul_QOA"],
+        )[heatflx]
 
     if args.varying_param == "dSST":
         title_param = "$\\Delta \\mathrm{SST}$"
@@ -307,6 +438,9 @@ for k, heatflx in enumerate(["Sensible", "Latent"]):
             ("dodgerblue", "dashed"),
             ("magenta",    "dotted"),
             ("green",      "dashdot"),
+            ("black",      "dashed"),
+            ("red",        "dashed"),
+            ("dodgerblue", "solid"),
         ][i]
 
         
@@ -335,28 +469,24 @@ for k, heatflx in enumerate(["Sensible", "Latent"]):
 
             #print("COORD_X = ", _coord_x)
 
-        if bracket:
-            var_label = "$\\delta ($%s$)$" % (_plot_info["label"],)
-        else:    
-            var_label = "$\\delta$%s" % (_plot_info["label"],)
 
-        label = "%s (%.2f %s)" % (var_label, _ref_m, _plot_info["unit"])
+        if args.delta_analysis:
+
+            label = _plot_info["label"]
+
+        else:
+
+            if bracket:
+                var_label = "$\\delta ($%s$)$" % (_plot_info["label"],)
+            else:    
+                var_label = "$\\delta$%s" % (_plot_info["label"],)
+
+            label = "%s (%.2f %s)" % (var_label, _ref_m, _plot_info["unit"])
+
+
+
+            
         _ax.errorbar(_coord_x, d_m, yerr=d_s, fmt='o-', markersize=6, capsize=5, color=color, linewidth=1.5, elinewidth=1.5, linestyle=linestyle, label=label)
-
-        """
-        for j in range(len(d_s)):
-
-            #_x = np.array([1.0, 1.0]) * _coord_x[j].to_numpy()
-            _x = [ _coord_x[j] ] * 2
-
-            _ax.plot(_x, [d_m[j] - d_s[j], d_m[j] + d_s[j]], color="gray", linestyle="solid")
-
- 
-        _ax.scatter(_coord_x, d_m, s=20, c=color)
-
-        _ax.plot(_coord_x, d_m, label=label, color=color, linestyle=linestyle)
-
-        """
 
         _ax.set_ylabel("[ %s ] " % (_plot_info["unit"]))
 

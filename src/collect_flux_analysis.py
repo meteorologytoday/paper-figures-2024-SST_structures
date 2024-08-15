@@ -23,6 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('--exp-beg-time', type=str, help='analysis beg time', required=True)
     parser.add_argument('--wrfout-data-interval', type=int, help='Time interval between each adjacent record in wrfout files in seconds.', required=True)
     parser.add_argument('--frames-per-wrfout-file', type=int, help='Number of frames in each wrfout file.', required=True)
+    parser.add_argument('--no-extra-variable', action="store_true", help='Number of frames in each wrfout file.',)
 
 
     args = parser.parse_args()
@@ -75,14 +76,15 @@ if __name__ == "__main__":
                     inclusive="left",
                 )
 
-                PRECIP = _ds["RAINNC"] + _ds["RAINC"] + _ds["RAINSH"] + _ds["SNOWNC"] + _ds["HAILNC"] + _ds["GRAUPELNC"]
-                PRECIP = ( PRECIP - PRECIP.shift(time=1) ) / wrfout_data_interval.total_seconds()
-                PRECIP = PRECIP.rename("PRECIP")
-               
-                _ds = xr.merge([
-                    _ds, PRECIP,
-                ])
- 
+                if not args.no_extra_variable:
+                    PRECIP = _ds["RAINNC"] + _ds["RAINC"] + _ds["RAINSH"] + _ds["SNOWNC"] + _ds["HAILNC"] + _ds["GRAUPELNC"]
+                    PRECIP = ( PRECIP - PRECIP.shift(time=1) ) / wrfout_data_interval.total_seconds()
+                    PRECIP = PRECIP.rename("PRECIP")
+                   
+                    _ds = xr.merge([
+                        _ds, PRECIP,
+                    ])
+     
                 if data is None:
 
                     varnames = _ds.keys()
