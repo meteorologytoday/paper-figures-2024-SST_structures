@@ -23,6 +23,7 @@ bl_schemes=(
 source 98_trapkill.sh
 
 for dT in 300; do
+#    for Lx in 500 100 ; do
     for Lx in 500 100 ; do
         for U in "20" ; do
             for target_lab in "${target_labs[@]}" ; do
@@ -62,7 +63,8 @@ for dT in 300; do
                         exp_name="SIMPLE."
                     fi
 
-                    input_dir=$data_sim_dir/$target_lab/case_mph-${mph}_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
+                    #input_dir=$data_sim_dir/$target_lab/case_mph-${mph}_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
+                    input_dir=$gendata_dir/preavg/$target_lab/case_mph-${mph}_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
                     output_dir=$output_fig_dir/$target_lab/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
                     
                     input_dir_base=$data_sim_dir/$target_lab/case_mph-${mph}_Lx${Lx}_U${U}_dT000_${_bl_scheme}
@@ -84,8 +86,8 @@ for dT in 300; do
                             --input-dir $input_dir  \
                             --input-dir-base $input_dir_base  \
                             --exp-beg-time "2001-01-01 00:00:00" \
-                            --wrfout-data-interval 60            \
-                            --frames-per-wrfout-file 60          \
+                            --wrfout-data-interval 3600          \
+                            --frames-per-wrfout-file 12          \
                             --time-rng $(( $hrs_beg * 60 )) $(( $hrs_end * 60 ))  \
                             --extra-title "$extra_title"         \
                             --z1-rng 0 5000 \

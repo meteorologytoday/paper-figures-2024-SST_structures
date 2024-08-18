@@ -48,6 +48,7 @@ if __name__ == "__main__":
     parser.add_argument('--varnames', type=str, nargs="+", help="Varnames to do the analysis.", required=True)
     parser.add_argument('--thumbnail-numbering', type=str, default="abcdefghijklmn")
     parser.add_argument('--labeled-wvlen', type=int, nargs="*", help='Number of frames in each wrfout file.', default=[])
+    parser.add_argument('--wrfout-suffix', type=str, default="")
 
 
 
@@ -68,9 +69,15 @@ if __name__ == "__main__":
         ))
 
         
+    same_base = False
     if len(args.input_dirs_base) == 1:
-        
+       
         args.input_dirs_base = [ args.input_dirs_base[0] ] * len(args.input_dirs) 
+
+
+    if np.all( [ input_dir_base == args.input_dirs_base[0] for input_dir_base in args.input_dirs_base  ] ):
+        same_base = True
+        print("# same_base = ", same_base)
 
 
     if len(args.input_dirs_base) != len(args.input_dirs):
@@ -103,15 +110,19 @@ if __name__ == "__main__":
         input_dir      = args.input_dirs[i]
          
         print("Loading base wrf dir: %s" % (input_dir_base,))
-        ds_base = wrf_load_helper.loadWRFDataFromDir(
-            wsm, 
-            input_dir_base,
-            beg_time = time_beg,
-            end_time = time_end,
-            avg="ALL",
-            verbose=False,
-            inclusive="left",
-        ).isel(time=0)
+
+
+        if i == 0 or not same_base:
+            ds_base = wrf_load_helper.loadWRFDataFromDir(
+                wsm, 
+                input_dir_base,
+                beg_time = time_beg,
+                end_time = time_end,
+                suffix=args.wrfout_suffix,
+                avg="ALL",
+                verbose=False,
+                inclusive="left",
+            ).isel(time=0)
 
 
         Nx = len(ds_base.coords["west_east"])
@@ -129,6 +140,7 @@ if __name__ == "__main__":
             input_dir,
             beg_time = time_beg,
             end_time = time_end,
+            suffix=args.wrfout_suffix,
             avg="ALL",
             verbose=False,
             inclusive="left",

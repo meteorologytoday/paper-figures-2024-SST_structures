@@ -2,10 +2,11 @@
 
 source 00_setup.sh
 
-input_dir_root=$data_dir/$target_lab
 output_dir=$fig_dir/transfer_function
 
 time_avg_interval=60   # minutes
+
+
 hrs_beg=$(( 24 * 5 ))
 hrs_end=$(( 24 * 10 ))
 
@@ -35,7 +36,7 @@ for target_lab in lab_sine_WETLWSW ; do
         casename="case_mph-${mph}_Lx${Lx}_U${Ug}_dT${dT}_${bl_scheme}"
         casename_base="case_mph-${mph}_Lx${Lx}_U${Ug}_dT000_${bl_scheme}"
 
-        input_dir_root=$data_sim_dir/$target_lab
+        input_dir_root=$gendata_dir/preavg/$target_lab
         
         input_dir="$input_dir_root/$casename"
         input_dirs="$input_dirs $input_dir"
@@ -59,12 +60,12 @@ for target_lab in lab_sine_WETLWSW ; do
         --time-rng $hrs_beg $hrs_end               \
         --exp-beg-time '2001-01-01 00:00:00'       \
         --time-rng $hrs_beg $hrs_end               \
-        --wrfout-data-interval 60                  \
-        --frames-per-wrfout-file 60                \
-        --number-of-harmonics 10                   \
+        --wrfout-data-interval 3600                \
+        --frames-per-wrfout-file 12                \
+        --number-of-harmonics 11                   \
         --labeled-wvlen 50 100 200 500             \
         --labels $labels \
-        --varnames TA UA 
+        --varnames SST TA UA 
     "
 
 

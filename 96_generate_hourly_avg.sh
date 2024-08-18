@@ -7,13 +7,18 @@ exp_names=""
 
 output_dir_root=$gendata_dir/preavg
 
-hrs_beg=$(( 24 * 0 ))
-hrs_end=$(( 24 * 16 ))
+hrs_beg=$(( 24 * 5 ))
+hrs_end=$(( 24 * 11 ))
 
 
 time_avg_interval=60   # minutes
-batch_cnt_limit=3
-nproc=5
+
+batch_cnt_limit=5
+nproc=2
+
+#batch_cnt_limit=1
+#nproc=1
+
 
 trap "exit" INT TERM
 trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
@@ -21,7 +26,8 @@ trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 #for _bl_scheme in MYJ YSU MYNN25 ; do
 for _bl_scheme in MYNN25 ; do # MYJ YSU ; do
 
-for target_lab in lab_sine_WETLWSW ; do 
+for target_lab in lab_sine_WETLWSW lab_sine_DRY; do 
+#for target_lab in lab_sine_DRY ; do 
 for Lx in 500 400 300 200 100 050 ; do
 for dT in 000 300 050 100 150 200 250 ; do
 for U in 20 ; do

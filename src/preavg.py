@@ -135,8 +135,20 @@ def avgData_subset(
         inclusive="both",
     )
 
-    print("Processing...")
-    ds = ds.mean(dim=['south_north', 'south_north_stag'], keep_attrs=True)
+
+    #print("First time Check the coordinates...: ", ds.coords)
+
+    #print("Processing...")
+    # Unset XLAT and XLONG as coordinate
+    # For some reason they disappeared after taking the time mean
+    ds = ds.reset_coords(names=['XLAT', 'XLONG'])
+    ds = ds.assign_coords(
+        XLAT=( ds.XLAT.dims,   ds.XLAT.data), 
+        XLONG=( ds.XLONG.dims, ds.XLONG.data),
+    )
+    #print("Check the coordinates...: ", ds.coords)
+
+
     
     ds = ds.compute()
     
@@ -216,7 +228,7 @@ if __name__ == "__main__":
 
         filename = os.path.join(
             args.output_dir,
-            "wrfout_d01_{timestr:s}.nc".format(
+            "wrfout_d01_{timestr:s}".format(
                 timestr = time_beg_of_file.strftime("%Y-%m-%d_%H:%M:%S"),
             )
         )

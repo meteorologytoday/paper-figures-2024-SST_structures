@@ -230,6 +230,8 @@ def loadWRFDataFromDir(wsm, input_dir, beg_time, end_time=None, prefix=wrfout_pr
     if 'time' in test_ds:
         print(fnames)
         ds = xr.open_mfdataset(fnames, decode_times=True, engine=engine, concat_dim=["time"], combine='nested')
+        ts = ds.coords["time"]
+
  
     else:
         ds = xr.open_mfdataset(fnames, decode_times=False, engine=engine, concat_dim=["Time"], combine='nested')
@@ -284,11 +286,15 @@ def loadWRFDataFromDir(wsm, input_dir, beg_time, end_time=None, prefix=wrfout_pr
         for i, _t in enumerate(pd.DatetimeIndex(ds.time)):
             print("[%d] %s" % (i, _t.strftime("%Y-%m-%d_%H:%M:%S")))
 
+
+    has_xlat_xlong = np.all( [ coord_varname in ds.coords for coord_varname in ["XLAT", "XLONG"] ] )
+
     if avg is not None:
 
         # Unset XLAT and XLONG as coordinate
         # For some reason they disappeared after taking the time mean
-        ds = ds.reset_coords(names=['XLAT', 'XLONG'])
+        if has_xlat_xlong:
+            ds = ds.reset_coords(names=['XLAT', 'XLONG'])
         
         avg_all = avg == "ALL"
 
@@ -334,13 +340,12 @@ def loadWRFDataFromDir(wsm, input_dir, beg_time, end_time=None, prefix=wrfout_pr
             raise Exception("If avg is not None or string 'ALL', it has to be a pandas.Timedelta object. Now type(avg) = `%s`" % str(type(avg),) )
 
 
-        #ds = ds.reset_coords(names=['XLAT', 'XLONG']).mean(dim="time", keep_attrs=True).expand_dims(dim={"time": ts[0:1]}, axis=0)
+        if has_xlat_xlong:
 
-        ds = ds.assign_coords(
-            XLAT=( ('time', 'south_north', 'west_east'), ds.XLAT.data), 
-            XLONG=( ('time', 'south_north', 'west_east'), ds.XLONG.data),
-        )
-
+            ds = ds.assign_coords(
+                XLAT=( ds.XLAT.dims, ds.XLAT.data), 
+                XLONG=( ds.XLONG.dims, ds.XLONG.data),
+            )
 
     return ds
     
