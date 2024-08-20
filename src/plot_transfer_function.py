@@ -22,6 +22,12 @@ plot_infos = dict(
         unit = "K",
     ), 
 
+    TOA = dict(
+        wrf_varname = "TOA",
+        unit = "K",
+    ), 
+
+
     UA = dict(
         selector = dict(bottom_top=0),
         wrf_varname = "U",
@@ -295,8 +301,8 @@ if __name__ == "__main__":
     for _ax in ax.flatten():
         _ax.grid()
         _ax.set_xticks(label_freq, labels=label_wvlen_text)
-
         _ax.legend()
+        _ax.set_xlabel("Wavelength [ km ]")
         
     for _ax in ax[:, 1].flatten():
         _ax.set_ylim([-180, 180])

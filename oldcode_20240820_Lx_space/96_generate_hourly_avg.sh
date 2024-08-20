@@ -5,10 +5,10 @@ source 00_setup.sh
 input_dirs=""
 exp_names=""
 
-output_dir_root=$gendata_dir/preavg
+output_dir_root=$preavg_dir
 
 hrs_beg=$(( 24 * 5 ))
-hrs_end=$(( 24 * 11 ))
+hrs_end=$(( 24 * 16 ))
 
 
 time_avg_interval=60   # minutes
@@ -24,12 +24,14 @@ trap "exit" INT TERM
 trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 
 #for _bl_scheme in MYJ YSU MYNN25 ; do
-for _bl_scheme in MYNN25 ; do # MYJ YSU ; do
+for _bl_scheme in MYNN25 MYJ YSU MYNN25 ; do
 
 for target_lab in lab_sine_WETLWSW lab_sine_DRY; do 
-#for target_lab in lab_sine_DRY ; do 
+#for target_lab in lab_sine_WETLWSW ; do 
 for Lx in 500 400 300 200 100 050 ; do
 for dT in 000 300 050 100 150 200 250 ; do
+#for dT in 000 300 ; do
+#for dT in 300 ; do
 for U in 20 ; do
 
     if [[ "$target_lab" =~ "SEMIWET" ]]; then
@@ -68,7 +70,6 @@ for U in 20 ; do
         batch_cnt=0
     fi
    
-done
 done
 done
 done

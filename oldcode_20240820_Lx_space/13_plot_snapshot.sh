@@ -10,8 +10,8 @@ nproc=1
 proc_cnt=0
 
 target_labs=(
-    lab_sine_WETLWSW
-    lab_sine_DRY
+    lab_FIXEDDOMAIN_SST_sine_WETLWSW
+    lab_FIXEDDOMAIN_SST_sine_DRY
 )
 
 bl_schemes=(
@@ -24,7 +24,7 @@ source 98_trapkill.sh
 
 for dT in 300; do
 #    for Lx in 500 100 ; do
-    for Lx in 500 100 ; do
+    for wnm in 004 020 ; do
         for U in "20" ; do
             for target_lab in "${target_labs[@]}" ; do
                 for _bl_scheme in "${bl_schemes[@]}" ; do
@@ -57,9 +57,9 @@ for dT in 300; do
                         tke_analysis=FALSE 
                     fi 
 
-                    if [[ "$target_lab" = "lab_sine_WETLWSW" ]]; then
+                    if [[ "$target_lab" =~ "WETLWSW" ]]; then
                         exp_name="FULL."
-                    elif [[ "$target_lab" =~ "lab_sine_DRY" ]]; then
+                    elif [[ "$target_lab" =~ "DRY" ]]; then
                         exp_name="SIMPLE."
                     fi
 
@@ -67,7 +67,7 @@ for dT in 300; do
                     input_dir=$gendata_dir/preavg/$target_lab/case_mph-${mph}_Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
                     output_dir=$output_fig_dir/$target_lab/Lx${Lx}_U${U}_dT${dT}_${_bl_scheme}
                     
-                    input_dir_base=$data_sim_dir/$target_lab/case_mph-${mph}_Lx${Lx}_U${U}_dT000_${_bl_scheme}
+                    input_dir_base=$gendata_dir/preavg/$target_lab/case_mph-${mph}_Lx${Lx}_U${U}_dT000_${_bl_scheme}
 
                     mkdir -p $output_dir
 

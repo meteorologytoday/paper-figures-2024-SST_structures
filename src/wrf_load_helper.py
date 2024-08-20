@@ -230,7 +230,6 @@ def loadWRFDataFromDir(wsm, input_dir, beg_time, end_time=None, prefix=wrfout_pr
     if 'time' in test_ds:
         print(fnames)
         ds = xr.open_mfdataset(fnames, decode_times=True, engine=engine, concat_dim=["time"], combine='nested')
-        ts = ds.coords["time"]
 
  
     else:
@@ -280,7 +279,7 @@ def loadWRFDataFromDir(wsm, input_dir, beg_time, end_time=None, prefix=wrfout_pr
             raise Exception("Error: Cannot find the matching `time` = %s" % (str(select_dt),))
             
     ds = ds.isel( time = slice(start_select, start_select + len(select_dts) ) )
- 
+    ts = ds.coords["time"] 
     if verbose:
         print("Loaded time: ")
         for i, _t in enumerate(pd.DatetimeIndex(ds.time)):

@@ -80,7 +80,8 @@ def genAnalysis(
                 reltime_rng,
                 avg_before_analysis,
             )
-    
+            
+
             merge_data.append(ds)
 
 
@@ -276,6 +277,7 @@ def genAnalysis_subset(
         verbose=False,
         inclusive="both",
     )
+
 
     ds_base = wrf_load_helper.loadWRFDataFromDir(
         wsm, 

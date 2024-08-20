@@ -12,8 +12,8 @@ parser.add_argument('--output', type=str, help='Output filename in png.', defaul
 parser.add_argument('--title', type=str, help='Title', default="")
 parser.add_argument('--no-display', action="store_true")
 parser.add_argument('--delta-analysis', action="store_true")
-parser.add_argument('--varying-param', type=str, help='Parameters. The first and second parameters will be the varying parameters while the rest stays fixed.', required=True, choices=["dSST", "Ug", "Lx"])
-parser.add_argument('--fixed-params', type=str, nargs='*', help='Parameters that stay fixed.', required=True, choices=["dSST", "Ug", "Lx"])
+parser.add_argument('--varying-param', type=str, help='Parameters. The first and second parameters will be the varying parameters while the rest stays fixed.', required=True, choices=["dSST", "Ug", "Lx", "wnm"])
+parser.add_argument('--fixed-params', type=str, nargs='*', help='Parameters that stay fixed.', required=True, choices=["dSST", "Ug", "Lx", "wnm"])
 parser.add_argument('--thumbnail-numbering', type=str, help='Thumbnail numbering.', default="abcdefghijklmn")
 parser.add_argument('--fixed-param-values', type=float, nargs="*", help='The values of the fixed parameters', default=[])
 parser.add_argument('--ref-exp-order', type=int, help='The reference case (start from 0) to perform decomposition', default=0)
@@ -421,6 +421,8 @@ for k, heatflx in enumerate(["Sensible", "Latent"]):
         title_param = "$U_g$"
     elif args.varying_param == "Lx":
         title_param = "$L$"
+    elif args.varying_param == "wnm":
+        title_param = "$L$"
  
     _ax.set_title(
         "(%s) %s heat flux as a function of %s" % (
@@ -454,7 +456,7 @@ for k, heatflx in enumerate(["Sensible", "Latent"]):
         _plot_data = (ds[varname] + offset) * factor
 
 
-        _ref_m = _plot_data.sel(stat="mean")[0].to_numpy()
+        _ref_m = 0.0# _plot_data.sel(stat="mean")[0].to_numpy()
         
         d_m = _plot_data.sel(stat="mean") - _ref_m
         d_s = _plot_data.sel(stat="std")
@@ -468,6 +470,9 @@ for k, heatflx in enumerate(["Sensible", "Latent"]):
             #_coord_x = 1 / coord_x.to_numpy()
 
             #print("COORD_X = ", _coord_x)
+    
+        elif args.varying_param == "wnm":
+            _coord_x = 2000.0 / coord_x + args.spacing * i
 
 
         if args.delta_analysis:
@@ -500,15 +505,19 @@ for k, heatflx in enumerate(["Sensible", "Latent"]):
         _ax.set_xlabel("$U_\\mathrm{g}$ [ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
     elif args.varying_param == "Lx":
         _ax.set_xlabel("$ L $ [ $\\mathrm{km} $ ]")
+    elif args.varying_param == "wnm":
+        _ax.set_xlabel("$ L $ [ $\\mathrm{km} $ ]")
+
         #_ax.set_xlabel("$ H^2_{\\mathrm{pbl}} / L $ [ $\\mathrm{m} $ ]")
         #_ax.set_xlabel("$ L^{-1} $ [ $\\mathrm{km}^{-1} $ ]")
 
 
+    """
     if heatflx == "Sensible":
         _ax.set_ylim(args.HFX_rng)
     elif heatflx == "Latent":
         _ax.set_ylim(args.LH_rng)
-
+    """
 
 
     _ax.legend()
