@@ -7,17 +7,17 @@ exp_names=""
 
 output_dir_root=$preavg_dir
 
-hrs_beg=$(( 24 * 0 ))
-hrs_end=$(( 24 * 20 ))
+hrs_beg=$(( 24 * 5 ))
+hrs_end=$(( 24 * 11 ))
 
 
 time_avg_interval=60   # minutes
 
-batch_cnt_limit=5
-nproc=2
-
 batch_cnt_limit=2
-nproc=5
+nproc=10
+
+#batch_cnt_limit=1
+#nproc=1
 
 
 trap "exit" INT TERM
@@ -26,7 +26,8 @@ trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 #for _bl_scheme in MYJ YSU MYNN25 ; do
 for _bl_scheme in MYNN25 ; do
 
-for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do 
+for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW lab_FIXEDDOMAIN_SST_sine_DRY ; do 
+#for target_lab in lab_FIXEDDOMAIN_SST_sine_DRY ; do 
 #for target_lab in lab_sine_WETLWSW ; do 
 for wnm in 000 004 005 007 010 020 040 ; do
 for dT in 000 300 050 100 150 200 250 ; do

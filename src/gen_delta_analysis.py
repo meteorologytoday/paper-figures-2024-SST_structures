@@ -12,33 +12,12 @@ import tool_fig_config
 import wrf_load_helper 
 import datetime
 import os
+from shared_constants import *
 
-cp_a  = 1004.0  # J / kg / K
-Lq = 2.5e6      # J / kg
-g0 = 9.81       # m / s^2
-
-def integrateVertically(X, ds, avg=False):
-
-    MUB = ds.MUB
-    DNW = ds.DNW
-    MU_FULL = ds.MU + ds.MUB
-    MU_STAR = MU_FULL / MUB
-    integration_factor = - MUB * DNW / g0  # notice that DNW is negative, so we need to multiply by -1
-
-    X_STAR = X * MU_STAR
-    X_INT = (integration_factor * X_STAR).sum(dim="bottom_top")
-
-    if avg:
-        sum_integration_factor = integration_factor.sum(dim="bottom_top")
-        X_INT = X_INT / sum_integration_factor
-
-    return X_INT
 
 
 def onlyPos(x):
     return 0.0 if x < 0.0 else x
-
-
 
 def genAnalysis(
     input_dir,
@@ -115,6 +94,7 @@ def genAnalysis(
 
 def preprocessing(
     ds,
+    data_interval,
 ):
 
     ds = ds.mean(dim=['south_north', 'south_north_stag'], keep_attrs=True)
@@ -213,6 +193,29 @@ def preprocessing(
     merge_data.append(WND_sfc)
     merge_data.append(C_H)
     merge_data.append(C_Q)
+
+
+    TTL_RAIN = ds["RAINNC"] + ds["RAINC"] #+ ds["RAINSH"] + ds["SNOWNC"] + ds["HAILNC"] + ds["GRAUPELNC"]
+    PRECIP = ( TTL_RAIN - TTL_RAIN.shift(time=1) ) / data_interval.total_seconds()
+    
+    TTL_RAIN = TTL_RAIN.rename("TTL_RAIN")
+    PRECIP = PRECIP.rename("PRECIP") 
+
+
+    #if "QICE_TTL" in ds:   
+    #    WATER_TTL = ds["QVAPOR_TTL"] + ds["QRAIN_TTL"] + ds["QICE_TTL"] + ds["QSNOW_TTL"] + ds["QCLOUD_TTL"]
+    #else:
+    #    WATER_TTL = ds["QVAPOR_TTL"] + ds["QRAIN_TTL"] + ds["QCLOUD_TTL"]
+
+    #dWATER_TTLdt = ( WATER_TTL - WATER_TTL.shift(time=1) ) / wrfout_data_interval.total_seconds()
+    #dWATER_TTLdt = dWATER_TTLdt.rename("dWATER_TTLdt") 
+
+    merge_data.append(PRECIP)
+    merge_data.append(TTL_RAIN)
+    #merge_data.append(dWATER_TTLdt)
+
+
+
    
     new_ds = xr.merge(merge_data)
 
@@ -293,8 +296,8 @@ def genAnalysis_subset(
 
     #print("Processing...")
 
-    ds      = preprocessing(ds)
-    ds_base = preprocessing(ds_base)
+    ds      = preprocessing(ds, data_interval)
+    ds_base = preprocessing(ds_base, data_interval)
 
     def diffVar(varname, newname=""):
         da = ds[varname] - ds_base[varname]
@@ -419,6 +422,15 @@ def genAnalysis_subset(
         dC_Q_dWND_dQOA,
  
     ])
+
+    # Adding extra variables
+    for varname in [
+        "IWV", "IVT", "IVT_x", "IVT_y", "TTL_RAIN", "PRECIP", 
+    ]:
+        
+        diff_da = ds[varname] - ds_base[varname] 
+        merge_data.append(diff_da) 
+
 
     # Merging data
     new_ds = xr.merge(merge_data)

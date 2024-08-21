@@ -130,7 +130,9 @@ def genInclusiveBounds(wsm, beg_dt, end_dt, interval, inclusive):
 def genFilenameFromDateRange(wsm, time_rng, inclusive="left", prefix=wrfout_prefix, suffix="", dirname=None, time_fmt=wrfout_time_fmt):
    
     beg_dt, end_dt = genInclusiveBounds(wsm, time_rng[0], time_rng[1], wsm.data_interval, inclusive)
-   
+    print("beg_dt = ", beg_dt)   
+    print("end_dt = ", end_dt)   
+    print("wsm.data_interval = ", wsm.data_interval)   
      
     firstfile_dt, _ = computeIndex(wsm, index_time=beg_dt)
     lastfile_dt,  _ = computeIndex(wsm, index_time=end_dt)
@@ -192,9 +194,9 @@ def _loadWRFTimeOnly(filename):
 def loadWRFDataFromDir(wsm, input_dir, beg_time, end_time=None, prefix=wrfout_prefix, suffix="", time_fmt=wrfout_time_fmt, verbose=False, avg=None, inclusive="left", assign_coords=True):
     
     if end_time is None:
-
         inclusive = "both"
         end_time = beg_time
+        print("Set inclusive = both")
   
     if verbose:
         print("[loadWRFDataFromDir] Going to load time range: [", beg_time, ", ", end_time, "]")

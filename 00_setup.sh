@@ -19,4 +19,6 @@ gendata_dir=./gendata
 preavg_dir=$gendata_dir/preavg
 
 
+Lx=2000
+
 mkdir -p $fig_dir

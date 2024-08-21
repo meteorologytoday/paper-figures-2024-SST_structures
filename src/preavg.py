@@ -12,6 +12,30 @@ import tool_fig_config
 import wrf_load_helper 
 import datetime
 import os
+import shared_constants
+
+
+cp_a  = shared_constants.cp_a
+Lq = shared_constants.Lq
+g0 = shared_constants.g0
+
+def integrateVertically(X, ds, avg=False):
+
+    MUB = ds.MUB
+    DNW = ds.DNW
+    MU_FULL = ds.MU + ds.MUB
+    MU_STAR = MU_FULL / MUB
+    integration_factor = - MUB * DNW / g0  # notice that DNW is negative, so we need to multiply by -1
+
+    X_STAR = X * MU_STAR
+    X_INT = (integration_factor * X_STAR).sum(dim="bottom_top")
+
+    if avg:
+        sum_integration_factor = integration_factor.sum(dim="bottom_top")
+        X_INT = X_INT / sum_integration_factor
+
+    return X_INT
+
 
 def avgData(
     input_dir,
@@ -135,12 +159,65 @@ def avgData_subset(
         inclusive="both",
     )
 
+    merge_data = []
+    # Integrate water vapor, TKE
 
-    #print("First time Check the coordinates...: ", ds.coords)
+    for species in ["VAPOR", "CLOUD", "RAIN", "ICE", "SNOW"]:
+        QX_varname = "Q%s" % (species,)
+        QX_TTL_varname = "Q%s_TTL" % (species,)
 
-    #print("Processing...")
+        if not ( QX_varname in ds ):
+            print("Variable %s not in file. Skip it." % (QX_varname,))
+            continue
+
+        QX_TTL = integrateVertically(ds[QX_varname], ds, avg=False).mean(dim="west_east").rename(QX_TTL_varname)
+        merge_data.append(QX_TTL)
+
+    THETA_MEAN = integrateVertically(300.0 + ds.T, ds, avg=True).mean(dim="west_east").rename("THETA_MEAN")
+    merge_data.append(THETA_MEAN)
+
+    # Convert V_T
+    V_T = xr.zeros_like(ds["T"]).rename("V_T")
+    _tmp = ds["V"].to_numpy()
+    V_T[:, :, :, :] = _tmp[:, :, 0:1, :]
+
+    # Convert U_T
+    _tmp = ds["U"].to_numpy()
+    U_T = xr.zeros_like(ds["T"]).rename("U_T")
+
+    U_T[:, :, :, :] = (_tmp[:, :, :, 1:] + _tmp[:, :, :, :-1]) / 2
+    U_T = U_T.rename("U_T")
+ 
+    # IWV
+    IWV = integrateVertically(ds["QVAPOR"], ds, avg=False).rename("IWV")
+ 
+    # IVT
+    IVT_x = integrateVertically(ds["QVAPOR"] * U_T, ds, avg=False)
+    IVT_y = integrateVertically(ds["QVAPOR"] * V_T, ds, avg=False)
+    
+    # code order matters here
+    IVT = ((IVT_x**2 + IVT_y**2)**0.5).mean(dim="west_east").rename("IVT")
+    IVT_x = IVT_x.mean(dim="west_east").rename("IVT_x")
+    IVT_y = IVT_y.mean(dim="west_east").rename("IVT_y")
+
+    merge_data.extend([IWV, IVT, IVT_x, IVT_y])
+
+    if "QKE" in ds:
+        TKE_TTL = integrateVertically(ds.QKE/2, ds, avg=False).mean(dim="west_east").rename("TKE_TTL")
+        merge_data.append(TKE_TTL)
+
+
+    # Merging data
+    extra_ds = xr.merge(merge_data)
+    extra_ds = extra_ds.mean(dim='west_east', skipna=True, keep_attrs=True)
+  
     # Unset XLAT and XLONG as coordinate
     # For some reason they disappeared after taking the time mean
+
+
+    ds = xr.merge([ds, extra_ds])
+
+
     ds = ds.reset_coords(names=['XLAT', 'XLONG'])
     ds = ds.assign_coords(
         XLAT=( ds.XLAT.dims,   ds.XLAT.data), 

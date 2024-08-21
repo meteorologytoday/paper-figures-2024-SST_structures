@@ -5,10 +5,10 @@ source 00_setup.sh
 input_dirs=""
 exp_names=""
 
-output_dir_root=$gendata_dir/dF_analysis_timeseries
+output_dir_root=$gendata_dir/delta_analysis
 
-hrs_beg=$(( 24 * 0 ))
-hrs_end=$(( 24 * 20 ))
+hrs_beg=$(( 24 * 5 ))
+hrs_end=$(( 24 * 10 ))
 
 
 time_avg_interval=60   # minutes
@@ -25,18 +25,14 @@ trap "exit" INT TERM
 trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 
 for avg_before_analysis in "TRUE" ; do
-#for _bl_scheme in MYJ YSU MYNN25 ; do
 for _bl_scheme in MYNN25 ; do # MYJ YSU ; do
-#for _bl_scheme in MYNN25 ; do
-
 for target_lab in  lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do 
-#for target_lab in  lab_sine_DRY ; do 
 
 for wnm in 000 004 005 007 010 020 040 ; do
 
     if [ "$wnm" = "004" ]; then
 
-        dTs=( 000 050 100 150 200 250 300 )
+        dTs=( 300 000 050 100 150 200 250 300 )
 
     else
         dTs=( 000 300 )
@@ -66,7 +62,7 @@ for U in 20 ; do
     mkdir -p $output_dir
 
 
-    python3 src/gen_dF_analysis_timeseries_parallel.py      \
+    python3 src/gen_delta_analysis.py              \
         --input-dir $input_dir                     \
         --input-dir-base $input_dir_base           \
         --output-dir $output_dir                   \
