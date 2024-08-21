@@ -28,6 +28,7 @@ def genAnalysis(
     frames_per_wrfout_file,
     reltime_rngs,
     avg_before_analysis,
+    analysis_style,
 ):
     
     result = dict(output_filename=output_filename, status='UNKNOWN')
@@ -58,6 +59,7 @@ def genAnalysis(
                 frames_per_wrfout_file,
                 reltime_rng,
                 avg_before_analysis,
+                analysis_style,
             )
             
 
@@ -71,9 +73,10 @@ def genAnalysis(
             
         full_range_time_beg = exp_beg_time + reltime_rngs[0][0]
         full_range_time_end = exp_beg_time + reltime_rngs[-1][1]
-        new_ds.attrs["time_beg"] = full_range_time_beg.strftime("%Y-%m-%d_%H:%M:%S"),
-        new_ds.attrs["time_end"] = full_range_time_end.strftime("%Y-%m-%d_%H:%M:%S"),
- 
+        new_ds.attrs["time_beg"] = full_range_time_beg.strftime("%Y-%m-%d_%H:%M:%S")
+        new_ds.attrs["time_end"] = full_range_time_end.strftime("%Y-%m-%d_%H:%M:%S")
+        new_ds.attrs["analysis_style"] = analysis_style 
+
         print("Writing file: %s" % (output_filename,))
         new_ds.to_netcdf(
             output_filename,
@@ -184,15 +187,15 @@ def preprocessing(
     merge_data.append(QFX_from_FLQC)
     merge_data.append(LH_from_FLQC)
 
-    C_H = ds["FLHC"] / WND_sfc
-    C_H = C_H.rename("C_H")
+    CH = ds["FLHC"] / WND_sfc
+    CH = CH.rename("CH")
     
-    C_Q = ds["FLQC"] / WND_sfc
-    C_Q = C_Q.rename("C_Q")
+    CQ = ds["FLQC"] / WND_sfc
+    CQ = CQ.rename("CQ")
 
     merge_data.append(WND_sfc)
-    merge_data.append(C_H)
-    merge_data.append(C_Q)
+    merge_data.append(CH)
+    merge_data.append(CQ)
 
 
     TTL_RAIN = ds["RAINNC"] + ds["RAINC"] #+ ds["RAINSH"] + ds["SNOWNC"] + ds["HAILNC"] + ds["GRAUPELNC"]
@@ -224,6 +227,282 @@ def preprocessing(
     return new_ds
 
 
+# This decomposition is the simple one
+def analysisStyle1(
+    ds, ds_base,
+):
+
+    def diffVar(varname, newname=""):
+        da = ds[varname] - ds_base[varname]
+
+        if newname != "":
+            da = da.rename(newname)
+        
+        return da
+
+
+    dCH = diffVar("CH")
+    dCQ = diffVar("CQ")
+    dWND = diffVar("WND_sfc")
+    dTOA = diffVar("TOA")
+    dQOA = diffVar("QOA")
+   
+    dCH_WND_TOA = (dCH * ds_base["WND_sfc"] * ds_base["TOA"]).mean(dim="west_east").rename("dCH_WND_TOA")
+    CH_dWND_TOA = (ds_base["CH"] * dWND * ds_base["TOA"]).mean(dim="west_east").rename("CH_dWND_TOA")
+    CH_WND_dTOA = (ds_base["CH"] * ds_base["WND_sfc"] * dTOA).mean(dim="west_east").rename("CH_WND_dTOA")
+
+    CH_dWND_dTOA = (ds_base["CH"] * dWND * dTOA).mean(dim="west_east").rename("CH_dWND_dTOA")
+    dCH_WND_dTOA = (dCH * ds_base["WND_sfc"] * dTOA).mean(dim="west_east").rename("dCH_WND_dTOA")
+    dCH_dWND_TOA = (dCH * dWND * ds_base["TOA"]).mean(dim="west_east").rename("dCH_dWND_TOA")
+
+    dCH_dWND_dTOA = (dCH * dWND * dTOA).mean(dim="west_east").rename("dCH_dWND_dTOA")
+    
+    
+    dCQ_WND_QOA = (dCQ * ds_base["WND_sfc"] * ds_base["QOA"]).mean(dim="west_east").rename("dCQ_WND_QOA")
+    CQ_dWND_QOA = (ds_base["CQ"] * dWND * ds_base["QOA"]).mean(dim="west_east").rename("CQ_dWND_QOA")
+    CQ_WND_dQOA = (ds_base["CQ"] * ds_base["WND_sfc"] * dQOA).mean(dim="west_east").rename("CQ_WND_dQOA")
+    
+    dCQ_dWND_QOA = (dCQ * dWND * ds_base["QOA"]).mean(dim="west_east").rename("dCQ_dWND_QOA")
+    CQ_dWND_dQOA = (ds_base["CQ"] * dWND * dQOA).mean(dim="west_east").rename("CQ_dWND_dQOA")
+    dCQ_WND_dQOA = (dCQ * ds_base["WND_sfc"] * dQOA).mean(dim="west_east").rename("dCQ_WND_dQOA")
+    
+    dCQ_dWND_dQOA = (dCQ * dWND * dQOA).mean(dim="west_east").rename("dCQ_dWND_dQOA")
+    
+    
+    dHFX_approx = (
+
+          dCH_WND_TOA
+        + CH_dWND_TOA
+        + CH_WND_dTOA
+
+        + CH_dWND_dTOA
+        + dCH_WND_dTOA
+        + dCH_dWND_TOA
+
+        + dCH_dWND_dTOA
+    
+    ).rename("dHFX_approx")
+
+
+    dQFX_approx = (
+        
+          dCQ_WND_QOA
+        + CQ_dWND_QOA
+        + CQ_WND_dQOA
+
+        + CQ_dWND_dQOA 
+        + dCQ_WND_dQOA 
+        + dCQ_dWND_QOA 
+
+        + dCQ_dWND_dQOA
+
+    ).rename("dQFX_approx")
+
+    dLH_approx = (Lq * dQFX_approx).rename("dLH_approx")
+    
+    dHFX = diffVar("HFX", "dHFX").mean(dim="west_east")
+    dQFX = diffVar("QFX", "dQFX").mean(dim="west_east")
+    dLH  = diffVar("LH", "dLH").mean(dim="west_east")
+    
+    dHFX_from_FLHC = diffVar("HFX_from_FLHC", "dHFX_from_FLHC").mean(dim="west_east")
+    dQFX_from_FLQC = diffVar("QFX_from_FLQC", "dQFX_from_FLQC").mean(dim="west_east")
+    dLH_from_FLQC = (dQFX_from_FLQC * Lq).rename("dLH_from_FLQC")
+   
+ 
+    #HFX  = ds["HFX"].mean(dim="west_east")
+    #HFX_approx  = ( ds["CH"] * ds["WND_sfc"] * ds["TOA"] ).mean(dim="west_east").rename("HFX_approx")
+    #HFX_from_FLHC  = ds["HFX_from_FLHC"].mean(dim="west_east")
+ 
+    merge_data = []
+        
+    merge_data.extend([
+        dHFX_approx, dQFX_approx, dLH_approx,
+        dHFX, dQFX, dLH,
+        dHFX_from_FLHC, dQFX_from_FLQC, dLH_from_FLQC,
+
+        #dHFX_approx2,
+
+        dCH_WND_TOA,
+        CH_dWND_TOA,
+        CH_WND_dTOA,
+
+        dCH_dWND_TOA,
+        CH_dWND_dTOA,
+        dCH_WND_dTOA,
+        dCH_dWND_dTOA,
+        
+ 
+        dCQ_WND_QOA,
+        CQ_dWND_QOA,
+        CQ_WND_dQOA,       
+ 
+        dCQ_dWND_QOA,
+        CQ_dWND_dQOA,
+        dCQ_WND_dQOA,
+        dCQ_dWND_dQOA,
+ 
+    ])
+
+    return merge_data 
+    
+    
+
+# This decomposition includes the spatial ones
+def analysisStyle2(
+    ds, ds_base,
+):
+
+    ds_base_m = ds_base.mean(dim="west_east")
+
+    def diffVar(varname, newname=""):
+        da = ds[varname] - ds_base[varname]
+
+        if newname != "":
+            da = da.rename(newname)
+        
+        return da
+
+    def horDecomp(da, name_m="mean", name_p="prime"):
+        m = da.mean(dim="west_east").rename(name_m)
+        p = (da - m).rename(name_p) 
+        return m, p
+
+
+    dCH = diffVar("CH")
+    dCQ = diffVar("CQ")
+    dWND = diffVar("WND_sfc")
+    dTOA = diffVar("TOA")
+    dQOA = diffVar("QOA")
+ 
+    dCHm, dCHp = horDecomp(dCH)
+    dCQm, dCQp = horDecomp(dCQ)
+    dWNDm, dWNDp = horDecomp(dWND)
+    dTOAm, dTOAp = horDecomp(dTOA)
+    dQOAm, dQOAp = horDecomp(dQOA)
+   
+    #print(ds_base["WND_sfc"])
+
+
+    dCHm_WNDm_TOAm = (dCHm * ds_base_m["WND_sfc"] * ds_base_m["TOA"]).rename("dCHm_WNDm_TOAm")
+    CHm_dWNDm_TOAm = (ds_base_m["CH"] * dWNDm * ds_base_m["TOA"]).rename("CHm_dWNDm_TOAm")
+    CHm_WNDm_dTOAm = (ds_base_m["CH"] * ds_base_m["WND_sfc"] * dTOAm).rename("CHm_WNDm_dTOAm")
+
+    CHm_dWNDp_dTOAp = ( ds_base_m["CH"] * (dWNDp * dTOAp).mean(dim="west_east")     ).rename("CHm_dWNDp_dTOAp")
+    WNDm_dCHp_dTOAp = ( ds_base_m["WND_sfc"] * (dCHp * dTOAp).mean(dim="west_east") ).rename("WNDm_dCHp_dTOAp")
+    TOAm_dCHp_dWNDp = ( ds_base_m["TOA"] * (dCHp * dWNDp).mean(dim="west_east")     ).rename("TOAm_dCHp_dWNDp")
+
+    CHm_dWNDm_dTOAm = (ds_base_m["CH"] * dWNDm * dTOAm).rename("CHm_dWNDm_dTOAm")
+    WNDm_dCHm_dTOAm = (ds_base_m["WND_sfc"] * dCHm * dTOAm).rename("WNDm_dCHm_dTOAm")
+    TOAm_dCHm_dWNDm = (ds_base_m["TOA"] * dCHm * dWNDm).rename("TOAm_dCHm_dWNDm")
+
+    dCH_dWND_dTOA = (dCH * dWND * dTOA).mean(dim="west_east").rename("dCH_dWND_dTOA")
+    
+    RES_H = (CHm_dWNDm_dTOAm + WNDm_dCHm_dTOAm + TOAm_dCHm_dWNDm + dCH_dWND_dTOA).rename("RES_H")
+
+    #===========
+ 
+    dCQm_WNDm_QOAm = (dCQm * ds_base_m["WND_sfc"] * ds_base_m["QOA"]).rename("dCQm_WNDm_QOAm")
+    CQm_dWNDm_QOAm = (ds_base_m["CQ"] * dWNDm * ds_base_m["QOA"]).rename("CQm_dWNDm_QOAm")
+    CQm_WNDm_dQOAm = (ds_base_m["CQ"] * ds_base_m["WND_sfc"] * dQOAm).rename("CQm_WNDm_dQOAm")
+
+    CQm_dWNDp_dQOAp = ( ds_base_m["CQ"] * (dWNDp * dQOAp).mean(dim="west_east")     ).rename("CQm_dWNDp_dQOAp")
+    WNDm_dCQp_dQOAp = ( ds_base_m["WND_sfc"] * (dCQp * dQOAp).mean(dim="west_east") ).rename("WNDm_dCQp_dQOAp")
+    QOAm_dCQp_dWNDp = ( ds_base_m["QOA"] * (dCQp * dWNDp).mean(dim="west_east")     ).rename("QOAm_dCQp_dWNDp")
+
+    CQm_dWNDm_dQOAm = (ds_base_m["CQ"] * dWNDm * dQOAm).rename("CQm_dWNDm_dQOAm")
+    WNDm_dCQm_dQOAm = (ds_base_m["WND_sfc"] * dCQm * dQOAm).rename("WNDm_dCQm_dQOAm")
+    QOAm_dCQm_dWNDm = (ds_base_m["QOA"] * dCQm * dWNDm).rename("QOAm_dCQm_dWNDm")
+
+    dCQ_dWND_dQOA = (dCQ * dWND * dQOA).mean(dim="west_east").rename("dCQ_dWND_dQOA")
+    
+    RES_Q = (CQm_dWNDm_dQOAm + WNDm_dCQm_dQOAm + QOAm_dCQm_dWNDm + dCQ_dWND_dQOA).rename("RES_Q")
+
+    
+    dHFX_approx = (
+
+          dCHm_WNDm_TOAm
+        + CHm_dWNDm_TOAm
+        + CHm_WNDm_dTOAm
+
+        + CHm_dWNDp_dTOAp
+        + WNDm_dCHp_dTOAp
+        + TOAm_dCHp_dWNDp
+
+        + RES_H
+    
+    ).rename("dHFX_approx")
+
+
+    dQFX_approx = (
+ 
+          dCQm_WNDm_QOAm
+        + CQm_dWNDm_QOAm
+        + CQm_WNDm_dQOAm
+
+        + CQm_dWNDp_dQOAp
+        + WNDm_dCQp_dQOAp
+        + QOAm_dCQp_dWNDp
+
+        + RES_Q
+
+    ).rename("dQFX_approx")
+
+    dLH_approx = (Lq * dQFX_approx).rename("dLH_approx")
+    
+    dHFX = diffVar("HFX", "dHFX").mean(dim="west_east")
+    dQFX = diffVar("QFX", "dQFX").mean(dim="west_east")
+    dLH  = diffVar("LH", "dLH").mean(dim="west_east")
+    
+    dHFX_from_FLHC = diffVar("HFX_from_FLHC", "dHFX_from_FLHC").mean(dim="west_east")
+    dQFX_from_FLQC = diffVar("QFX_from_FLQC", "dQFX_from_FLQC").mean(dim="west_east")
+    dLH_from_FLQC = (dQFX_from_FLQC * Lq).rename("dLH_from_FLQC")
+   
+    merge_data = []
+        
+    merge_data.extend([
+        dHFX_approx, dQFX_approx, dLH_approx,
+        dHFX, dQFX, dLH,
+        dHFX_from_FLHC, dQFX_from_FLQC, dLH_from_FLQC,
+
+        dCHm_WNDm_TOAm,
+        CHm_dWNDm_TOAm,
+        CHm_WNDm_dTOAm,
+
+        CHm_dWNDp_dTOAp,
+        WNDm_dCHp_dTOAp,
+        TOAm_dCHp_dWNDp,
+        
+        CHm_dWNDm_dTOAm,
+        WNDm_dCHm_dTOAm,
+        TOAm_dCHm_dWNDm,
+
+        dCH_dWND_dTOA,
+    
+        RES_H,
+
+        #######
+
+        dCQm_WNDm_QOAm,
+        CQm_dWNDm_QOAm,
+        CQm_WNDm_dQOAm,
+
+        CQm_dWNDp_dQOAp,
+        WNDm_dCQp_dQOAp,
+        QOAm_dCQp_dWNDp,
+        
+        CQm_dWNDm_dQOAm,
+        WNDm_dCQm_dQOAm,
+        QOAm_dCQm_dWNDm,
+
+        dCQ_dWND_dQOA,
+    
+        RES_Q,
+ 
+    ])
+
+    return merge_data
+
+
 def genAnalysis_subset(
     input_dir,
     input_dir_base,
@@ -232,6 +511,7 @@ def genAnalysis_subset(
     frames_per_wrfout_file,
     reltime_rng,
     avg_before_analysis,
+    analysis_style,
 ):
 
 
@@ -299,129 +579,20 @@ def genAnalysis_subset(
     ds      = preprocessing(ds, data_interval)
     ds_base = preprocessing(ds_base, data_interval)
 
-    def diffVar(varname, newname=""):
-        da = ds[varname] - ds_base[varname]
 
-        if newname != "":
-            da = da.rename(newname)
+    if analysis_style == "STYLE1":
         
-        return da
-
-
-    dC_H = diffVar("C_H")
-    dC_Q = diffVar("C_Q")
-    dWND = diffVar("WND_sfc")
-    dTOA = diffVar("TOA")
-    dQOA = diffVar("QOA")
+        merge_data = analysisStyle1(ds, ds_base)
    
-
-    #print(dC_H)
-    #print(dTOA)
-    #print(dWND)
-    #print(ds["C_H"])
-    #print(ds["WND_sfc"])
-    #print(ds["TOA"])
-    
-    #HFX_approx2      = (ds["C_H"] * ds["WND_sfc"] * ds["TOA"]).mean(dim="west_east")
-    #HFX_approx2_base = (ds_base["C_H"] * ds_base["WND_sfc"] * ds_base["TOA"]).mean(dim="west_east")
-    #dHFX_approx2 = (HFX_approx2 - HFX_approx2_base).rename("dHFX_approx2") 
-
-
-    dC_H_WND_TOA = (dC_H * ds_base["WND_sfc"] * ds_base["TOA"]).mean(dim="west_east").rename("dC_H_WND_TOA")
-    C_H_dWND_TOA = (ds_base["C_H"] * dWND * ds_base["TOA"]).mean(dim="west_east").rename("C_H_dWND_TOA")
-    C_H_WND_dTOA = (ds_base["C_H"] * ds_base["WND_sfc"] * dTOA).mean(dim="west_east").rename("C_H_WND_dTOA")
-
-    C_H_dWND_dTOA = (ds_base["C_H"] * dWND * dTOA).mean(dim="west_east").rename("C_H_dWND_dTOA")
-    dC_H_WND_dTOA = (dC_H * ds_base["WND_sfc"] * dTOA).mean(dim="west_east").rename("dC_H_WND_dTOA")
-    dC_H_dWND_TOA = (dC_H * dWND * ds_base["TOA"]).mean(dim="west_east").rename("dC_H_dWND_TOA")
-
-    dC_H_dWND_dTOA = (dC_H * dWND * dTOA).mean(dim="west_east").rename("dC_H_dWND_dTOA")
-    
-    
-    dC_Q_WND_QOA = (dC_Q * ds_base["WND_sfc"] * ds_base["QOA"]).mean(dim="west_east").rename("dC_Q_WND_QOA")
-    C_Q_dWND_QOA = (ds_base["C_Q"] * dWND * ds_base["QOA"]).mean(dim="west_east").rename("C_Q_dWND_QOA")
-    C_Q_WND_dQOA = (ds_base["C_Q"] * ds_base["WND_sfc"] * dQOA).mean(dim="west_east").rename("C_Q_WND_dQOA")
-    
-    dC_Q_dWND_QOA = (dC_Q * dWND * ds_base["QOA"]).mean(dim="west_east").rename("dC_Q_dWND_QOA")
-    C_Q_dWND_dQOA = (ds_base["C_Q"] * dWND * dQOA).mean(dim="west_east").rename("C_Q_dWND_dQOA")
-    dC_Q_WND_dQOA = (dC_Q * ds_base["WND_sfc"] * dQOA).mean(dim="west_east").rename("dC_Q_WND_dQOA")
-    
-    dC_Q_dWND_dQOA = (dC_Q * dWND * dQOA).mean(dim="west_east").rename("dC_Q_dWND_dQOA")
-    
-    
-    dHFX_approx = (
-
-          dC_H_WND_TOA
-        + C_H_dWND_TOA
-        + C_H_WND_dTOA
-
-        + C_H_dWND_dTOA
-        + dC_H_WND_dTOA
-        + dC_H_dWND_TOA
-
-        + dC_H_dWND_dTOA
-    
-    ).rename("dHFX_approx")
-
-
-    dQFX_approx = (
+    elif analysis_style == "STYLE2": 
         
-          dC_Q_WND_QOA
-        + C_Q_dWND_QOA
-        + C_Q_WND_dQOA
+        merge_data = analysisStyle2(ds, ds_base)
 
-        + C_Q_dWND_dQOA 
-        + dC_Q_WND_dQOA 
-        + dC_Q_dWND_QOA 
-
-        + dC_Q_dWND_dQOA
-
-    ).rename("dQFX_approx")
-
-    dLH_approx = (Lq * dQFX_approx).rename("dLH_approx")
+    else:
     
-    dHFX = diffVar("HFX", "dHFX").mean(dim="west_east")
-    dQFX = diffVar("QFX", "dQFX").mean(dim="west_east")
-    dLH  = diffVar("LH", "dLH").mean(dim="west_east")
-    
-    dHFX_from_FLHC = diffVar("HFX_from_FLHC", "dHFX_from_FLHC").mean(dim="west_east")
-    dQFX_from_FLQC = diffVar("QFX_from_FLQC", "dQFX_from_FLQC").mean(dim="west_east")
-    dLH_from_FLQC = (dQFX_from_FLQC * Lq).rename("dLH_from_FLQC")
-   
- 
-    #HFX  = ds["HFX"].mean(dim="west_east")
-    #HFX_approx  = ( ds["C_H"] * ds["WND_sfc"] * ds["TOA"] ).mean(dim="west_east").rename("HFX_approx")
-    #HFX_from_FLHC  = ds["HFX_from_FLHC"].mean(dim="west_east")
- 
-    merge_data = []
-        
-    merge_data.extend([
-        dHFX_approx, dQFX_approx, dLH_approx,
-        dHFX, dQFX, dLH,
-        dHFX_from_FLHC, dQFX_from_FLQC, dLH_from_FLQC,
+        raise Exception("Unknown analysis_style = `%s`" % (analysis_style,))
 
-        #dHFX_approx2,
 
-        dC_H_WND_TOA,
-        C_H_dWND_TOA,
-        C_H_WND_dTOA,
-
-        dC_H_dWND_TOA,
-        C_H_dWND_dTOA,
-        dC_H_WND_dTOA,
-        dC_H_dWND_dTOA,
-        
- 
-        dC_Q_WND_QOA,
-        C_Q_dWND_QOA,
-        C_Q_WND_dQOA,       
- 
-        dC_Q_dWND_QOA,
-        C_Q_dWND_dQOA,
-        dC_Q_WND_dQOA,
-        dC_Q_dWND_dQOA,
- 
-    ])
 
     # Adding extra variables
     for varname in [
@@ -465,6 +636,7 @@ if __name__ == "__main__":
     parser.add_argument('--output-count', type=int, help="The numbers of output in a file.", default=1)
     parser.add_argument('--avg-before-analysis', type=str, help="If set true, then the program will average first before analysis. This might affect the correlation terms.", choices=["TRUE", "FALSE"], required=True)
     parser.add_argument('--nproc', type=int, help="Number of parallel CPU.", default=1)
+    parser.add_argument('--analysis-style', type=str, help=".", choices=["STYLE1", "STYLE2"], required=True)
     
     args = parser.parse_args()
 
@@ -550,6 +722,7 @@ if __name__ == "__main__":
                 args.frames_per_wrfout_file,
                 reltime_rngs,
                 avg_before_analysis,
+                args.analysis_style,
             )
         )
     

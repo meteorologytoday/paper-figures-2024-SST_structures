@@ -15,8 +15,8 @@ nproc=1
 proc_cnt=0
 
 target_labs=(
-    lab_FIXEDDOMAIN_SST_sine_WETLWSW
     lab_FIXEDDOMAIN_SST_sine_DRY
+    lab_FIXEDDOMAIN_SST_sine_WETLWSW
 )
 
 bl_schemes=(
@@ -28,7 +28,7 @@ bl_schemes=(
 source 98_trapkill.sh
 
 for dT in 300; do
-for wnm in 004 010 020 ; do #020 ; do
+for wnm in 004 010 ; do #020 ; do
 for U in "20" ; do
 for target_lab in "${target_labs[@]}" ; do
 for _bl_scheme in "${bl_schemes[@]}" ; do

@@ -22,7 +22,7 @@ for hr in 120-240 ; do
 
     mkdir -p $output_dir
 
-    python3 src/plot_comparison_total_flux_new_one_fig.py \
+    python3 src/plot_flux_decomp.py \
         --input-file $input_file \
         --output $output_file \
         --delta-analysis \

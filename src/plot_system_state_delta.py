@@ -91,10 +91,28 @@ def loadData(input_dir):
         beg_time = time_beg,
         end_time = time_end,
         prefix="wrfout_d01_",
+        avg = None, #"ALL",
+        verbose=False,
+        inclusive="both",
+    )
+    ACCRAIN = ds["RAINNC"] + ds["RAINC"]
+
+    PRECIP = ( ACCRAIN.isel(time=-1) - ACCRAIN.isel(time=0) ) / ( time_end - time_beg - wrfout_data_interval ).total_seconds()
+    PRECIP = PRECIP.rename("PRECIP")
+
+
+    ds = wrf_load_helper.loadWRFDataFromDir(
+        wsm, 
+        input_dir,
+        beg_time = time_beg,
+        end_time = time_end,
+        prefix="wrfout_d01_",
         avg = "ALL",
         verbose=False,
         inclusive="both",
     )
+
+
 
     # Compute TKE stuff
     # Bolton (1980)
@@ -103,7 +121,7 @@ def loadData(input_dir):
     QA  = ds["QVAPOR"].isel(bottom_top=0).rename("QA")
     QO = QSFCMR.rename("QO")
 
-    ds = xr.merge([ds, QO, QA])
+    ds = xr.merge([ds, QO, QA, PRECIP])
 
 
     WND10 = ((ds.U10**2 + ds.V10**2)**0.5).rename("WND10")
@@ -274,13 +292,13 @@ import matplotlib.transforms as transforms
 print("Done")
 
 ncol = 1
-nrow = 4
+nrow = 5
 
 w = [6,]
 
 figsize, gridspec_kw = tool_fig_config.calFigParams(
     w = w,
-    h = [4, 4/3, 4/3, 4/3],
+    h = [4, 4/3, 4/3, 4/3, 4/3],
     wspace = 1.0,
     hspace = 1.0,
     w_left = 1.0,
@@ -371,6 +389,12 @@ dT2_mean = np.mean(diff_ds["T2"])
 ax[3, 0].plot(X_sT, diff_ds["TSK"], color='blue', label="$\\delta \\mathrm{SST}$")
 ax[3, 0].plot(X_sT, diff_ds["T2"] - dT2_mean, color='red', label="$\\delta T_{\\mathrm{2m}} - \\delta \\overline{T}_{\\mathrm{2m}}$")
 
+# Precipitation
+PRECIP = diff_ds["PRECIP"]#RAINC"] + diff_ds["RAINNC"]
+PRECIP_mean = np.mean(PRECIP)
+ax[4, 0].plot(X_sT, (PRECIP - PRECIP_mean)*86400, color='black', label="$P$")
+
+
 for i, _ax in enumerate(ax[:, 0]):
     
     _ax.set_xlabel("$x$ [km]")
@@ -392,15 +416,18 @@ thumbnail_numbering = args.thumbnail_numbering[args.thumbnail_skip_part1:]
         
         
 ax[0, 0].set_title("(%s) $\\delta W$ [$\\mathrm{cm} / \\mathrm{s}$]" % (thumbnail_numbering[0],))
-ax[2, 0].set_title("(%s) $\\delta Q_O^* - \\delta \\overline{Q}_O^*$ (blue) and $\\delta Q_A - \\delta \\overline{Q}_A$ (red). $\\left(\\delta \\overline{Q}_O^*, \\delta \\overline{Q}_A \\right) = \\left( %.2f, %.2f \\right)$ g / kg" % (thumbnail_numbering[2], dQO_mean*1e3, dQA_mean*1e3))
-ax[3, 0].set_title("(%s) $\\delta \\mathrm{SST}$ (blue) and $\\delta T_\\mathrm{2m} - \\delta \\overline{T}_\\mathrm{2m}$ (red). $\\delta \\overline{T}_\\mathrm{2m} = %.2f \\, {}^\\circ \\mathrm{C}$" % (thumbnail_numbering[3], dT2_mean))
+ax[2, 0].set_title("(%s) $\\delta Q'_O$ (blue) and $\\delta Q'_A$ (red). $\\left(\\delta \\overline{Q}_O^*, \\delta \\overline{Q}_A \\right) = \\left( %.2f, %.2f \\right)$ g / kg" % (thumbnail_numbering[2], dQO_mean*1e3, dQA_mean*1e3))
+ax[3, 0].set_title("(%s) $\\delta \\mathrm{SST}'$ (blue) and $\\delta T'_\\mathrm{2m}$ (red). $\\delta \\overline{T}_\\mathrm{2m} = %.2f \\, {}^\\circ \\mathrm{C}$" % (thumbnail_numbering[3], dT2_mean))
+
+ax[4, 0].set_title("(%s) $\\delta \\mathrm{PRECIP}'$. $\\delta \\overline{\\mathrm{PRECIP}} = %.2f \\, \\mathrm{mm} / \\mathrm{day}$" % (thumbnail_numbering[4], PRECIP_mean*86400))
 
 #ax[1, 0].legend(loc="upper right")
 ax[1, 0].set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
-ax[1, 0].set_title("(%s) $\\delta \\left|\\overline{U}_\\mathrm{10m}\\right| - \\delta \\overline{ \\left| \\vec{U}_\\mathrm{10m} \\right|}$ (solid), $\\delta U_\\mathrm{10m} - \\delta \\overline{U}_\\mathrm{10m}$ (dashed), $\\delta V_\\mathrm{10m} - \\delta \\overline{V}_\\mathrm{10m}$ (dotted).\n $\\delta \\overline{\\left|\\vec{U}_{\\mathrm{10m}}\\right|} = %.2f \\, \\mathrm{m} / \\mathrm{s}$. $\\left( \\delta \\overline{U}_{\\mathrm{10m}}, \\delta \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right) \\, \\mathrm{m} / \\mathrm{s}$. " % (thumbnail_numbering[1], WND10_mean, U10_mean, V10_mean,))
+ax[1, 0].set_title("(%s) $\\delta \\left|\\vec{U}_\\mathrm{10m}\\right|'$ (solid), $\\delta U'_\\mathrm{10m}$ (dashed), $\\delta V'_\\mathrm{10m}$ (dotted).\n $\\delta \\overline{\\left|\\vec{U}_{\\mathrm{10m}}\\right|} = %.2f \\, \\mathrm{m} / \\mathrm{s}$. $\\left( \\delta \\overline{U}_{\\mathrm{10m}}, \\delta \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right) \\, \\mathrm{m} / \\mathrm{s}$. " % (thumbnail_numbering[1], WND10_mean, U10_mean, V10_mean,))
 
 ax[2, 0].set_ylabel("[ $ \\mathrm{g} \\, / \\, \\mathrm{kg}$ ]", color="black")
 ax[3, 0].set_ylabel("[ $ \\mathrm{K}$ ]", color="black")
+ax[4, 0].set_ylabel("[ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
 
 
 ax[1, 0].set_ylim(args.U10_rng)
