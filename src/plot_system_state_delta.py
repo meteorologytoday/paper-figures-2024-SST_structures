@@ -261,6 +261,9 @@ print("Done loading data.")
 ds = data["ds"]
 ds_ref_stat = data["ds_ref_stat"]
 
+ds_base = data_base["ds"]
+ds_base_ref_stat = data_base["ds_ref_stat"]
+
 diff_ds_ref_stat = data["ds_ref_stat"] - data_base["ds_ref_stat"]
 
 
@@ -365,11 +368,13 @@ cs = ax[0, 0].contour(X_T, Z_T, diff_ds["QVAPOR"] * 1e3, levels=QVAPOR_diff_levs
 plt.clabel(cs)
 
 for _ax in ax[0:1, 0].flatten():
-    _ax.plot(X_sT, ds.PBLH, color="magenta", linestyle="--")
+    _ax.plot(X_sT, ds_base["PBLH"], color="magenta", linestyle=":")
+    _ax.plot(X_sT, ds["PBLH"], color="magenta", linestyle="--")
 
-for _ax in ax[0, 1:]:
-    trans = transforms.blended_transform_factory(_ax.transAxes, _ax.transData)
-    _ax.plot([0, 1], [ds_ref_stat["PBLH"].to_numpy()]*2, color="magenta", linestyle="-.", transform=trans)
+
+#for _ax in ax[0, 1:]:
+#    trans = transforms.blended_transform_factory(_ax.transAxes, _ax.transData)
+#    _ax.plot([0, 1], [ds_ref_stat["PBLH"].to_numpy()]*2, color="magenta", linestyle="-.", transform=trans)
 
 U10_mean = np.mean(diff_ds["U10"])
 V10_mean = np.mean(diff_ds["V10"])
@@ -570,7 +575,9 @@ if args.tke_analysis == "TRUE":
 
 for _ax in ax[0, :]:
     trans = transforms.blended_transform_factory(_ax.transAxes, _ax.transData)
+    _ax.plot([0, 1], [ds_base_ref_stat["PBLH"].to_numpy()]*2, color="magenta", linestyle=":", transform=trans)
     _ax.plot([0, 1], [ds_ref_stat["PBLH"].to_numpy()]*2, color="magenta", linestyle="--", transform=trans)
+
 
 
 for i, _ax in enumerate(ax[0, :]):

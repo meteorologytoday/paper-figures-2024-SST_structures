@@ -29,33 +29,23 @@ svg_stack.py \
     > $fig_dir/merged-exp.svg
 
 echo "Figure 3: Merge snapshots... "
-svg_stack.py \
-    --direction=h \
-    $fig_dir/snapshots_dhr-120/lab_sine_DRY/Lx500_U20_dT300_MYNN25/snapshot-part1_120-240.svg \
-    $fig_dir/snapshots_dhr-120/lab_sine_WETLWSW/Lx500_U20_dT300_MYNN25/snapshot-part1_120-240.svg \
-    > $fig_dir/merged-snapshot_part1.svg
 
-svg_stack.py \
-    --direction=v \
-    $fig_dir/snapshots_dhr-120/lab_sine_DRY/Lx500_U20_dT300_MYNN25/snapshot-part2_120-240.svg \
-    $fig_dir/snapshots_dhr-120/lab_sine_WETLWSW/Lx500_U20_dT300_MYNN25/snapshot-part2_120-240.svg \
-    > $fig_dir/merged-snapshot_part2.svg
+for wnm in 004 010 ; do
+    
+    svg_stack.py \
+        --direction=h \
+        $fig_dir/snapshots_dhr-120/lab_FIXEDDOMAIN_SST_sine_DRY/case_mph-off_wnm${wnm}_U20_dT300_MYNN25/snapshot-part1_120-240.svg \
+        $fig_dir/snapshots_dhr-120/lab_FIXEDDOMAIN_SST_sine_WETLWSW/case_mph-on_wnm${wnm}_U20_dT300_MYNN25/snapshot-part1_120-240.svg \
+        > $fig_dir/merged-snapshot_wnm${wnm}_part1.svg
 
+    svg_stack.py \
+        --direction=v \
+        $fig_dir/snapshots_dhr-120/lab_FIXEDDOMAIN_SST_sine_DRY/case_mph-off_wnm${wnm}_U20_dT300_MYNN25/snapshot-part2_120-240.svg \
+        $fig_dir/snapshots_dhr-120/lab_FIXEDDOMAIN_SST_sine_WETLWSW/case_mph-on_wnm${wnm}_U20_dT300_MYNN25/snapshot-part2_120-240.svg \
+        > $fig_dir/merged-snapshot_wnm${wnm}_part2.svg
 
+done
 
-
-svg_stack.py \
-    --direction=h \
-    $fig_dir/snapshots_dhr-120/lab_sine_DRY/Lx100_U20_dT300_MYNN25/snapshot-part1_120-240.svg \
-    $fig_dir/snapshots_dhr-120/lab_sine_WETLWSW/Lx100_U20_dT300_MYNN25/snapshot-part1_120-240.svg \
-    > $fig_dir/merged-snapshot_100km_part1.svg
-
-
-svg_stack.py \
-    --direction=v \
-    $fig_dir/snapshots_dhr-120/lab_sine_DRY/Lx100_U20_dT300_MYNN25/snapshot-part2_120-240.svg \
-    $fig_dir/snapshots_dhr-120/lab_sine_WETLWSW/Lx100_U20_dT300_MYNN25/snapshot-part2_120-240.svg \
-    > $fig_dir/merged-snapshot_100km_part2.svg
 
 svg_stack.py \
     --direction=v \
