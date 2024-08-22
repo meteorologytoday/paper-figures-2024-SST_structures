@@ -498,7 +498,7 @@ _ax.plot(diff_ds_ref_stat["T"], ref_Z_T, 'k-', label="$\\overline{\\theta}$")
 _ax.plot(diff_ds_ref_stat["THETAV"], ref_Z_T, 'r--', label="$\\overline{\\theta_v}$")
 _ax.set_title("(%s) $ \\delta \\overline{\\theta}$ (-), $\\delta \\overline{\\theta}_v$ (--)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{K}$ ]")
-_ax.set_xlim([-2, 2])
+_ax.set_xlim([-2, 10])
 #_ax.legend(loc="upper right")
 iii += 1
 
@@ -540,7 +540,7 @@ _ax.plot(diff_ds_ref_stat["QVAPOR"] * 1e3, ref_Z_T, color="black")
 
 _ax.set_title("(%s) $\\delta \\overline{Q}_\\mathrm{vapor}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{g} \\, / \\, \\mathrm{kg}$ ]")
-_ax.set_xlim([-5, 5])
+_ax.set_xlim([-1, 1])
 iii += 1
 
 

@@ -15,8 +15,8 @@ nproc=1
 proc_cnt=0
 
 target_labs=(
-    lab_FIXEDDOMAIN_SST_sine_DRY
     lab_FIXEDDOMAIN_SST_sine_WETLWSW
+    lab_FIXEDDOMAIN_SST_sine_DRY
 )
 
 bl_schemes=(
@@ -105,8 +105,8 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
             --Q-rng -3 3 \
             --W-levs "${W_levs[@]}" \
             --SST-rng -5 5 \
-            --U-rng -1 1   \
-            --V-rng -1 1   \
+            --U-rng -1.5 1.5   \
+            --V-rng -1.5 1.5   \
             --x-rng 0 $x_rng        \
             --x-rolling 11          \
             --output1 $output1_name \

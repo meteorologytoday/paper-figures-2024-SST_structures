@@ -6,6 +6,7 @@ import tool_fig_config
 import datetime
 import wrf_load_helper 
 import os
+import wrf_preprocess
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--input-dirs', nargs="+", type=str, help='Input directories.', required=True)
@@ -67,32 +68,16 @@ def loadData(input_dir):
         input_dir,
         beg_time = time_beg,
         end_time = time_end,
-        prefix="analysis_",
-        suffix=".nc",
         avg=None,
         verbose=False,
         inclusive="left",
     )
 
     merge_data = [ds, ]   
- 
-    TTL_RAIN = ds["RAINNC"] + ds["RAINC"] + ds["RAINSH"] + ds["SNOWNC"] + ds["HAILNC"] + ds["GRAUPELNC"]
-    PRECIP = ( TTL_RAIN - TTL_RAIN.shift(time=1) ) / wrfout_data_interval.total_seconds()
-    PRECIP = PRECIP.rename("PRECIP") 
-    TTL_RAIN = TTL_RAIN.rename("TTL_RAIN")
+    merge_data.append(wrf_preprocess.genAnalysis(ds, wsm.data_interval))
 
-    if "QICE_TTL" in ds:   
-        WATER_TTL = ds["QVAPOR_TTL"] + ds["QRAIN_TTL"] + ds["QICE_TTL"] + ds["QSNOW_TTL"] + ds["QCLOUD_TTL"]
-    else:
-        WATER_TTL = ds["QVAPOR_TTL"] + ds["QRAIN_TTL"] + ds["QCLOUD_TTL"]
 
-    dWATER_TTLdt = ( WATER_TTL - WATER_TTL.shift(time=1) ) / wrfout_data_interval.total_seconds()
-    dWATER_TTLdt = dWATER_TTLdt.rename("dWATER_TTLdt") 
-
-    merge_data.append(PRECIP)
-    merge_data.append(TTL_RAIN)
-    merge_data.append(dWATER_TTLdt)
-
+    """ 
     if "ACLHF" in ds: 
 
         if "QFX" in ds:
@@ -108,26 +93,24 @@ def loadData(input_dir):
 
         merge_data.append(WATER_BUDGET_RES)
         merge_data.append(QFX)
-    
-    HFX_res = (ds["HFX_approx"] - ds["HFX"]).rename("HFX_res")
-    LH_res = (ds["LH_approx"] - ds["LH"]).rename("LH_res")
- 
-    #HFX_res = (ds["HFX_from_FLHC"] - ds["HFX"]).rename("HFX_res")
-    #LH_res = (ds["LH_from_FLQC"] - ds["LH"]).rename("LH_res")
-    
-    merge_data.append(HFX_res)
-    merge_data.append(LH_res)
- 
+    """
+
     ds = xr.merge(merge_data)
 
     merge_data = []
-
     for varname in args.varnames:
         if varname == "BLANK":
             continue
         merge_data.append(ds[varname])
-    ds = xr.merge( merge_data ).load()
+
+    ds = xr.merge( merge_data )
+
+    for dim in ["west_east", "west_east_stag",]:
+        if "west_east" in ds.dims:
+            ds = ds.mean(dim=dim)
+
     ds = ds.rolling(time=args.smooth, center=True).mean()
+
 
     return ds
    
@@ -170,7 +153,7 @@ LH_corr_diff_rng = [-1, 15]
 plot_infos = dict(
 
 
-    C_Q_WND_QOA_cx = dict(
+    CQ_WND_QOA_cx = dict(
         factor = 2.5e6,
         label = "$L_Q \\, \\overline{ C'_Q \\, U'_A \\, Q'_{OA} }$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
@@ -178,7 +161,7 @@ plot_infos = dict(
         ylim_diff = LH_corr_diff_rng,
     ),
 
-    WND_QOA_cx_mul_C_Q = dict(
+    WND_QOA_cx_mul_CQ = dict(
         factor = 2.5e6,
         label = "$L_Q \\, \\overline{C}_Q \\, \\overline{ U'_A Q'_{OA} }$",
         label_diff = "$\\delta \\left( L_Q \\, \\overline{C}_Q \\, \\overline{ U'_A Q'_{OA} } \\right)$",
@@ -189,26 +172,26 @@ plot_infos = dict(
 
 
 
-    C_Q_QOA_cx_mul_WND = dict(
+    CQ_QOA_cx_mul_WND = dict(
         factor = 2.5e6,
-        label = "$L_Q \\, \\overline{U}_A \\, \\overline{ C_Q' Q'_{OA} }$",
-        label_diff = "$\\delta \\left( L_Q \\, \\overline{U}_A \\, \\overline{ C_Q' Q'_{OA} }\\right)$",
+        label = "$L_Q \\, \\overline{U}_A \\, \\overline{ CQ' Q'_{OA} }$",
+        label_diff = "$\\delta \\left( L_Q \\, \\overline{U}_A \\, \\overline{ CQ' Q'_{OA} }\\right)$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ylim = LH_corr_rng,
         ylim_diff = LH_corr_diff_rng,
     ),
 
 
-    C_Q_WND_cx_mul_QOA = dict(
+    CQ_WND_cx_mul_QOA = dict(
         factor = 2.5e6,
-        label = "$L_Q \\, \\overline{Q}_{OA} \\, \\overline{ C_Q' U'_A }$",
-        label_diff = "$\\delta \\left( L_Q \\, \\overline{Q}_{OA} \\, \\overline{ C_Q' U'_A } \\right)$",
+        label = "$L_Q \\, \\overline{Q}_{OA} \\, \\overline{ CQ' U'_A }$",
+        label_diff = "$\\delta \\left( L_Q \\, \\overline{Q}_{OA} \\, \\overline{ CQ' U'_A } \\right)$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ylim = LH_corr_rng,
         ylim_diff = LH_corr_diff_rng,
     ),
 
-    C_Q_WND_QOA = dict(
+    CQ_WND_QOA = dict(
         factor = 2.5e6,
         label = "$L_Q \\overline{C}_Q \\, \\overline{U}_A \\, \\overline{Q}_{OA}$",
         label_diff = "$\\delta \\left( L_Q \\overline{C}_Q \\, \\overline{U}_A \\, \\overline{Q}_{OA} \\right)$",
@@ -217,7 +200,7 @@ plot_infos = dict(
         ylim_diff = LH_diff_rng,
     ),
 
-    C_H_WND_TOA = dict(
+    CH_WND_TOA = dict(
         factor = 1.0,
         label = "$\\overline{C}_H \\, \\overline{U}_A \\, \\overline{T}_{OA}$",
         label_diff = "$\\delta \\left( \\overline{C}_H \\, \\overline{U}_A \\, \\overline{T}_{OA} \\right)$",
@@ -227,7 +210,7 @@ plot_infos = dict(
     ),
 
 
-    WND_TOA_cx_mul_C_H = dict(
+    WND_TOA_cx_mul_CH = dict(
         label = "$\\overline{C}_T \\, \\overline{ U'_A T'_{OA} }$",
         label_diff = "$\\delta \\left( \\overline{C}_T \\, \\overline{ U'_A T'_{OA} } \\right)$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
@@ -236,7 +219,7 @@ plot_infos = dict(
     ),
 
 
-    C_H_WND_TOA_cx = dict(
+    CH_WND_TOA_cx = dict(
         label = "$\\overline{ C'_H \\, U'_A \\, T'_{OA} }$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         #ylim = [-0.2 , 3.6,],
@@ -244,9 +227,9 @@ plot_infos = dict(
         ylim_diff = HFX_corr_diff_rng,
     ),
 
-    C_H_TOA_cx_mul_WND = dict(
-        label = "$\\overline{U}_A \\, \\overline{ C_H' T'_{OA} }$",
-        label_diff = "$\\delta \\left( \\overline{U}_A \\, \\overline{ C_H' T'_{OA} } \\right)$",
+    CH_TOA_cx_mul_WND = dict(
+        label = "$\\overline{U}_A \\, \\overline{ CH' T'_{OA} }$",
+        label_diff = "$\\delta \\left( \\overline{U}_A \\, \\overline{ CH' T'_{OA} } \\right)$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         #ylim = [-0.2 , 3.6,],
         ylim = HFX_corr_rng,
@@ -254,9 +237,9 @@ plot_infos = dict(
     ),
 
 
-    C_H_WND_cx_mul_TOA = dict(
-        label = "$\\overline{T}_{OA} \\, \\overline{ C_H' U'_A }$",
-        label_diff = "$\\delta \\left( \\overline{T}_{OA} \\, \\overline{ C_H' U'_A } \\right)$",
+    CH_WND_cx_mul_TOA = dict(
+        label = "$\\overline{T}_{OA} \\, \\overline{ CH' U'_A }$",
+        label_diff = "$\\delta \\left( \\overline{T}_{OA} \\, \\overline{ CH' U'_A } \\right)$",
         unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         #ylim = [-0.2 , 3.6,],
         ylim = HFX_corr_rng,
@@ -431,18 +414,18 @@ plot_infos = dict(
 
 
 
-    WND_m = dict(
-        label = "$\\overline{U} $",
+    WND_sfc = dict(
+        label = "$\\overline{\\left|\\vec{U}\\right|} $",
         unit = "$ \\mathrm{m} / \\mathrm{s} $",
         ylim = [10, 20],
     ),
 
-    C_H_m = dict(
+    CH = dict(
         label = "$\\overline{C}_H $",
         unit = "$ \\mathrm{J} \\, / \\, \\mathrm{K} \\, / \\, \\mathrm{m}^3 $",
     ),
 
-    C_Q_m = dict(
+    CQ = dict(
         label = "$\\overline{C}_Q $",
         unit = "$ \\mathrm{kg} \\, / \\, \\mathrm{m}^3 $",
     ),

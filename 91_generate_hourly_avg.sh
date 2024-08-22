@@ -2,13 +2,15 @@
 
 source 00_setup.sh
 
+source 98_trapkill.sh
+
 input_dirs=""
 exp_names=""
 
 output_dir_root=$preavg_dir
 
-hrs_beg=$(( 24 * 5 ))
-hrs_end=$(( 24 * 11 ))
+hrs_beg=$(( 24 * 0 ))
+hrs_end=$(( 24 * 16 ))
 
 
 time_avg_interval=60   # minutes
@@ -20,14 +22,12 @@ nproc=10
 #nproc=1
 
 
-trap "exit" INT TERM
-trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
 
 #for _bl_scheme in MYJ YSU MYNN25 ; do
 for _bl_scheme in MYNN25 ; do
 
-#for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW lab_FIXEDDOMAIN_SST_sine_DRY ; do 
-for target_lab in lab_FIXEDDOMAIN_SST_sine_DRY ; do 
+for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW lab_FIXEDDOMAIN_SST_sine_DRY ; do 
+#for target_lab in lab_FIXEDDOMAIN_SST_sine_DRY ; do 
 #for target_lab in lab_sine_WETLWSW ; do 
 for wnm in 000 010 004 005 007 010 020 040 ; do
 for dT in 000 300 050 100 150 200 250 ; do
@@ -40,6 +40,14 @@ for U in 20 ; do
     elif [[ "$target_lab" =~ "DRY" ]]; then
         mph=off
     fi
+
+    if [[ "$wnm" = "000" ]] && [[ "$dT" != "000" ]] ; then
+
+        continue
+
+    fi
+
+
 
     casename="case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}"
     input_dir_root=$data_sim_dir/$target_lab
