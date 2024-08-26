@@ -19,11 +19,13 @@ plot_infos = dict(
     TA = dict(
         selector = dict(bottom_top=0),
         wrf_varname = "T",
+        label = "$\\Theta_{A}$",
         unit = "K",
     ), 
 
     TOA = dict(
         wrf_varname = "TOA",
+        label = "$\\Theta_{OA}$",
         unit = "K",
     ), 
 
@@ -31,6 +33,7 @@ plot_infos = dict(
     UA = dict(
         selector = dict(bottom_top=0),
         wrf_varname = "U",
+        label = "$U_{A}$",
         unit = "$ \\mathrm{m} \\, / \\, \\mathrm{s}$",
     ), 
 
@@ -52,9 +55,12 @@ if __name__ == "__main__":
     parser.add_argument('--frames-per-wrfout-file', type=int, help='Number of frames in each wrfout file.', required=True)
     parser.add_argument('--number-of-harmonics', type=int, help='Number of frames in each wrfout file.', default=None)
     parser.add_argument('--varnames', type=str, nargs="+", help="Varnames to do the analysis.", required=True)
+    parser.add_argument('--linestyles', type=str, nargs="+", help="Varnames to do the analysis.", required=True)
+    parser.add_argument('--linecolors', type=str, nargs="+", help="Varnames to do the analysis.", required=True)
     parser.add_argument('--thumbnail-numbering', type=str, default="abcdefghijklmn")
     parser.add_argument('--labeled-wvlen', type=int, nargs="*", help='Number of frames in each wrfout file.', default=[])
     parser.add_argument('--wrfout-suffix', type=str, default="")
+    parser.add_argument('--magnitude-threshold', type=float, help='The threshold that set direction=0 if magnitude is too low.', default=1e-5)
 
 
 
@@ -73,6 +79,13 @@ if __name__ == "__main__":
             len(labels),
             len(args.input_dirs),
         ))
+
+    if len(args.linestyles) != len(args.input_dirs):
+        raise Exception("Length of `--linestyles` (%d) does not equal to length of `--input-dirs` (%d). " % (
+            len(args.linestyles),
+            len(args.input_dirs),
+        ))
+
 
         
     same_base = False
@@ -261,6 +274,9 @@ if __name__ == "__main__":
             _dd = _d[varname]
             plot_info = plot_infos[varname]
 
+            linestyle = args.linestyles[i]
+            linecolor = args.linecolors[i]
+
             varname_label = plot_info["label"] if "label" in plot_info else varname
             unit = plot_info["unit"] if "unit" in plot_info else "???"
  
@@ -278,17 +294,19 @@ if __name__ == "__main__":
             #imag = np.imag(sp)
             ang = np.angle(sp, deg=True)
             mag = np.abs(sp)
-            
-            _ax1.plot( x, mag, label=labels[i], marker='o')
-            _ax2.plot( x, ang, label=labels[i], marker='o')
+           
+            ang[mag < args.magnitude_threshold] = 0.0
+ 
+            _ax1.plot( x, mag, label=labels[i], marker='o', linestyle=linestyle, color=linecolor)
+            _ax2.plot( x, ang, label=labels[i], marker='o', linestyle=linestyle, color=linecolor)
             
 
             if i == 0: 
                 _ax1.set_ylabel("[ %s ]" % (unit,))
-                _ax1.set_title("(%s) %s Magnitude of Fourier Coefficient" % (args.thumbnail_numbering[thumbnail_cnt], varname_label))
+                _ax1.set_title("(%s) $\\delta$%s Magnitude of Fourier Coefficient" % (args.thumbnail_numbering[thumbnail_cnt], varname_label))
                 thumbnail_cnt += 1
 
-                _ax2.set_title("(%s) %s Phase Angle of Fourier Coefficient" % (args.thumbnail_numbering[thumbnail_cnt], varname_label))
+                _ax2.set_title("(%s) $\\delta$%s Phase Angle of Fourier Coefficient" % (args.thumbnail_numbering[thumbnail_cnt], varname_label))
                 thumbnail_cnt += 1
 
 
@@ -301,11 +319,11 @@ if __name__ == "__main__":
     for _ax in ax.flatten():
         _ax.grid()
         _ax.set_xticks(label_freq, labels=label_wvlen_text)
-        _ax.legend()
         _ax.set_xlabel("Wavelength [ km ]")
         
     for _ax in ax[:, 1].flatten():
         _ax.set_ylim([-180, 180])
+        _ax.set_yticks(np.arange(-180, 210, 30))
         _ax.set_ylabel("[ deg ]")
                 
 

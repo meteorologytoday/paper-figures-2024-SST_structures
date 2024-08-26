@@ -20,9 +20,6 @@ fixed_dSST=300
 
 
 for fixed_param in dSST wnm ; do
-#for fixed_param in dSST ; do
-#for fixed_param in wnm ; do
-
 
     echo "Fixed Param: ${fixed_param}"
     output_root=$gendata_dir/dF_collected_flux/fixed_${fixed_param}
@@ -46,8 +43,8 @@ for fixed_param in dSST wnm ; do
 
 
 
-    #for _bl_scheme in YSU MYJ MYNN25 ; do
-    for _bl_scheme in MYNN25 ; do #MYJ YSU; do
+    for _bl_scheme in YSU MYJ MYNN25 ; do
+    #for _bl_scheme in YSU ; do
     for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do       
         
         if [[ "$target_lab" =~ "SEMIWET" ]]; then
@@ -86,7 +83,6 @@ for fixed_param in dSST wnm ; do
                 --exp-beg-time 2001-01-01T00:00:00 \
                 --wrfout-data-interval 3600 \
                 --frames-per-wrfout-file 12 \
-                --no-extra-variable
             "
         fi
 

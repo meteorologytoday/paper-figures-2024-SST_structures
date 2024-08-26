@@ -20,6 +20,7 @@ parser.add_argument('--ref-exp-order', type=int, help='The reference case (start
 parser.add_argument('--LH-rng', type=float, nargs=2, help='The values of the LH range', default=[None, None])
 parser.add_argument('--HFX-rng', type=float, nargs=2, help='The values of the HFX range', default=[None, None])
 parser.add_argument('--spacing', type=float, help='The small separation between different variables', default=0.02)
+parser.add_argument('--domain-size', type=float, help='The length of domain used with wnm', default=None)
 
 
 
@@ -29,6 +30,9 @@ print(args)
 
 ncols = 2
 nrows = 1
+        
+if args.varying_param == "wnm" and args.domain_size is None:
+    raise Exception("If the varying parameter is `wnm`, `--domain-size` must be provided.")
 
 sel_dict = {}
 for i, param in enumerate(args.fixed_params):
@@ -473,7 +477,7 @@ for k, heatflx in enumerate(["Sensible", "Latent"]):
             #print("COORD_X = ", _coord_x)
     
         elif args.varying_param == "wnm":
-            _coord_x = 2000.0 / coord_x + args.spacing * i
+            _coord_x = args.domain_size / coord_x + args.spacing * i
 
 
         if args.delta_analysis:

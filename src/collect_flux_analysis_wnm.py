@@ -76,9 +76,13 @@ if __name__ == "__main__":
                     inclusive="left",
                 )
 
+                if "PRECIP" in _ds:
+                    print("Drop PRECIP")
+                    _ds = _ds.drop_vars(["PRECIP",])
+
                 if not args.no_extra_variable:
-                    PRECIP = _ds["RAINNC"] + _ds["RAINC"] + _ds["RAINSH"] + _ds["SNOWNC"] + _ds["HAILNC"] + _ds["GRAUPELNC"]
-                    PRECIP = ( PRECIP - PRECIP.shift(time=1) ) / wrfout_data_interval.total_seconds()
+                    print("Compute PRECIP")
+                    PRECIP = ( _ds["TTL_RAIN"] - _ds["TTL_RAIN"].shift(time=1) ) / wrfout_data_interval.total_seconds()
                     PRECIP = PRECIP.rename("PRECIP")
                    
                     _ds = xr.merge([

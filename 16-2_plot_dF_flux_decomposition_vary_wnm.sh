@@ -33,6 +33,7 @@ for hr in 120-240 ; do
         --HFX-rng -5 10 \
         --spacing 4.0 \
         --thumbnail-numbering cdefg \
+        --domain-size $Lx \
         --no-display
             
 done

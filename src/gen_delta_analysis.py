@@ -199,10 +199,10 @@ def preprocessing(
 
 
     TTL_RAIN = ds["RAINNC"] + ds["RAINC"] #+ ds["RAINSH"] + ds["SNOWNC"] + ds["HAILNC"] + ds["GRAUPELNC"]
-    PRECIP = ( TTL_RAIN - TTL_RAIN.shift(time=1) ) / data_interval.total_seconds()
-    
+
+
     TTL_RAIN = TTL_RAIN.rename("TTL_RAIN")
-    PRECIP = PRECIP.rename("PRECIP") 
+
 
 
     #if "QICE_TTL" in ds:   
@@ -213,7 +213,7 @@ def preprocessing(
     #dWATER_TTLdt = ( WATER_TTL - WATER_TTL.shift(time=1) ) / wrfout_data_interval.total_seconds()
     #dWATER_TTLdt = dWATER_TTLdt.rename("dWATER_TTLdt") 
 
-    merge_data.append(PRECIP)
+
     merge_data.append(TTL_RAIN)
     #merge_data.append(dWATER_TTLdt)
 
@@ -596,7 +596,7 @@ def genAnalysis_subset(
 
     # Adding extra variables
     for varname in [
-        "IWV", "IVT", "IVT_x", "IVT_y", "TTL_RAIN", "PRECIP", 
+        "IWV", "IVT", "IVT_x", "IVT_y", "TTL_RAIN", 
     ]:
         
         diff_da = ds[varname] - ds_base[varname] 

@@ -28,7 +28,7 @@ bl_schemes=(
 source 98_trapkill.sh
 
 for dT in 300; do
-for wnm in 004 ; do #020 ; do
+for wnm in 010 004 ; do #020 ; do
 for U in "20" ; do
 for target_lab in "${target_labs[@]}" ; do
 for _bl_scheme in "${bl_schemes[@]}" ; do
