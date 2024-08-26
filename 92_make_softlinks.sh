@@ -9,7 +9,7 @@ source 00_setup.sh
 
 
 for _bl_scheme in MYNN25 MYJ YSU ; do
-for target_lab in  lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do 
+for target_lab in  lab_FIXEDDOMAIN_SST_sine_DRY lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do 
 for U in 20 ; do
 for wnm in 004 005 007 010 020 040 ; do
 
@@ -33,7 +33,7 @@ for wnm in 004 005 007 010 020 040 ; do
 
         if [ -e "$softlink_casename" ] ; then
             echo "The softlink $softlink_casename already exists. Remove this..."
-            rm $softlink_casename
+            rm -rf $softlink_casename
         fi
 
         echo "Make softlink $softlink_casename => $actual_casename"

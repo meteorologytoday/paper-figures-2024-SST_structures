@@ -47,17 +47,22 @@ for wnm in 004 010 ; do
 done
 
 
+
+# Merging the phase diagram
+echo "Figure 6: Merge snapshots... "
 svg_stack.py \
     --direction=v \
-    $fig_dir/flux_decomposition_varying_dSST/lab_sine_WETLWSW/flux_decomposition_onefig_varying_dSST_MYNN25_hr120-240.svg  \
-    $fig_dir/flux_decomposition_varying_Lx/lab_sine_WETLWSW/flux_decomposition_onefig_varying_Lx_MYNN25_hr120-240.svg \
-    > $fig_dir/merged-flux_decomposition_varying_dSST_Lx_MYNN25_hr120-240.svg
+    $fig_dir/dF_flux_decomposition_varying_dSST/lab_FIXEDDOMAIN_SST_sine_WETLWSW/dF_flux_decomposition_onefig_varying_dSST_MYNN25_hr120-240.svg \
+    $fig_dir/dF_flux_decomposition_varying_wnm/lab_FIXEDDOMAIN_SST_sine_WETLWSW/dF_flux_decomposition_onefig_varying_wnm_MYNN25_hr120-240.svg \
+    > $fig_dir/merged-dF_flux_decomposition_varying_dSST_wnm_MYNN25_hr120-240.svg
+
 
 svg_stack.py \
     --direction=v \
     $fig_dir/snapshots_vertical_timeseries_WRFV4.6.0_avg-60/VERTICAL_avg-TRUE_Lx500_MYJ_120-240.svg \
     $fig_dir/snapshots_vertical_timeseries_WRFV4.6.0_avg-60/VERTICAL_avg-TRUE_Lx500_YSU_120-240.svg \
     > $fig_dir/merged-snapshots_vertical_timeseres_MYJ-YSU_120-240.svg
+
 
 
 svg_stack.py \
@@ -70,10 +75,10 @@ svg_stack.py \
 name_pairs=(
     sst_analysis_20170101.svg                                                                     fig01
     merged-exp.svg                                                                                fig02
-    merged-snapshot_part1.svg                                                                     fig03
-    merged-snapshot_part2.svg                                                                     fig04
-    timeseries_WRFV4.6.0/SIMPLE_avg-TRUE_Lx500_MYNN25_timeseries_smooth-25_000-360.svg            fig05
-    merged-flux_decomposition_varying_dSST_Lx_MYNN25_hr120-240.svg                                fig06
+    merged-snapshot_wnm004_part1.svg                                                              fig03
+    merged-snapshot_wnm004_part2.svg                                                              fig04
+    timeseries/timeseries_wnm004_MYNN25_timeseries_smooth-25_000-360.svg                          fig05
+    merged-dF_flux_decomposition_varying_dSST_wnm_MYNN25_hr120-240.svg                            fig06
     merged-AR_dependency_hr120-240.svg                                                            fig07 
     snapshots_vertical_timeseries_WRFV4.6.0_avg-60/VERTICAL_rel_avg-TRUE_Lx100_120-240.svg        fig08
     snapshots_vertical_timeseries_WRFV4.6.0_avg-60/VERTICAL_abs_avg-TRUE_Lx100_120-240.svg        fig09

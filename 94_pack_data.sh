@@ -19,9 +19,9 @@ fixed_wnm=004
 fixed_dSST=300
 
 
-#for fixed_param in dSST wnm ; do
+for fixed_param in dSST wnm ; do
 #for fixed_param in dSST ; do
-for fixed_param in wnm ; do
+#for fixed_param in wnm ; do
 
 
     echo "Fixed Param: ${fixed_param}"

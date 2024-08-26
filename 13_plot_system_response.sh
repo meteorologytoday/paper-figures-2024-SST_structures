@@ -28,7 +28,7 @@ bl_schemes=(
 source 98_trapkill.sh
 
 for dT in 300; do
-for wnm in 004 010 ; do #020 ; do
+for wnm in 004 ; do #020 ; do
 for U in "20" ; do
 for target_lab in "${target_labs[@]}" ; do
 for _bl_scheme in "${bl_schemes[@]}" ; do
@@ -40,18 +40,19 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
         mph=off
         #W_levs=( -10 10 11 )
         W_levs=( -2 2 21 )
-        thumbnail_skip_part1=4
+        thumbnail_skip_part1=5
         thumbnail_skip_part2=6
     elif [[ "$target_lab" =~ "WET" ]]; then
         mph=on
         #W_levs=( -50 50 11 )
         W_levs=( -2 2 21 )
-        thumbnail_skip_part1=4
-        thumbnail_skip_part2=6
+        thumbnail_skip_part1=7
+        thumbnail_skip_part2=5
     elif [[ "$target_lab" =~ "DRY" ]]; then
         mph=off
         W_levs=( -2 2 21 )
     fi
+        
 
     if [[ "$_bl_scheme" = "MYNN25" ]]; then
         tke_analysis=TRUE 
@@ -101,10 +102,11 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
             --extra-title "$extra_title"         \
             --z1-rng 0 5000 \
             --z2-rng 0 5000 \
-            --U10-rng -5 5 \
+            --U10-rng -3 3 \
             --Q-rng -3 3 \
             --W-levs "${W_levs[@]}" \
             --SST-rng -5 5 \
+            --TKE-rng -1 1     \
             --U-rng -1.5 1.5   \
             --V-rng -1.5 1.5   \
             --x-rng 0 $x_rng        \

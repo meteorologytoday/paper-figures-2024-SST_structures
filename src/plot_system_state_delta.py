@@ -4,7 +4,8 @@ import numpy as np
 import argparse
 import tool_fig_config
 import datetime
-import wrf_load_helper 
+import wrf_load_helper
+import wrf_preprocess 
 import cmocean
 from shared_constants import *
 
@@ -85,7 +86,7 @@ def loadData(input_dir):
 
 
 
-    ds = wrf_load_helper.loadWRFDataFromDir(
+    ds_nonavg = wrf_load_helper.loadWRFDataFromDir(
         wsm, 
         input_dir,
         beg_time = time_beg,
@@ -95,10 +96,16 @@ def loadData(input_dir):
         verbose=False,
         inclusive="both",
     )
-    ACCRAIN = ds["RAINNC"] + ds["RAINC"]
 
-    PRECIP = ( ACCRAIN.isel(time=-1) - ACCRAIN.isel(time=0) ) / ( time_end - time_beg - wrfout_data_interval ).total_seconds()
-    PRECIP = PRECIP.rename("PRECIP")
+
+   
+    ds_extra = wrf_preprocess.genAnalysis(ds_nonavg, wsm.data_interval)
+    
+    ds_extra = xr.merge( [ds_extra[varname] for varname in ["PRECIP", "TA", "QA", "TO", "QO", "VOR10", "DIV10", "DIV", "VOR", "U_T", "WND"]] ).mean(dim="time")
+     
+    #ACCRAIN = ds["RAINNC"] + ds["RAINC"]
+
+    #PRECIP = ( ACCRAIN.isel(time=-1) - ACCRAIN.isel(time=0) ) / ( time_end - time_beg - wrfout_data_interval ).total_seconds()
 
 
     ds = wrf_load_helper.loadWRFDataFromDir(
@@ -112,16 +119,7 @@ def loadData(input_dir):
         inclusive="both",
     )
 
-
-
-    # Compute TKE stuff
-    # Bolton (1980)
-    E1 = 0.6112e3 * np.exp(17.67 * (ds["TSK"] - 273.15) / (ds["TSK"] - 29.65) )
-    QSFCMR = 0.62175 * E1 / (ds["PSFC"] - E1)
-    QA  = ds["QVAPOR"].isel(bottom_top=0).rename("QA")
-    QO = QSFCMR.rename("QO")
-
-    ds = xr.merge([ds, QO, QA, PRECIP])
+    ds = xr.merge([ds, ds_extra])
 
 
     WND10 = ((ds.U10**2 + ds.V10**2)**0.5).rename("WND10")
@@ -178,6 +176,13 @@ def loadData(input_dir):
     Z_T = (Z_W[1:, :] + Z_W[:-1, :]) / 2
 
 
+    Z_W_idx_1km = np.argmin(np.abs(ref_Z_W.to_numpy() - 1e3)) 
+    Z_W_idx_500m = np.argmin(np.abs(ref_Z_W.to_numpy() - 500.0)) 
+
+    Z_T_idx_1km = np.argmin(np.abs(ref_Z_T.to_numpy() - 1e3)) 
+    Z_T_idx_500m = np.argmin(np.abs(ref_Z_T.to_numpy() - 500.0)) 
+
+
     theta = ds.T + 300.0
     zeta = (ds.V[:, 1:] - ds.V[:, :-1]) / ds.DX
 
@@ -207,10 +212,10 @@ def loadData(input_dir):
     NVfreq = ((g0 / 300.0 * ddz(ds_ref_stat["THETAV"]))**0.5).rename("NVfreq")
     Nfreq = ((g0 / 300.0 * ddz(ds_ref_stat["THETA"]))**0.5).rename("Nfreq")
 
-    WND = (ds_ref_stat["U"]**2 +  ds_ref_stat["V"]**2)**0.5
-    WND = WND.rename("WND")
+    #WND = (ds_ref_stat["U"]**2 +  ds_ref_stat["V"]**2)**0.5
+    #WND = WND.rename("WND")
 
-    ds_ref_stat = xr.merge([ds_ref_stat, NVfreq, Nfreq, WND])
+    ds_ref_stat = xr.merge([ds_ref_stat, NVfreq, Nfreq])
 
     if args.x_rolling != 1:
 
@@ -244,6 +249,11 @@ def loadData(input_dir):
             X_W = X_W,
             Z_W = Z_W,
             Z_T = Z_T,
+            Z_W_idx_1km = Z_W_idx_1km,
+            Z_W_idx_500m = Z_W_idx_500m,
+            Z_T_idx_1km = Z_T_idx_1km,
+            Z_T_idx_500m = Z_T_idx_500m,
+
         )
     )
 
@@ -295,13 +305,13 @@ import matplotlib.transforms as transforms
 print("Done")
 
 ncol = 1
-nrow = 5
+nrow = 7
 
 w = [6,]
 
 figsize, gridspec_kw = tool_fig_config.calFigParams(
     w = w,
-    h = [4, 4/3, 4/3, 4/3, 4/3],
+    h = [4,] + [4/3,] * 4 + [4/3] * 2,
     wspace = 1.0,
     hspace = 1.0,
     w_left = 1.0,
@@ -330,6 +340,21 @@ else:
     fig.suptitle(args.overwrite_title)
 
 
+thumbnail_numberings = args.thumbnail_numbering[args.thumbnail_skip_part1:]
+ax_cnt = 0
+
+def nextAxes():
+
+    global ax_cnt 
+
+    _ax = ax[ax_cnt, 0]
+    thumbnail_numbering = thumbnail_numberings[ax_cnt]
+    
+    ax_cnt += 1
+
+    return _ax, thumbnail_numbering
+
+
 u_levs = np.linspace(-1, 1, 11)
 v_levs = np.linspace(-1, 1, 11)
 w_levs = np.linspace(args.W_levs[0], args.W_levs[1], int(args.W_levs[2]))
@@ -354,50 +379,157 @@ cs = ax[0, 0].contour(X_W, Z_W, ds.W * 1e2, levels=w_levs, colors="black")
 plt.clabel(cs)
 """
 
+_ax, _thumbnail_numbering = nextAxes()
+
 # Version 2: shading = W, contour = TKE
-mappable1 = ax[0, 0].contourf(X_W, Z_W, diff_ds["W"]*1e2, levels=w_levs, cmap=cmap_diverge, extend="both")
-cax = tool_fig_config.addAxesNextToAxes(fig, ax[0, 0], "right", thickness=0.03, spacing=0.05)
+mappable1 = _ax.contourf(X_W, Z_W, diff_ds["W"]*1e2, levels=w_levs, cmap=cmap_diverge, extend="both")
+cax = tool_fig_config.addAxesNextToAxes(fig, _ax, "right", thickness=0.03, spacing=0.05)
 cbar0 = plt.colorbar(mappable1, cax=cax, orientation="vertical")
 
 if has_TKE:
     tke = diff_ds["QKE"].to_numpy() / 2
-    cs = ax[0, 0].contour(X_T, Z_T, tke, levels=tke_levs, colors="black")
+    cs = _ax.contour(X_T, Z_T, tke, levels=tke_levs, colors="black")
     plt.clabel(cs)
 
-cs = ax[0, 0].contour(X_T, Z_T, diff_ds["QVAPOR"] * 1e3, levels=QVAPOR_diff_levs, colors="yellow")
+cs = _ax.contour(X_T, Z_T, diff_ds["QVAPOR"] * 1e3, levels=QVAPOR_diff_levs, colors="yellow")
 plt.clabel(cs)
 
-for _ax in ax[0:1, 0].flatten():
-    _ax.plot(X_sT, ds_base["PBLH"], color="magenta", linestyle=":")
-    _ax.plot(X_sT, ds["PBLH"], color="magenta", linestyle="--")
+_ax.plot(X_sT, ds_base["PBLH"], color="magenta", linestyle=":")
+_ax.plot(X_sT, ds["PBLH"], color="magenta", linestyle="--")
 
 
-#for _ax in ax[0, 1:]:
-#    trans = transforms.blended_transform_factory(_ax.transAxes, _ax.transData)
-#    _ax.plot([0, 1], [ds_ref_stat["PBLH"].to_numpy()]*2, color="magenta", linestyle="-.", transform=trans)
+_ax.set_title("(%s) $\\delta W$ [$\\mathrm{cm} / \\mathrm{s}$]" % (_thumbnail_numbering,))
+
+# Begin the line plots
+
+
+# Thumbnail: The 500m layer U V
+
+_ax, _thumbnail_numbering = nextAxes()
+
+U500 = ds["U_T"].isel(bottom_top=data["Z_T_idx_500m"]) - ds_base["U_T"].isel(bottom_top=data_base["Z_T_idx_500m"])
+V500 = ds["V"].isel(bottom_top=data["Z_T_idx_500m"]) - ds_base["V"].isel(bottom_top=data_base["Z_T_idx_500m"])
+WND500 = ds["WND"].isel(bottom_top=data["Z_T_idx_500m"]) - ds_base["WND"].isel(bottom_top=data_base["Z_T_idx_500m"])
+
+U500_mean = np.mean(U500)
+V500_mean = np.mean(V500)
+WND500_mean = np.mean(WND500)
+
+_ax.plot(X_sT, U500 - U500_mean, color="black", linestyle="--")
+_ax.plot(X_sT, V500 - V500_mean, color="black", linestyle=":")
+_ax.plot(X_sT, WND500 - WND500_mean, color="black", linestyle="-")
+
+_ax.set_title("(%s) $\\delta \\left|\\vec{U}_\\mathrm{500m}\\right|'$ (-), $\\delta U'_\\mathrm{500m}$ (--), and $\\delta V'_\\mathrm{500m}$ (:).\n $\\delta \\overline{\\left|\\vec{U}_{\\mathrm{500m}}\\right|} = %.2f \\, \\mathrm{m} / \\mathrm{s}$. $\\left( \\delta \\overline{U}_{\\mathrm{500m}}, \\delta \\overline{V}_{\\mathrm{500m}}\\right) = \\left( %.2f, %.2f \\right) \\, \\mathrm{m} / \\mathrm{s}$. " % (_thumbnail_numbering, WND500_mean, U500_mean, V500_mean,))
+_ax.set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
+_ax.set_ylim(args.U10_rng)
+
+# Thumbnail: The 10m layer U V
+_ax, _thumbnail_numbering = nextAxes()
 
 U10_mean = np.mean(diff_ds["U10"])
 V10_mean = np.mean(diff_ds["V10"])
 WND10_mean = np.mean(diff_ds["WND10"])
-ax[1, 0].plot(X_sT, diff_ds["U10"] - U10_mean, color="gray", linestyle="dashed", label="$\\delta U_{\\mathrm{10m}} - \\delta \\overline{U}_{\\mathrm{10m}}$")
-ax[1, 0].plot(X_sT, diff_ds["V10"] - V10_mean, color="gray", linestyle="dotted", label="$\\delta V_{\\mathrm{10m}} - \\delta \\overline{V}_{\\mathrm{10m}}$")
-ax[1, 0].plot(X_sT, diff_ds["WND10"] - WND10_mean, color="black", linestyle="solid",   label="$\\left| \\vec{U}_{\\mathrm{10m}} \\right| - \\delta \\overline{\\left| \\vec{U}_{\\mathrm{10m}} \\right|}$")
+_ax.plot(X_sT, diff_ds["U10"] - U10_mean, color="black", linestyle="--", label="$\\delta U_{\\mathrm{10m}} - \\delta \\overline{U}_{\\mathrm{10m}}$")
+_ax.plot(X_sT, diff_ds["V10"] - V10_mean, color="black", linestyle=":", label="$\\delta V_{\\mathrm{10m}} - \\delta \\overline{V}_{\\mathrm{10m}}$")
+_ax.plot(X_sT, diff_ds["WND10"] - WND10_mean, color="black", linestyle="-",   label="$\\left| \\vec{U}_{\\mathrm{10m}} \\right| - \\delta \\overline{\\left| \\vec{U}_{\\mathrm{10m}} \\right|}$")
 
-# vapor
-dQO_mean = np.mean(diff_ds["QO"])
-dQA_mean = np.mean(diff_ds["QA"])
-ax[2, 0].plot(X_sT, ( diff_ds["QO"] - dQO_mean ) * 1e3, color='blue', label="$\\delta Q_O^* - \\delta \\overline{Q}^*_O$")
-ax[2, 0].plot(X_sT, ( diff_ds["QA"] - dQA_mean ) * 1e3, color='red',  label="$\\delta Q_A - \\delta \\overline{Q}_A$")
+_ax.set_title("(%s) $\\delta \\left|\\vec{U}_\\mathrm{10m}\\right|'$ (-), $\\delta U'_\\mathrm{10m}$ (--), and $\\delta V'_\\mathrm{10m}$ (:).\n $\\delta \\overline{\\left|\\vec{U}_{\\mathrm{10m}}\\right|} = %.2f \\, \\mathrm{m} / \\mathrm{s}$. $\\left( \\delta \\overline{U}_{\\mathrm{10m}}, \\delta \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right) \\, \\mathrm{m} / \\mathrm{s}$. " % (_thumbnail_numbering, WND10_mean, U10_mean, V10_mean,))
+_ax.set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
+_ax.set_ylim(args.U10_rng)
 
-# SST
-dT2_mean = np.mean(diff_ds["T2"])
-ax[3, 0].plot(X_sT, diff_ds["TSK"], color='blue', label="$\\delta \\mathrm{SST}$")
-ax[3, 0].plot(X_sT, diff_ds["T2"] - dT2_mean, color='red', label="$\\delta T_{\\mathrm{2m}} - \\delta \\overline{T}_{\\mathrm{2m}}$")
 
-# Precipitation
+
+# Thumbnail: The 500m layer DIV VOR
+_ax, _thumbnail_numbering = nextAxes()
+
+DIV500 = ds["DIV"].isel(bottom_top=data["Z_T_idx_500m"]) - ds_base["DIV"].isel(bottom_top=data_base["Z_T_idx_500m"])
+VOR500 = ds["VOR"].isel(bottom_top=data["Z_T_idx_500m"]) - ds_base["VOR"].isel(bottom_top=data_base["Z_T_idx_500m"])
+
+DIV500_mean = np.mean(DIV500)
+VOR500_mean = np.mean(VOR500)
+
 PRECIP = diff_ds["PRECIP"]#RAINC"] + diff_ds["RAINNC"]
 PRECIP_mean = np.mean(PRECIP)
-ax[4, 0].plot(X_sT, (PRECIP - PRECIP_mean)*86400, color='black', label="$P$")
+
+_ax_twinx = _ax.twinx()
+
+_ax.plot(X_sT, ( DIV500 - DIV500_mean ) * 1e5, color="black", linestyle="-")
+_ax.plot(X_sT, ( VOR500 - VOR500_mean ) * 1e5, color="black", linestyle="--")
+
+_ax_twinx.plot(X_sT, (PRECIP - PRECIP_mean)*86400, color='black', linestyle=":", label="$P$")
+
+_ax.set_title("(%s) $\\delta \\mathrm{D}'_\\mathrm{500m}$ (-), $\\delta \\zeta'_\\mathrm{500m}$ (--), and $\\delta P'$ (:).\n$\\left(\\delta \\overline{D}_\\mathrm{500m}, \\delta \\overline{\\zeta}_\\mathrm{500m} \\right) = \\left( %.2f, %.2f \\right) \\times 10^{-5} \\, \\mathrm{s}^{-1}$. $\\delta \\overline{P} = %.2f \\, \\mathrm{mm} / \\mathrm{day} $ " % (_thumbnail_numbering, DIV500_mean*1e5, VOR500_mean*1e5, PRECIP_mean*86400))
+
+_ax.set_ylabel("[ $ \\times 10^{-5} \\, \\mathrm{s}^{-1}$ ]", color="black")
+_ax_twinx.set_ylabel("$\\delta P'$ [ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
+_ax.set_ylim([-6, 6])
+_ax_twinx.set_ylim([-1.5, 1.5])
+
+
+# Thumbnail: The 10m layer VOR DIV
+_ax, _thumbnail_numbering = nextAxes()
+
+VOR10_mean = np.mean(diff_ds["VOR10"])
+DIV10_mean = np.mean(diff_ds["DIV10"])
+
+PRECIP = diff_ds["PRECIP"]#RAINC"] + diff_ds["RAINNC"]
+PRECIP_mean = np.mean(PRECIP)
+
+_ax_twinx = _ax.twinx()
+
+_ax.plot(X_sU[:-1], ( diff_ds["DIV10"] - DIV10_mean ) * 1e5, color="black", linestyle="-")
+_ax.plot(X_sU[:-1], ( diff_ds["VOR10"] - VOR10_mean ) * 1e5, color="black", linestyle="--")
+_ax_twinx.plot(X_sT, (PRECIP - PRECIP_mean)*86400, color='black', linestyle=":", label="$P$")
+
+_ax.set_title("(%s) $\\delta \\mathrm{D}'_\\mathrm{10m}$ (-), $\\delta \\zeta'_\\mathrm{10m}$ (--), and $\\delta P'$ (:).\n$\\left(\\delta \\overline{D}_\\mathrm{10m}, \\delta \\overline{\\zeta}_\\mathrm{10m} \\right) = \\left( %.2f, %.2f \\right) \\times 10^{-5} \\, \\mathrm{s}^{-1}$. $\\delta \\overline{P} = %.2f \\, \\mathrm{mm} / \\mathrm{day} $ " % (_thumbnail_numbering, DIV10_mean*1e5, VOR10_mean*1e5, PRECIP_mean*86400))
+
+_ax.set_ylabel("[ $ \\times 10^{-5} \\, \\mathrm{s}^{-1}$ ]", color="black")
+_ax_twinx.set_ylabel("$\\delta P'$ [ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
+_ax.set_ylim([-6, 6])
+_ax_twinx.set_ylim([-1.5, 1.5])
+
+"""
+# Precipitation
+_ax, _thumbnail_numbering = nextAxes()
+PRECIP = diff_ds["PRECIP"]#RAINC"] + diff_ds["RAINNC"]
+PRECIP_mean = np.mean(PRECIP)
+
+
+W1km = ds["W"].isel(bottom_top_stag=data["Z_W_idx_1km"]) - ds_base["W"].isel(bottom_top_stag=data_base["Z_W_idx_1km"])
+W1km_mean = np.mean(W1km)
+
+_ax.plot(X_sT, (PRECIP - PRECIP_mean)*86400, color='black', label="$P$")
+_ax_twinx = _ax.twinx()
+_ax_twinx.plot(X_sT, (W1km - W1km_mean) * 1e2, color='black', linestyle="--")
+
+_ax.set_title("(%s) $\\delta P'$ (-) and $\\delta W'_{\\mathrm{1km}}$ (--). $\\delta \\overline{P} = %.2f \\, \\mathrm{mm} / \\mathrm{day}$, $\\delta \\overline{W}_\\mathrm{1km} = %.1f \\, \\mathrm{cm} / \\mathrm{s}$" % (_thumbnail_numbering, PRECIP_mean*86400, W1km_mean*1e2))
+
+_ax.set_ylabel("$\\delta P'$ [ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
+_ax_twinx.set_ylabel("$\\delta W'$ [ $ \\mathrm{cm} \\, / \\, \\mathrm{s} $ ]", color="black")
+"""
+
+# vapor
+_ax, _thumbnail_numbering = nextAxes()
+dQO_mean = np.mean(diff_ds["QO"])
+dQA_mean = np.mean(diff_ds["QA"])
+_ax.plot(X_sT, ( diff_ds["QO"] - dQO_mean ) * 1e3, color='black', linestyle="-", label="$\\delta Q_O^* - \\delta \\overline{Q}^*_O$")
+_ax.plot(X_sT, ( diff_ds["QA"] - dQA_mean ) * 1e3, color='black', linestyle="--",  label="$\\delta Q_A - \\delta \\overline{Q}_A$")
+_ax.set_title("(%s) $\\delta Q'_O$ (-) and $\\delta Q'_A$ (--). $\\left(\\delta \\overline{Q}_O^*, \\delta \\overline{Q}_A \\right) = \\left( %.2f, %.2f \\right)$ g / kg" % (_thumbnail_numbering, dQO_mean*1e3, dQA_mean*1e3))
+_ax.set_ylabel("[ $ \\mathrm{g} \\, / \\, \\mathrm{kg}$ ]", color="black")
+_ax.set_ylim(args.Q_rng)
+
+
+# SST
+_ax, _thumbnail_numbering = nextAxes()
+dTA_mean = np.mean(diff_ds["TA"])
+dTO_mean = np.mean(diff_ds["TO"])
+_ax.plot(X_sT, diff_ds["TO"] - dTO_mean, color='black', linestyle="-")
+_ax.plot(X_sT, diff_ds["TA"] - dTA_mean, color='black', linestyle="--")
+
+_ax.set_title("(%s) $\\delta \\Theta^*'_O$ (-) and $\\delta \\Theta'_A$ (--). $ \\left( \\delta \\overline{\\Theta}_O, \\delta \\overline{\\Theta}_A \\right) = \\left( %.2f, %.2f \\right) \\, {}^\\circ \\mathrm{C}$" % (_thumbnail_numbering, dTO_mean, dTA_mean))
+_ax.set_ylabel("[ $ \\mathrm{K}$ ]", color="black")
+_ax.set_ylim(args.SST_rng)
+
 
 
 for i, _ax in enumerate(ax[:, 0]):
@@ -416,28 +548,8 @@ for i, _ax in enumerate(ax[:, 0]):
     _ax.grid(visible=True, which='major', axis='both')
         
 
-thumbnail_numbering = args.thumbnail_numbering[args.thumbnail_skip_part1:]
-
-        
-        
-ax[0, 0].set_title("(%s) $\\delta W$ [$\\mathrm{cm} / \\mathrm{s}$]" % (thumbnail_numbering[0],))
-ax[2, 0].set_title("(%s) $\\delta Q'_O$ (blue) and $\\delta Q'_A$ (red). $\\left(\\delta \\overline{Q}_O^*, \\delta \\overline{Q}_A \\right) = \\left( %.2f, %.2f \\right)$ g / kg" % (thumbnail_numbering[2], dQO_mean*1e3, dQA_mean*1e3))
-ax[3, 0].set_title("(%s) $\\delta \\mathrm{SST}'$ (blue) and $\\delta T'_\\mathrm{2m}$ (red). $\\delta \\overline{T}_\\mathrm{2m} = %.2f \\, {}^\\circ \\mathrm{C}$" % (thumbnail_numbering[3], dT2_mean))
-
-ax[4, 0].set_title("(%s) $\\delta \\mathrm{PRECIP}'$. $\\delta \\overline{\\mathrm{PRECIP}} = %.2f \\, \\mathrm{mm} / \\mathrm{day}$" % (thumbnail_numbering[4], PRECIP_mean*86400))
-
-#ax[1, 0].legend(loc="upper right")
-ax[1, 0].set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
-ax[1, 0].set_title("(%s) $\\delta \\left|\\vec{U}_\\mathrm{10m}\\right|'$ (solid), $\\delta U'_\\mathrm{10m}$ (dashed), $\\delta V'_\\mathrm{10m}$ (dotted).\n $\\delta \\overline{\\left|\\vec{U}_{\\mathrm{10m}}\\right|} = %.2f \\, \\mathrm{m} / \\mathrm{s}$. $\\left( \\delta \\overline{U}_{\\mathrm{10m}}, \\delta \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right) \\, \\mathrm{m} / \\mathrm{s}$. " % (thumbnail_numbering[1], WND10_mean, U10_mean, V10_mean,))
-
-ax[2, 0].set_ylabel("[ $ \\mathrm{g} \\, / \\, \\mathrm{kg}$ ]", color="black")
-ax[3, 0].set_ylabel("[ $ \\mathrm{K}$ ]", color="black")
-ax[4, 0].set_ylabel("[ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
 
 
-ax[1, 0].set_ylim(args.U10_rng)
-ax[2, 0].set_ylim(args.Q_rng)
-ax[3, 0].set_ylim(args.SST_rng)
 
 if args.output1 != "":
     print("Saving output: ", args.output1)
@@ -451,15 +563,15 @@ if not args.no_display:
 
 print("Generating vertical profile")
 
-ncol = 4
+ncol = 5
 nrow = 1
 
-w = [1.5, 1.5, 1.5, 1.5]
+w = [1.5, 1.5, 1.5, 1.5, 1.5]
 
-if args.tke_analysis == "TRUE":
+#if args.tke_analysis == "TRUE":
 
-    ncol += 2 
-    w = w + [1, 2,]
+#    ncol += 2 
+#    w = w + [1, 2,]
 
 figsize, gridspec_kw = tool_fig_config.calFigParams(
     w = w,
@@ -514,11 +626,11 @@ iii += 1
 
 # U, V
 _ax = ax[0, iii]
-_ax.plot(diff_ds_ref_stat["WND"], ref_Z_T, linestyle="solid", color="black")
-_ax.plot(diff_ds_ref_stat["U"], ref_Z_T, linestyle="dashed", color="blue")#, ref_Z_T)
-_ax.plot(diff_ds_ref_stat["V"], ref_Z_T, linestyle="dotted", color="red")#, ref_Z_T)
+_ax.plot(diff_ds_ref_stat["WND"], ref_Z_T, linestyle="-", color="black")
+_ax.plot(diff_ds_ref_stat["U"], ref_Z_T, linestyle="--", color="blue")#, ref_Z_T)
+_ax.plot(diff_ds_ref_stat["V"], ref_Z_T, linestyle=":", color="red")#, ref_Z_T)
 
-_ax.set_title("(%s) $\\delta \\left| \\overline{\\vec{U}} \\right|$ (-), $\\delta \\overline{U}$ (--), $\\delta \\overline{V}$ (..)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+_ax.set_title("(%s) $\\delta \\overline{ \\left| \\vec{U} \\right| }$ (-), $\\delta \\overline{U}$ (--), $\\delta \\overline{V}$ (..)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
 _ax.set_xlim(args.U_rng)
 iii += 1
@@ -534,6 +646,17 @@ _ax.set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
 _ax.set_xlim(args.U_rng)
 iii += 1
 """
+
+# TKE
+_ax = ax[0, iii]
+_ax.plot(diff_ds_ref_stat["QKE"]/2, ref_Z_T, color="black")
+_ax.set_title("(%s) $\\delta \\overline{\\mathrm{TKE}}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+_ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
+_ax.set_xlim(args.TKE_rng)
+iii+=1
+
+
+
 # Q
 _ax = ax[0, iii]
 _ax.plot(diff_ds_ref_stat["QVAPOR"] * 1e3, ref_Z_T, color="black")
@@ -558,14 +681,14 @@ if args.tke_analysis == "TRUE":
     _ax = ax[0, iii]
 
     _ax.set_title("(%s) TKE budget" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
-    _ax.plot(diff_ds_ref_stat["DQKE_T"] * 1e1 / 2, ref_Z_T,   color="black", linestyle='solid', label="$10 \\times \\partial q / \\partial t$")
-    _ax.plot(diff_ds_ref_stat["QSHEAR_T"]/2, ref_Z_T, color="red", linestyle='solid',   label="$q_{sh}$")
-    _ax.plot(diff_ds_ref_stat["QBUOY_T"]/2, ref_Z_T,  color="blue", linestyle='solid',  label="$q_{bu}$")
-    _ax.plot(diff_ds_ref_stat["QWT_T"]/2 , ref_Z_T,    color="red", linestyle='dashed',  label="$q_{vt}$")
-    _ax.plot(diff_ds_ref_stat["QDISS_T"]/2, ref_Z_T,  color="blue", linestyle='dashed', label="$q_{ds}$")
-    _ax.plot(diff_ds_ref_stat["QRES_T"]/2, ref_Z_T,   color="#aaaaaa", linestyle='dashed',label="$res$")
+    _ax.plot(diff_ds_ref_stat["DQKE_T"] * 1e1 / 2, ref_Z_T,   color="black", linestyle='-', label="$10 \\times \\partial q / \\partial t$")
+    _ax.plot(diff_ds_ref_stat["QSHEAR_T"]/2, ref_Z_T, color="red", linestyle='-',   label="$q_{sh}$")
+    _ax.plot(diff_ds_ref_stat["QBUOY_T"]/2, ref_Z_T,  color="blue", linestyle='-',  label="$q_{bu}$")
+    _ax.plot(diff_ds_ref_stat["QWT_T"]/2 , ref_Z_T,    color="red", linestyle='--',  label="$q_{vt}$")
+    _ax.plot(diff_ds_ref_stat["QDISS_T"]/2, ref_Z_T,  color="blue", linestyle='--', label="$q_{ds}$")
+    _ax.plot(diff_ds_ref_stat["QRES_T"]/2, ref_Z_T,   color="#aaaaaa", linestyle='--',label="$res$")
 
-    #_ax.plot(ds_ref_stat["QWT_T"]/2 + ds_ref_stat["QADV_T"]/2, ref_Z_T,    color="red", linestyle='dashed',  label="$q_{vt} + q_{adv}$")
+    #_ax.plot(ds_ref_stat["QWT_T"]/2 + ds_ref_stat["QADV_T"]/2, ref_Z_T,    color="red", linestyle='--',  label="$q_{vt} + q_{adv}$")
 
     _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
     _ax.set_xlim(args.DTKE_rng)

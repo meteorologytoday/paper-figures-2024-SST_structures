@@ -20,9 +20,9 @@ mkdir -p $fig_dir
 
 plot_codes=(
 
-#    $sh 11_plot_ocean_SST_analysis.sh                   "BLANK"
-#    $sh 12_plot_sounding.sh                             "BLANK"
-#    $sh 13_plot_system_response.sh                      "BLANK"
+    $sh 11_plot_ocean_SST_analysis.sh                   "BLANK"
+    $sh 12_plot_sounding.sh                             "BLANK"
+    $sh 13_plot_system_response.sh                      "BLANK"
     $sh 14_plot_timeseries_see_steady_state.sh          "BLANK"
 )
 

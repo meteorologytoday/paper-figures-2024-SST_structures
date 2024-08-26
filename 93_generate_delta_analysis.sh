@@ -8,7 +8,7 @@ exp_names=""
 
 
 hrs_beg=$(( 24 * 5 ))
-hrs_end=$(( 24 * 10 ))
+hrs_end=$(( 24 * 11 ))
 
 
 time_avg_interval=60   # minutes
@@ -31,11 +31,10 @@ for analysis_style in STYLE1 ; do
 
 
     for avg_before_analysis in "TRUE" ; do
-    for _bl_scheme in MYNN25 ; do # MYJ YSU ; do
-    #for target_lab in  lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do 
-    for target_lab in  lab_FIXEDDOMAIN_SST_sine_DRY ; do 
+    for _bl_scheme in MYNN25  MYJ YSU ; do
+    for target_lab in  lab_FIXEDDOMAIN_SST_sine_WETLWSW lab_FIXEDDOMAIN_SST_sine_DRY; do 
 
-    for wnm in 004 000 005 007 010 020 040 ; do
+    for wnm in 000 004 005 007 010 020 040 ; do
 
         if [ "$wnm" = "004" ]; then
 

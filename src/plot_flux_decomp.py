@@ -53,79 +53,80 @@ if args.delta_analysis:
     plot_infos = dict(
 
 
-        dC_H_WND_TOA = dict(
+        dCH_WND_TOA = dict(
             label = "$\\overline{ \\delta C_H \\, U_A \\, \\Theta_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ),
 
-        C_H_dWND_TOA = dict(
+        CH_dWND_TOA = dict(
             label = "$\\overline{ C_H \\, \\delta U_A \\, \\Theta_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ),
 
-        C_H_WND_dTOA = dict(
+        CH_WND_dTOA = dict(
             label = "$\\overline{ C_H \\, U_A \\,  \\delta \\Theta_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ),
 
-        C_H_dWND_dTOA = dict(
+        CH_dWND_dTOA = dict(
             label = "$\\overline{ C_H \\, \\delta U_A \\, \\delta \\Theta_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ),
 
-        dC_H_WND_dTOA = dict(
+        dCH_WND_dTOA = dict(
             label = "$\\overline{ \\delta C_H \\, U_A \\, \\delta \\Theta_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ),
 
-        dC_H_dWND_TOA = dict(
+        dCH_dWND_TOA = dict(
             label = "$\\overline{ \\delta C_H \\, \\delta U_A \\, \\Theta_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ),
 
-        dC_H_dWND_dTOA = dict(
+        dCH_dWND_dTOA = dict(
             label = "$\\overline{ \\delta C_H \\, \\delta U_A \\, \\delta \\Theta_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ),
 
 
-        dC_Q_WND_QOA = dict(
+        dCQ_WND_QOA = dict(
             factor = 2.5e6,
             label = "$\\overline{ \\delta C_Q \\, U_A \\, Q_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ),
 
-        C_Q_dWND_QOA = dict(
+        CQ_dWND_QOA = dict(
             factor = 2.5e6,
             label = "$\\overline{ C_Q \\, \\delta U_A \\, Q_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ),
 
-        C_Q_WND_dQOA = dict(
+        CQ_WND_dQOA = dict(
             factor = 2.5e6,
             label = "$\\overline{ C_Q \\, U_A \\,  \\delta Q_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ),
 
-        C_Q_dWND_dQOA = dict(
+        CQ_dWND_dQOA = dict(
             factor = 2.5e6,
             label = "$\\overline{ C_Q \\, \\delta U_A \\, \\delta Q_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ),
 
-        dC_Q_WND_dQOA = dict(
+
+        dCQ_WND_dQOA = dict(
             factor = 2.5e6,
             label = "$\\overline{ \\delta C_Q \\, U_A \\, \\delta Q_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ),
 
-        dC_Q_dWND_QOA = dict(
+        dCQ_dWND_QOA = dict(
             factor = 2.5e6,
             label = "$\\overline{ \\delta C_Q \\, \\delta U_A \\, Q_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
         ),
 
-        dC_Q_dWND_dQOA = dict(
+        dCQ_dWND_dQOA = dict(
             factor = 2.5e6,
             label = "$\\overline{ \\delta C_Q \\, \\delta U_A \\, \\delta Q_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
@@ -171,7 +172,7 @@ else:
     plot_infos = dict(
 
 
-        C_Q_WND_QOA_cx = dict(
+        CQ_WND_QOA_cx = dict(
             factor = 2.5e6,
             label = "$L_Q \\, \\overline{ C'_Q \\, U'_A \\, Q'_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
@@ -187,7 +188,7 @@ else:
 
 
 
-        C_Q_QOA_cx_mul_WND = dict(
+        CQ_QOA_cx_mul_WND = dict(
             factor = 2.5e6,
             label = "$L_Q \\, \\overline{U}_A \\, \\overline{ C_Q' Q'_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
@@ -195,21 +196,21 @@ else:
         ),
 
 
-        C_Q_WND_cx_mul_QOA = dict(
+        CQ_WND_cx_mul_QOA = dict(
             factor = 2.5e6,
             label = "$L_Q \\, \\overline{Q}_{OA} \\, \\overline{ C_Q' U'_A }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
             
         ),
 
-        C_Q_WND_QOA = dict(
+        CQ_WND_QOA = dict(
             factor = 2.5e6,
             label = "$L_Q \\overline{C}_Q \\, \\overline{U}_A \\, \\overline{Q}_{OA}$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
             
         ),
 
-        C_H_WND_TOA = dict(
+        CQ_WND_TOA = dict(
             factor = 1.0,
             label = "$\\overline{C}_H \\, \\overline{U}_A \\, \\overline{T}_{OA}$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
@@ -224,14 +225,14 @@ else:
         ),
 
 
-        C_H_WND_TOA_cx = dict(
+        CQ_WND_TOA_cx = dict(
             label = "$\\overline{ C'_H \\, U'_A \\, T'_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
             #
             
         ),
 
-        C_H_TOA_cx_mul_WND = dict(
+        CQ_TOA_cx_mul_WND = dict(
             label = "$\\overline{U}_A \\, \\overline{ C_H' T'_{OA} }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
             #
@@ -239,7 +240,7 @@ else:
         ),
 
 
-        C_H_WND_cx_mul_TOA = dict(
+        CQ_WND_cx_mul_TOA = dict(
             label = "$\\overline{T}_{OA} \\, \\overline{ C_H' U'_A }$",
             unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
             #
@@ -340,7 +341,7 @@ else:
             
         ),
 
-        C_H_m = dict(
+        CQ_m = dict(
             label = "$\\overline{C_H} $",
             unit = "$ \\mathrm{m} / \\mathrm{s} $",
         ),
@@ -404,15 +405,15 @@ for k, heatflx in enumerate(["Sensible", "Latent"]):
     if args.delta_analysis:
 
         varnames = dict(
-            Sensible = ["dHFX", "dC_H_WND_TOA", "C_H_dWND_TOA", "C_H_WND_dTOA", "C_H_dWND_dTOA", "dC_H_WND_dTOA", "dC_H_dWND_TOA", "dC_H_dWND_dTOA",],
-            Latent   = ["dLH", "dC_Q_WND_QOA", "C_Q_dWND_QOA", "C_Q_WND_dQOA", "C_Q_dWND_dQOA", "dC_Q_WND_dQOA", "dC_Q_dWND_QOA", "dC_Q_dWND_dQOA",],
+            Sensible = ["dHFX", "dCH_WND_TOA", "CH_dWND_TOA", "CH_WND_dTOA", "CH_dWND_dTOA", "dCH_WND_dTOA", "dCH_dWND_TOA", "dCH_dWND_dTOA",],
+            Latent   = ["dLH", "dCQ_WND_QOA", "CQ_dWND_QOA", "CQ_WND_dQOA", "CQ_dWND_dQOA", "dCQ_WND_dQOA", "dCQ_dWND_QOA", "dCQ_dWND_dQOA",],
         )[heatflx]
 
 
     else:
         varnames = dict(
-            Sensible = ["HFX", "C_H_WND_TOA", "WND_TOA_cx_mul_C_H", "C_H_TOA_cx_mul_WND", "C_H_WND_cx_mul_TOA"],
-            Latent   = ["LH",  "C_Q_WND_QOA", "WND_QOA_cx_mul_C_Q", "C_Q_QOA_cx_mul_WND", "C_Q_WND_cx_mul_QOA"],
+            Sensible = ["HFX", "CQ_WND_TOA", "WND_TOA_cx_mul_C_H", "CQ_TOA_cx_mul_WND", "CQ_WND_cx_mul_TOA"],
+            Latent   = ["LH",  "CQ_WND_QOA", "WND_QOA_cx_mul_C_Q", "CQ_QOA_cx_mul_WND", "CQ_WND_cx_mul_QOA"],
         )[heatflx]
 
     if args.varying_param == "dSST":

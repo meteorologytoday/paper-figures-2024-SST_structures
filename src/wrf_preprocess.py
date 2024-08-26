@@ -18,6 +18,7 @@ def genAnalysis(
     X_sT = (X_sU[1:] + X_sU[:-1]) / 2
     X_T = np.repeat(np.reshape(X_sT, (1, -1)), [Nz,], axis=0)
     X_W = np.repeat(np.reshape(X_sT, (1, -1)), [Nz+1,], axis=0)
+    dX_sT = ref_ds.DX * np.arange(Nx)
 
     Z_W = (ref_ds.PHB + ref_ds.PH) / 9.81
     Z_T = (Z_W[1:, :] + Z_W[:-1, :]) / 2
@@ -43,7 +44,8 @@ def genAnalysis(
     dT = (np.amax(ds["TSK"].to_numpy()) - np.amin(ds["TSK"].to_numpy())) / 2 
 
     TA = ( 300.0 + ds["T"].isel(bottom_top=0) ).rename("TA")
-    TOA    = ( ds["TSK"] * (PRES1000hPa/SFC_PRES)**R_over_cp - TA ).rename("TOA")
+    TO = (ds["TSK"] * (PRES1000hPa/SFC_PRES)**R_over_cp).rename("TO")
+    TOA    = ( TO - TA ).rename("TOA")
 
     #  e1=svp1*exp(svp2*(tgdsa(i)-svpt0)/(tgdsa(i)-svp3)) 
 
@@ -55,16 +57,14 @@ def genAnalysis(
     QSFCMR = (287/461.6) * E1 / (SFC_PRES - E1)
     
     QA  = ds["QVAPOR"].isel(bottom_top=0).rename("QA")
+    QO  = QSFCMR.rename("QO")
 
-    QOA = QSFCMR - ds["QVAPOR"].isel(bottom_top=0)
+    QOA = QO - QA
     #QOA = xr.where(QOA > 0, QOA, 0.0)
     QOA = QOA.rename("QOA")
  
     #merge_data.append(WIND10)
-    merge_data.append(TA)
-    merge_data.append(QA)
-    merge_data.append(TOA)
-    merge_data.append(QOA)
+    merge_data.extend([TO, TA, TOA, QO, QA, QOA,])
 
     V_T = ds["V"]
     
@@ -121,6 +121,38 @@ def genAnalysis(
     merge_data.append(PRECIP)
     merge_data.append(TTL_RAIN)
     #merge_data.append(dWATER_TTLdt)
+
+
+    DIV10 = ( ( ds["U10"].roll(west_east=-1) - ds["U10"] ) / ds.DX ).rename("DIV10")
+    VOR10 = ( ( ds["V10"].roll(west_east=-1) - ds["V10"] ) / ds.DX ).rename("VOR10")
+    merge_data.append(DIV10)
+    merge_data.append(VOR10)
+
+
+    DIV = xr.zeros_like(ds["T"]).rename("DIV")
+    tmp = ( ds["U"].roll(west_east_stag=-1) - ds["U"] ) / ds.DX
+    tmp = tmp.isel(west_east_stag=slice(0, -1))
+    DIV[:] = tmp[:]
+
+    VOR = xr.zeros_like(ds["V"]).rename("VOR")
+    tmp = ( ds["V"] - ds["V"].roll(west_east=1) ) / ds.DX
+    tmp = (tmp.roll(west_east=-1) + tmp ) / 2.0
+    VOR[:] = tmp[:]
+
+    merge_data.append(DIV)
+    merge_data.append(VOR)
+
+    U_T = xr.zeros_like(ds["T"]).rename("U_T")
+    tmp = (ds["U"].roll(west_east_stag=-1) + ds["U"] ) / 2.0
+    tmp = tmp.isel(west_east_stag=slice(0, -1))
+    U_T[:] = tmp[:]
+
+    WND = ( U_T**2 + ds["V"]**2 )**0.5
+    WND = WND.rename("WND")
+
+    merge_data.append(U_T)
+    merge_data.append(WND)
+
 
     new_ds = xr.merge(merge_data)
 
