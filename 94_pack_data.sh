@@ -15,7 +15,7 @@ hrs_end=$(( 24 * 10 ))
 analysis_root=$gendata_dir/delta_analysis_style-STYLE1
 
 
-fixed_wnm=004
+fixed_wnm=010
 fixed_dSST=300
 
 

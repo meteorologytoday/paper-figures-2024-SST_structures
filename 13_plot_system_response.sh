@@ -27,7 +27,7 @@ bl_schemes=(
 
 source 98_trapkill.sh
 
-for dT in 300; do
+for dT in 100; do
 for wnm in 010 004 ; do #020 ; do
 for U in "20" ; do
 for target_lab in "${target_labs[@]}" ; do
@@ -69,7 +69,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
     fi
 
 
-    tke_analysis=FALSE
+    part2_tke_analysis=FALSE
 
     input_dir=$gendata_dir/preavg/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}
     output_dir=$output_fig_dir/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}
@@ -78,7 +78,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
 
     mkdir -p $output_dir
 
-    x_rng=$( python3 -c "print(\"%.3f\" % ( $Lx / float('${wnm}'.lstrip('0')) , ))" )
+    part1_x_rng=$( python3 -c "print(\"%.3f\" % ( $Lx / float('${wnm}'.lstrip('0')) , ))" )
 
 
     for beg_day in "${beg_days[@]}"; do
@@ -91,32 +91,85 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
         extra_title=""
 
         extra_title="${exp_name}${_bl_scheme}."
- 
-        python3 src/plot_system_state_delta.py  \
+
+        if [ "$dT" == 300 ] ; then
+            part1_U10_rng=(-3 3)
+            part1_U500_rng=(-3 3)
+            part1_DIVVOR10_rng=(-6 6)
+            part1_DIVVOR500_rng=(-6 6)
+            part1_PRECIP_rng=(-1.2 1.2)
+            part1_Q_rng=(-3 3)
+            part1_SST_rng=(-4 4)
+            part1_W_levs=(-8 8 17)
+            part1_TKE_levs=(-1 1 11)
+
+            part2_THETA_rng=(-2 10)
+            part2_Nfreq_rng=(-1.5 1.5)
+            part2_TKE_rng=(-1 1)
+            part2_DTKE_rng=(-1 1)
+            part2_U_rng=(-1.5 1.5)
+            part2_Q_rng=(-1 1)
+  
+        elif [ "$dT" == 100 ] ; then
+            part1_U10_rng=(-2 2)
+            part1_U500_rng=(-1 1)
+            part1_DIVVOR10_rng=(-5 5)
+            part1_DIVVOR500_rng=(-2 2)
+            part1_PRECIP_rng=(-0.5 0.5)
+            part1_Q_rng=(-1 1)
+            part1_SST_rng=(-1.5 1.5)
+            part1_W_levs=(-1.4 1.4 15)
+            part1_TKE_levs=(-1 1 11)
+
+            part2_THETA_rng=(-2 10)
+            part2_Nfreq_rng=(-1.5 1.5)
+            part2_TKE_rng=(-1 1)
+            part2_DTKE_rng=(-1 1)
+            part2_U_rng=(-1.5 1.5)
+            part2_Q_rng=(-1 1)
+  
+        else
+
+            echo "ERROR: unspecified dT: $dT"
+            exit 1
+
+        fi 
+
+
+        eval "python3 src/plot_system_state_delta.py  \
             --input-dir $input_dir  \
             --input-dir-base $input_dir_base  \
-            --exp-beg-time "2001-01-01 00:00:00" \
+            --exp-beg-time '2001-01-01 00:00:00' \
             --wrfout-data-interval 3600          \
             --frames-per-wrfout-file 12          \
             --time-rng $(( $hrs_beg * 60 )) $(( $hrs_end * 60 ))  \
-            --extra-title "$extra_title"         \
-            --z1-rng 0 5000 \
-            --z2-rng 0 5000 \
-            --U10-rng -3 3 \
-            --Q-rng -3 3 \
-            --W-levs "${W_levs[@]}" \
-            --SST-rng -5 5 \
-            --TKE-rng -1 1     \
-            --U-rng -1.5 1.5   \
-            --V-rng -1.5 1.5   \
-            --x-rng 0 $x_rng        \
-            --x-rolling 11          \
+            --extra-title '$extra_title'         \
+            --part1-z-rng 0 5000 \
+            --part2-z-rng 0 5000 \
+            --part1-U10-rng ${part1_U10_rng[@]} \
+            --part1-U500-rng ${part1_U500_rng[@]} \
+            --part1-DIVVOR500-rng ${part1_DIVVOR500_rng[@]} \
+            --part1-DIVVOR10-rng ${part1_DIVVOR10_rng[@]} \
+            --part1-PRECIP-rng ${part1_PRECIP_rng[@]} \
+            --part1-Q-rng ${part1_Q_rng[@]} \
+            --part1-SST-rng ${part1_SST_rng[@]} \
+            --part1-W-levs ${part1_W_levs[@]} \
+            --part1-TKE-levs ${part1_TKE_levs[@]} \
+            --part2-THETA-rng ${part2_THETA_rng[@]} \
+            --part2-Nfreq-rng ${part2_Nfreq_rng[@]} \
+            --part2-TKE-rng ${part2_TKE_rng[@]} \
+            --part2-DTKE-rng ${part2_DTKE_rng[@]} \
+            --part2-U-rng ${part2_U_rng[@]} \
+            --part2-Q-rng ${part2_Q_rng[@]} \
+            --part1-x-rng 0 $part1_x_rng        \
+            --part1-x-rolling 11          \
             --output1 $output1_name \
             --output2 $output2_name \
             --thumbnail-skip-part1 $thumbnail_skip_part1 \
             --thumbnail-skip-part2 $thumbnail_skip_part2 \
-            --tke-analysis $tke_analysis \
-            --no-display &
+            --part2-tke-analysis $part2_tke_analysis \
+            --no-display 
+        " &
 
 
 

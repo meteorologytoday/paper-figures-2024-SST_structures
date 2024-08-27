@@ -2,28 +2,30 @@
 
 source 00_setup.sh
 
-output_dir=$fig_dir/spectral_analysis
+
 
 time_avg_interval=60   # minutes
-
 
 hrs_beg=$(( 24 * 5 ))
 hrs_end=$(( 24 * 10 ))
 
-mkdir -p $output_dir
-    
+
+thumbnail_skip=0
+for tracking_wnm in 1 ; do
 #for bl_scheme in MYNN25 MYJ YSU; do
 for bl_scheme in MYNN25 ; do
-for target_lab in lab_FIXEDDOMAIN_SST_sine_DRY lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do
+for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW lab_FIXEDDOMAIN_SST_sine_DRY ; do
+
+    output_dir=$fig_dir/spectral_analysis_tracking_wnm${tracking_wnm}
+    mkdir -p $output_dir
     
     input_dirs_base=""
     input_dirs=""
     labels=""
-
+    wnms=""
     for Ug in 20 ; do
-    for wnm in 010 ; do
-    for dT in 100 200 300; do
-    #for dT in 300; do
+    for wnm in 004 005 007 010 020 040 ; do
+    for dT in 300; do
     
         if [[ "$target_lab" =~ "SEMIWET" ]]; then
             mph=off
@@ -44,6 +46,8 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_DRY lab_FIXEDDOMAIN_SST_sine_WETLWSW 
         input_dir_base="$input_dir_root/$casename_base"
         input_dirs_base="$input_dirs_base $input_dir_base"
 
+        wnms="$wnms $wnm"
+
     done
     done
     done
@@ -61,13 +65,14 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_DRY lab_FIXEDDOMAIN_SST_sine_WETLWSW 
     )
 
 
-    output_file=$output_dir/spectral_analysis_${target_lab}_${bl_scheme}_wnm${wnm}_hr${hrs_beg}-${hrs_end}.svg
+    output_file=$output_dir/spectral_analysis_${target_lab}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
 
-    eval "python3 src/plot_spectral_analysis.py    \
+    eval "python3 src/plot_spectral_analysis_trace_wnm.py    \
         --input-dirs $input_dirs                   \
         --input-dirs-base $input_dirs_base         \
         --output $output_file                      \
         --no-display                               \
+        --tracking-wnms $wnms                      \
         --time-rng $hrs_beg $hrs_end               \
         --exp-beg-time '2001-01-01 00:00:00'       \
         --time-rng $hrs_beg $hrs_end               \
@@ -77,11 +82,12 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_DRY lab_FIXEDDOMAIN_SST_sine_WETLWSW 
         --labeled-wvlen 100 200 500                \
         --linestyles ${linestyles[@]}              \
         --linecolors ${linecolors[@]}              \
-        --magnitude-threshold 1e-4                 \
+        --thumbnail-skip $thumbnail_skip           \
         --varnames SST TA UA 
     "
 
+    thumbnail_skip=$(( $thumbnail_skip + 2 ))
 
-
+done
 done
 done

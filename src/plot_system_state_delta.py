@@ -16,8 +16,7 @@ parser.add_argument('--output1', type=str, help='Output filename in png.', defau
 parser.add_argument('--output2', type=str, help='Output filename in png.', default="")
 parser.add_argument('--extra-title', type=str, help='Title', default="")
 parser.add_argument('--overwrite-title', type=str, help='If set then title will be set to this.', default="")
-parser.add_argument('--blh-method', type=str, help='Method to determine boundary layer height', default=[], nargs='+', choices=['bulk', 'grad'])
-parser.add_argument('--SST-rng', type=float, nargs=2, help='Title', default=[-5, 5])
+
 parser.add_argument('--no-display', action="store_true")
 parser.add_argument('--plot-check', action="store_true")
 parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
@@ -25,23 +24,35 @@ parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours a
 parser.add_argument('--exp-beg-time', type=str, help='analysis beg time', required=True)
 parser.add_argument('--wrfout-data-interval', type=int, help='Time interval between each adjacent record in wrfout files in seconds.', required=True)
 parser.add_argument('--frames-per-wrfout-file', type=int, help='Number of frames in each wrfout file.', required=True)
-parser.add_argument('--z1-rng', type=float, nargs=2, help='The plotted height rng in meters.', default=[0, 5000.0])
-parser.add_argument('--z2-rng', type=float, nargs=2, help='The plotted height rng in meters.', default=[0, 2000.0])
-parser.add_argument('--x-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
-parser.add_argument('--U-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
-parser.add_argument('--V-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
-parser.add_argument('--Q-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
-parser.add_argument('--W-levs', type=float, nargs=3, help='The plotted W contours. Three parameters will be fed into numpy.linspace', default=[-8, 8, 17])
-parser.add_argument('--TKE-levs', type=float, nargs=3, help='The plotted W contours. Three parameters will be fed into numpy.linspace', default=[-1, 1, 11])
-parser.add_argument('--U10-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
-parser.add_argument('--TKE-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
-parser.add_argument('--DTKE-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
+parser.add_argument('--part1-z-rng', type=float, nargs=2, help='The plotted height rng in meters.', default=[0, 5000.0])
+parser.add_argument('--part2-z-rng', type=float, nargs=2, help='The plotted height rng in meters.', default=[0, 2000.0])
+parser.add_argument('--part1-x-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
+parser.add_argument('--part1-U10-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
+parser.add_argument('--part1-U500-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
+parser.add_argument('--part1-DIVVOR10-rng', type=float, nargs=2, help='DIV VOR 10m. In unit of 1e-5 /s', default=[None, None])
+parser.add_argument('--part1-DIVVOR500-rng', type=float, nargs=2, help='DIV VOR 500m. In unit of 1e-5 /s', default=[None, None])
+parser.add_argument('--part1-PRECIP-rng', type=float, nargs=2, help='PRECIP in unit of mm/day', default=[None, None])
+parser.add_argument('--part1-Q-rng', type=float, nargs=2, help='The plotted height rng in kilometers', default=[None, None])
+parser.add_argument('--part1-SST-rng', type=float, nargs=2, help='Title', default=[-5, 5])
+parser.add_argument('--part1-W-levs', type=float, nargs=3, help='The plotted W contours. Three parameters will be fed into numpy.linspace', default=[-8, 8, 17])
+parser.add_argument('--part1-TKE-levs', type=float, nargs=3, help='The plotted W contours. Three parameters will be fed into numpy.linspace', default=[-1, 1, 11])
+parser.add_argument('--part1-x-rolling', type=int, help='The plotted height rng in kilometers', default=1)
 
-parser.add_argument('--tke-analysis', type=str, help='analysis beg time', choices=["TRUE", "FALSE"], default="FALSE")
+
+
+
+parser.add_argument('--part2-THETA-rng', type=float, nargs=2, help='Theta range in K', default=[None, None])
+parser.add_argument('--part2-Nfreq-rng', type=float, nargs=2, help='Theta range in 1e-2/s^2', default=[None, None])
+parser.add_argument('--part2-TKE-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
+parser.add_argument('--part2-DTKE-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
+parser.add_argument('--part2-U-rng', type=float, nargs=2, help='U range in m/s', default=[None, None])
+parser.add_argument('--part2-Q-rng', type=float, nargs=2, help='Q range in g/kg', default=[None, None])
+
+parser.add_argument('--part2-tke-analysis', type=str, help='analysis beg time', choices=["TRUE", "FALSE"], default="FALSE")
 parser.add_argument('--thumbnail-skip-part1', type=int, help='Skip of thumbnail numbering.', default=0)
 parser.add_argument('--thumbnail-skip-part2', type=int, help='Skip of thumbnail numbering.', default=0)
 parser.add_argument('--thumbnail-numbering', type=str, help='Skip of thumbnail numbering.', default="abcdefghijklmn")
-parser.add_argument('--x-rolling', type=int, help='The plotted height rng in kilometers', default=1)
+
 
 args = parser.parse_args()
 
@@ -138,7 +149,7 @@ def loadData(input_dir):
 
         return da_T
 
-    if args.tke_analysis == "TRUE" and has_TKE:
+    if args.part2_tke_analysis == "TRUE" and has_TKE:
         DQKE_T = (2 * ds["DTKE"]).rename("DQKE_T")
         QSHEAR_T =   W2T(ds["QSHEAR"]).rename("QSHEAR_T")
         QBUOY_T  =   W2T(ds["QBUOY"]).rename("QBUOY_T")
@@ -217,14 +228,14 @@ def loadData(input_dir):
 
     ds_ref_stat = xr.merge([ds_ref_stat, NVfreq, Nfreq])
 
-    if args.x_rolling != 1:
+    if args.part1_x_rolling != 1:
 
-        print("Smooth over W with rolling = ", args.x_rolling)
+        print("Smooth over W with rolling = ", args.part1_x_rolling)
 
-        if args.x_rolling < 1 or args.x_rolling % 2 != 1:
+        if args.part1_x_rolling < 1 or args.part1_x_rolling % 2 != 1:
             raise Exception("Bad x_rolling. It should be positive and odd.")
 
-        window = args.x_rolling // 2
+        window = args.part1_x_rolling // 2
 
         da_W = ds["W"].copy()
         
@@ -357,8 +368,8 @@ def nextAxes():
 
 u_levs = np.linspace(-1, 1, 11)
 v_levs = np.linspace(-1, 1, 11)
-w_levs = np.linspace(args.W_levs[0], args.W_levs[1], int(args.W_levs[2]))
-tke_levs = np.linspace(args.TKE_levs[0], args.TKE_levs[1], int(args.TKE_levs[2]))
+w_levs = np.linspace(args.part1_W_levs[0], args.part1_W_levs[1], int(args.part1_W_levs[2]))
+tke_levs = np.linspace(args.part1_TKE_levs[0], args.part1_TKE_levs[1], int(args.part1_TKE_levs[2]))
 tke_levs = [-1, -0.8, -0.6, -0.4, -0.2, 0.2, 0.4, 0.6, 0.8, 1.0] #np.linspace(args.TKE_levs[0], args.TKE_levs[1], int(args.TKE_levs[2]))
 
 QVAPOR_diff_levs = np.arange(-2, 2.5, 0.5)
@@ -421,7 +432,7 @@ _ax.plot(X_sT, WND500 - WND500_mean, color="black", linestyle="-")
 
 _ax.set_title("(%s) $\\delta \\left|\\vec{U}_\\mathrm{500m}\\right|'$ (-), $\\delta U'_\\mathrm{500m}$ (--), and $\\delta V'_\\mathrm{500m}$ (:).\n $\\delta \\overline{\\left|\\vec{U}_{\\mathrm{500m}}\\right|} = %.2f \\, \\mathrm{m} / \\mathrm{s}$. $\\left( \\delta \\overline{U}_{\\mathrm{500m}}, \\delta \\overline{V}_{\\mathrm{500m}}\\right) = \\left( %.2f, %.2f \\right) \\, \\mathrm{m} / \\mathrm{s}$. " % (_thumbnail_numbering, WND500_mean, U500_mean, V500_mean,))
 _ax.set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
-_ax.set_ylim(args.U10_rng)
+_ax.set_ylim(args.part1_U500_rng)
 
 # Thumbnail: The 10m layer U V
 _ax, _thumbnail_numbering = nextAxes()
@@ -435,7 +446,7 @@ _ax.plot(X_sT, diff_ds["WND10"] - WND10_mean, color="black", linestyle="-",   la
 
 _ax.set_title("(%s) $\\delta \\left|\\vec{U}_\\mathrm{10m}\\right|'$ (-), $\\delta U'_\\mathrm{10m}$ (--), and $\\delta V'_\\mathrm{10m}$ (:).\n $\\delta \\overline{\\left|\\vec{U}_{\\mathrm{10m}}\\right|} = %.2f \\, \\mathrm{m} / \\mathrm{s}$. $\\left( \\delta \\overline{U}_{\\mathrm{10m}}, \\delta \\overline{V}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right) \\, \\mathrm{m} / \\mathrm{s}$. " % (_thumbnail_numbering, WND10_mean, U10_mean, V10_mean,))
 _ax.set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
-_ax.set_ylim(args.U10_rng)
+_ax.set_ylim(args.part1_U10_rng)
 
 
 
@@ -462,8 +473,8 @@ _ax.set_title("(%s) $\\delta \\mathrm{D}'_\\mathrm{500m}$ (-), $\\delta \\zeta'_
 
 _ax.set_ylabel("[ $ \\times 10^{-5} \\, \\mathrm{s}^{-1}$ ]", color="black")
 _ax_twinx.set_ylabel("$\\delta P'$ [ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
-_ax.set_ylim([-6, 6])
-_ax_twinx.set_ylim([-1.5, 1.5])
+_ax.set_ylim(args.part1_DIVVOR500_rng)
+_ax_twinx.set_ylim(args.part1_PRECIP_rng)
 
 
 # Thumbnail: The 10m layer VOR DIV
@@ -485,8 +496,9 @@ _ax.set_title("(%s) $\\delta \\mathrm{D}'_\\mathrm{10m}$ (-), $\\delta \\zeta'_\
 
 _ax.set_ylabel("[ $ \\times 10^{-5} \\, \\mathrm{s}^{-1}$ ]", color="black")
 _ax_twinx.set_ylabel("$\\delta P'$ [ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
-_ax.set_ylim([-6, 6])
-_ax_twinx.set_ylim([-1.5, 1.5])
+_ax.set_ylim(args.part1_DIVVOR10_rng)
+_ax_twinx.set_ylim(args.part1_PRECIP_rng)
+
 
 """
 # Precipitation
@@ -516,7 +528,7 @@ _ax.plot(X_sT, ( diff_ds["QO"] - dQO_mean ) * 1e3, color='black', linestyle="-",
 _ax.plot(X_sT, ( diff_ds["QA"] - dQA_mean ) * 1e3, color='black', linestyle="--",  label="$\\delta Q_A - \\delta \\overline{Q}_A$")
 _ax.set_title("(%s) $\\delta Q'_O$ (-) and $\\delta Q'_A$ (--). $\\left(\\delta \\overline{Q}_O^*, \\delta \\overline{Q}_A \\right) = \\left( %.2f, %.2f \\right)$ g / kg" % (_thumbnail_numbering, dQO_mean*1e3, dQA_mean*1e3))
 _ax.set_ylabel("[ $ \\mathrm{g} \\, / \\, \\mathrm{kg}$ ]", color="black")
-_ax.set_ylim(args.Q_rng)
+_ax.set_ylim(args.part1_Q_rng)
 
 
 # SST
@@ -528,18 +540,18 @@ _ax.plot(X_sT, diff_ds["TA"] - dTA_mean, color='black', linestyle="--")
 
 _ax.set_title("(%s) $\\delta \\Theta^*'_O$ (-) and $\\delta \\Theta'_A$ (--). $ \\left( \\delta \\overline{\\Theta}_O, \\delta \\overline{\\Theta}_A \\right) = \\left( %.2f, %.2f \\right) \\, {}^\\circ \\mathrm{C}$" % (_thumbnail_numbering, dTO_mean, dTA_mean))
 _ax.set_ylabel("[ $ \\mathrm{K}$ ]", color="black")
-_ax.set_ylim(args.SST_rng)
+_ax.set_ylim(args.part1_SST_rng)
 
 
 
 for i, _ax in enumerate(ax[:, 0]):
     
     _ax.set_xlabel("$x$ [km]")
-    _ax.set_xlim(np.array(args.x_rng))
+    _ax.set_xlim(np.array(args.part1_x_rng))
 
     if i == 0:
         
-        _ax.set_ylim(args.z1_rng)
+        _ax.set_ylim(args.part1_z_rng)
         
         _ax.set_ylabel("$z$ [ km ]")
         yticks = np.array(_ax.get_yticks())
@@ -610,7 +622,7 @@ _ax.plot(diff_ds_ref_stat["T"], ref_Z_T, 'k-', label="$\\overline{\\theta}$")
 _ax.plot(diff_ds_ref_stat["THETAV"], ref_Z_T, 'r--', label="$\\overline{\\theta_v}$")
 _ax.set_title("(%s) $ \\delta \\overline{\\theta}$ (-), $\\delta \\overline{\\theta}_v$ (--)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{K}$ ]")
-_ax.set_xlim([-2, 10])
+_ax.set_xlim(args.part2_THETA_rng)
 #_ax.legend(loc="upper right")
 iii += 1
 
@@ -620,7 +632,7 @@ _ax.plot(diff_ds_ref_stat["Nfreq"] * 1e2, ref_Z_W, 'k-', label="$N$")
 _ax.plot(diff_ds_ref_stat["NVfreq"] * 1e2, ref_Z_W, 'r--', label="$N_v$")
 _ax.set_title("(%s) $\\delta N$ (-), $\\delta N_v$ (--)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\times 10^{-2} \\mathrm{s}^{-1}$ ]")
-_ax.set_xlim([-1.5, 1.5])
+_ax.set_xlim(args.part2_Nfreq_rng)
 #_ax.legend(loc="upper right")
 iii += 1
 
@@ -632,7 +644,7 @@ _ax.plot(diff_ds_ref_stat["V"], ref_Z_T, linestyle=":", color="red")#, ref_Z_T)
 
 _ax.set_title("(%s) $\\delta \\overline{ \\left| \\vec{U} \\right| }$ (-), $\\delta \\overline{U}$ (--), $\\delta \\overline{V}$ (..)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
-_ax.set_xlim(args.U_rng)
+_ax.set_xlim(args.part2_U_rng)
 iii += 1
 
 
@@ -652,7 +664,7 @@ _ax = ax[0, iii]
 _ax.plot(diff_ds_ref_stat["QKE"]/2, ref_Z_T, color="black")
 _ax.set_title("(%s) $\\delta \\overline{\\mathrm{TKE}}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
-_ax.set_xlim(args.TKE_rng)
+_ax.set_xlim(args.part2_TKE_rng)
 iii+=1
 
 
@@ -663,18 +675,18 @@ _ax.plot(diff_ds_ref_stat["QVAPOR"] * 1e3, ref_Z_T, color="black")
 
 _ax.set_title("(%s) $\\delta \\overline{Q}_\\mathrm{vapor}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{g} \\, / \\, \\mathrm{kg}$ ]")
-_ax.set_xlim([-1, 1])
+_ax.set_xlim(args.part2_Q_rng)
 iii += 1
 
 
 
-if args.tke_analysis == "TRUE":
+if args.part2_tke_analysis == "TRUE":
     # TKE
     _ax = ax[0, iii]
     _ax.plot(diff_ds_ref_stat["QKE"]/2, ref_Z_T)
     _ax.set_title("(%s) $\\delta \\overline{\\mathrm{TKE}}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
     _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
-    _ax.set_xlim(args.TKE_rng)
+    _ax.set_xlim(args.part2_TKE_rng)
     iii+=1
 
     # TKE budget
@@ -691,7 +703,7 @@ if args.tke_analysis == "TRUE":
     #_ax.plot(ds_ref_stat["QWT_T"]/2 + ds_ref_stat["QADV_T"]/2, ref_Z_T,    color="red", linestyle='--',  label="$q_{vt} + q_{adv}$")
 
     _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
-    _ax.set_xlim(args.DTKE_rng)
+    _ax.set_xlim(args.part2_DTKE_rng)
 
     _ax.legend(loc="upper right")
     iii+=1
@@ -705,7 +717,7 @@ for _ax in ax[0, :]:
 
 for i, _ax in enumerate(ax[0, :]):
 
-    _ax.set_ylim(args.z2_rng)
+    _ax.set_ylim(args.part2_z_rng)
      
     _ax.set_ylabel("$z$ [ km ]")
     yticks = np.array(_ax.get_yticks())

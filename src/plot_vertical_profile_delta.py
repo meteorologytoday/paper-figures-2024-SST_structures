@@ -107,7 +107,7 @@ def loadData(input_dir):
         beg_time = time_beg,
         end_time = time_end,
         prefix="wrfout_d01_",
-        avg = avg_interval,
+        avg = None if avg_interval == wrfout_data_interval else avg_interval,
         verbose=False,
         inclusive="left",
     )
@@ -448,9 +448,9 @@ for i, varname in enumerate(plot_varnames):
             plot_data = plot_data - (_data_base["ds"][varname] - offset) * factor
 
         if len(plot_data) == len(Z_T):
-            plot_Z = Z_T
+            plot_Z = Z_T / 1e3
         elif len(plot_data) == len(Z_W):
-            plot_Z = Z_W
+            plot_Z = Z_W / 1e3
 
 
         _ax.plot(plot_data, plot_Z, color=linecolor, linestyle=linestyle, label=label)
@@ -462,7 +462,7 @@ for i, varname in enumerate(plot_varnames):
     _ax.set_title("(%s) %s" % (args.thumbnail_numbering[args.thumbnail_skip + i], label))
     _ax.set_xlabel("[ %s ]" % unit)
     
-    _ax.set_ylim(args.z_rng)
+    _ax.set_ylim(np.array(args.z_rng))
     _ax.set_ylabel("$z$ [ km ]")
     
     yticks = np.array(_ax.get_yticks())
