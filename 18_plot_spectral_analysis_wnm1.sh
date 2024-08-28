@@ -56,9 +56,11 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW lab_FIXEDDOMAIN_SST_sine_DRY 
         "solid"
         "dashed"
         "dotted"
+        "dashdot"
     )
 
     linecolors=(
+        "black"
         "black"
         "black"
         "black"
@@ -83,7 +85,7 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW lab_FIXEDDOMAIN_SST_sine_DRY 
         --linestyles ${linestyles[@]}              \
         --linecolors ${linecolors[@]}              \
         --thumbnail-skip $thumbnail_skip           \
-        --varnames SST TA UA 
+        --varnames SST TA UA VA 
     "
 
     thumbnail_skip=$(( $thumbnail_skip + 2 ))

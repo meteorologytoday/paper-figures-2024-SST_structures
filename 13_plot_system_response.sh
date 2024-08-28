@@ -46,7 +46,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
         mph=on
         #W_levs=( -50 50 11 )
         W_levs=( -2 2 21 )
-        thumbnail_skip_part1=7
+        thumbnail_skip_part1=5
         thumbnail_skip_part2=5
     elif [[ "$target_lab" =~ "DRY" ]]; then
         mph=off

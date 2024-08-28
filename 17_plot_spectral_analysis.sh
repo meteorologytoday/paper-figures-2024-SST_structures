@@ -21,7 +21,7 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_DRY lab_FIXEDDOMAIN_SST_sine_WETLWSW 
     labels=""
 
     for Ug in 20 ; do
-    for wnm in 004 ; do
+    for wnm in 010 ; do
     for dT in 100 200 300; do
     
         if [[ "$target_lab" =~ "SEMIWET" ]]; then
@@ -77,7 +77,7 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_DRY lab_FIXEDDOMAIN_SST_sine_WETLWSW 
         --linestyles ${linestyles[@]}              \
         --linecolors ${linecolors[@]}              \
         --magnitude-threshold 1e-4                 \
-        --varnames SST TA UA 
+        --varnames SST TA UA VA 
     "
 
 

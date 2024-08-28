@@ -33,9 +33,17 @@ plot_infos = dict(
     UA = dict(
         selector = dict(bottom_top=0),
         wrf_varname = "U",
-        label = "$U_{A}$",
+        label = "$u_{A}$",
         unit = "$ \\mathrm{m} \\, / \\, \\mathrm{s}$",
     ), 
+
+    VA = dict(
+        selector = dict(bottom_top=0),
+        wrf_varname = "V",
+        label = "$v_{A}$",
+        unit = "$ \\mathrm{m} \\, / \\, \\mathrm{s}$",
+    ), 
+
 
 
 )
@@ -293,7 +301,7 @@ if __name__ == "__main__":
             #real = np.real(sp)
             #imag = np.imag(sp)
             ang = np.angle(sp, deg=True)
-            mag = np.abs(sp)
+            mag = np.abs(sp) * 2 # Sum positive and negative wavelengths
            
             ang[mag < args.magnitude_threshold] = 0.0
  

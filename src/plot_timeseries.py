@@ -267,7 +267,7 @@ plot_infos = dict(
         factor = 86400.0,
         label = "$\\overline{P}$",
         unit = "$ \\mathrm{mm} / \\mathrm{day} $",
-        ylim = [-1, 25],
+        ylim = [-1, 4],
         ylim_diff = [-5, 5],
     ),
 
@@ -282,7 +282,7 @@ plot_infos = dict(
 
     TO = dict(
         factor = 1,
-        label = "$T_O$",
+        label = "$\\overline{\\Theta}_O$",
         unit = "$ \\mathrm{K} $",
         ylim = [0, 8],
     ),
@@ -290,7 +290,7 @@ plot_infos = dict(
     TA = dict(
         factor = 1,
         offset = 273.15,
-        label = "$\\overline{T}_A$",
+        label = "$\\overline{\\Theta}_A$",
         unit = "$ \\mathrm{K} $",
         ylim = [12, 17],
     ),
@@ -304,7 +304,7 @@ plot_infos = dict(
 
     QO = dict(
         factor = 1e3,
-        label = "$Q_O$",
+        label = "$Q_O^*$",
         unit = "$ \\mathrm{g} / \\mathrm{kg} $",
         ylim = [0, 10],
     ),
@@ -415,7 +415,7 @@ plot_infos = dict(
 
 
     WND_sfc = dict(
-        label = "$\\overline{\\left|\\vec{U}\\right|} $",
+        label = "$\\overline{U}_A $",
         unit = "$ \\mathrm{m} / \\mathrm{s} $",
         ylim = [10, 20],
     ),

@@ -33,9 +33,17 @@ plot_infos = dict(
     UA = dict(
         selector = dict(bottom_top=0),
         wrf_varname = "U",
-        label = "$U_{A}$",
+        label = "$u_{A}$",
         unit = "$ \\mathrm{m} \\, / \\, \\mathrm{s}$",
     ), 
+
+    VA = dict(
+        selector = dict(bottom_top=0),
+        wrf_varname = "V",
+        label = "$v_{A}$",
+        unit = "$ \\mathrm{m} \\, / \\, \\mathrm{s}$",
+    ), 
+
 
 
 )
@@ -336,17 +344,19 @@ if __name__ == "__main__":
         _ax.set_xticks(Lxs, labels=xticklabels)
         _ax.set_xlabel("Wavelength [ km ]")
         _ax.legend(loc="lower right")
-        
-    for _ax in ax[:, 1].flatten():
-        #_ax.set_ylim([-180, 180])
-        _ax.set_yticks(np.arange(-180, -60, 30))
-        _ax.set_ylabel("[ deg ]")
  
     for _ax in ax[:, 0].flatten():
         #_ax.set_ylim([-180, 180])
         _ax.set_yticks(np.linspace(0, 1, 11) * 100)
+        #_ax.set_yticks(np.arange(-180, 210, 30))
         _ax.set_ylabel("[ $\\%$ ]")
-                
+        
+    for _ax in ax[:, 1].flatten():
+        #_ax.set_ylim([-180, 180])
+        _ax.set_yticks(np.arange(-180, 90, 30))
+        _ax.set_ylabel("[ deg ]")
+ 
+               
 
     if args.output != "":
         print("Saving output: ", args.output) 
