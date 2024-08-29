@@ -19,17 +19,31 @@ source 00_setup.sh
 mkdir -p $fig_dir
 
 plot_codes=(
-    $sh 11_plot_ocean_SST_analysis.sh                   "BLANK"
-    $sh 12_plot_sounding.sh                             "BLANK"
-    $sh 13_plot_system_response.sh                      "BLANK"
-    $sh 14_plot_timeseries_see_steady_state.sh          "BLANK"
-    $sh 16-1_plot_dF_flux_decomposition_vary_dSST.sh    "BLANK"
-    $sh 16-2_plot_dF_flux_decomposition_vary_wnm.sh     "BLANK"
-    $sh 17_plot_spectral_analysis.sh                        "BLANK"
-    $sh 18_plot_spectral_analysis_wnm1.sh                   "BLANK"
-    $sh 19-1_plot_AR_dependency_vary_dSST_all_bl_schemes.sh "BLANK"
-    $sh 19-2_plot_AR_dependency_vary_wnm_all_bl_schemes.sh  "BLANK"
-    $sh 21_plot_vertical_profile_all_bl_schemes_abs.sh      "BLANK"
+
+    # Fig 1
+    $sh 11_plot_ocean_SST_analysis.sh                       "BLANK"
+    
+    # Fig 2
+    $sh 12_plot_sounding.sh                                 "BLANK"
+ 
+    # Fig 3
+    $sh 15_plot_timeseries_see_steady_state.sh              "BLANK"
+   
+    # Fig 4 and 5
+    $sh 13_plot_system_response.sh                          "BLANK"
+    
+    # Fig 6
+    $sh 19-1_plot_misc_vary_dSST.sh "BLANK"
+    $sh 19-2_plot_misc_vary_wnm.sh  "BLANK"
+
+    # Fig 7
+    $sh 16-1_plot_dF_flux_decomposition_vary_dSST.sh        "BLANK"
+    $sh 16-2_plot_dF_flux_decomposition_vary_wnm.sh         "BLANK"
+    
+    # Fig 8
+    $sh 18-1_plot_spectral_analysis_linearity_on_dSST.sh    "BLANK"
+    $sh 18-2_plot_spectral_analysis_wnm1.sh                 "BLANK"
+
 )
 
 N=$(( ${#plot_codes[@]} / 3 ))

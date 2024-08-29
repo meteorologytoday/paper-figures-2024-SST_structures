@@ -93,14 +93,17 @@ name_pairs=(
     timeseries/timeseries_wnm010_U20_dT100_MYNN25_timeseries_smooth-25_000-360.svg                   fig03
     merged-snapshot_wnm010_U20_dT100_part1.svg                                                       fig04
     merged-snapshot_wnm010_U20_dT100_part2.svg                                                       fig05
-    merged-dF_flux_decomposition_wnm010_dSST100_MYNN25_hr120-240.svg                                 fig06
-#    spectral_analysis/spectral_analysis_lab_FIXEDDOMAIN_SST_sine_WETLWSW_MYNN25_wnm010_hr120-240.svg fig07
-    merged-spectral_analysis_wnm010_dSST100_MYNN25_hr120-240.svg                                     fig07
-    spectral_analysis_tracking_wnm1/spectral_analysis_lab_FIXEDDOMAIN_SST_sine_WETLWSW_dT100_MYNN25_hr120-240.svg fig08
-    merged-phase_misc_hr120-240.svg                                                                  fig08
-    snapshots_vertical-60/VERTICAL_abs_avg-TRUE_wnm010_120-240.svg                                   fig09
+    merged-phase_misc_hr120-240.svg                                                                  fig06
+    merged-dF_flux_decomposition_wnm010_dSST100_MYNN25_hr120-240.svg                                 fig07
+
+    merged-spectral_analysis_wnm010_dSST100_MYNN25_hr120-240.svg                                     fig08
+
     merged-snapshot_wnm004_U20_dT300_part1.svg                                                       figS01
     merged-snapshot_wnm004_U20_dT300_part2.svg                                                       figS02
+
+#    spectral_analysis/spectral_analysis_lab_FIXEDDOMAIN_SST_sine_WETLWSW_MYNN25_wnm010_hr120-240.svg fig07
+#    spectral_analysis_tracking_wnm1/spectral_analysis_lab_FIXEDDOMAIN_SST_sine_WETLWSW_dT100_MYNN25_hr120-240.svg fig08
+#    snapshots_vertical-60/VERTICAL_abs_avg-TRUE_wnm010_120-240.svg                                   fig09
 
 #    snapshots_vertical_timeseries_WRFV4.6.0_avg-60/VERTICAL_rel_avg-TRUE_Lx100_120-240.svg        fig08
 #    snapshots_vertical_timeseries_WRFV4.6.0_avg-60/VERTICAL_abs_avg-TRUE_Lx100_120-240.svg        fig09
