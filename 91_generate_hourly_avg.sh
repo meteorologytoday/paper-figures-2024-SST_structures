@@ -26,12 +26,12 @@ nproc=10
 for _bl_scheme in MYNN25 MYJ YSU ; do
 #for _bl_scheme in MYNN25 ; do
 
-for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW lab_FIXEDDOMAIN_SST_sine_DRY ; do 
+for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do #lab_FIXEDDOMAIN_SST_sine_DRY ; do 
 #for target_lab in lab_FIXEDDOMAIN_SST_sine_DRY ; do 
 #for target_lab in lab_sine_WETLWSW ; do 
 for wnm in 000 010 004 005 007 010 020 040 ; do
-#for dT in 000 300 050 100 150 200 250 ; do
-for dT in 100 ; do
+for dT in 000 300 050 100 150 200 250 ; do
+#for dT in 100 ; do
 for U in 20 ; do
 
     if [[ "$target_lab" =~ "SEMIWET" ]]; then

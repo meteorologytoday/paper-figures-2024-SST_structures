@@ -14,11 +14,11 @@ def genAnalysis(
     Nx = ref_ds.dims['west_east']
     Nz = ref_ds.dims['bottom_top']
 
-    X_sU = ref_ds.DX * np.arange(Nx+1) / 1e3
+    X_sU = ds.DX * np.arange(Nx+1) / 1e3
     X_sT = (X_sU[1:] + X_sU[:-1]) / 2
     X_T = np.repeat(np.reshape(X_sT, (1, -1)), [Nz,], axis=0)
     X_W = np.repeat(np.reshape(X_sT, (1, -1)), [Nz+1,], axis=0)
-    dX_sT = ref_ds.DX * np.arange(Nx)
+    dX_sT = ds.DX * np.arange(Nx)
 
     Z_W = (ref_ds.PHB + ref_ds.PH) / 9.81
     Z_T = (Z_W[1:, :] + Z_W[:-1, :]) / 2

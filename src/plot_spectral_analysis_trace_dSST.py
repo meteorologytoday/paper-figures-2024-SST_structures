@@ -46,7 +46,6 @@ plot_infos = dict(
         label = "$C_{Q}$",
     ), 
 
-
     UA = dict(
         selector = dict(bottom_top=0),
         wrf_varname = "U",
@@ -71,7 +70,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--input-dirs', type=str, nargs="+", help='Input directories.', required=True)
     parser.add_argument('--input-dirs-base', type=str, nargs="+", help='Input directories.', required=True)
-    parser.add_argument('--tracking-wnms', type=int, nargs="+", help='The wave number to trace.', required=True)
+    parser.add_argument('--tracking-wnm', type=int, help='The wave number to trace.', required=True)
+    parser.add_argument('--dSSTs', type=int, nargs="+", help='Delta SST. In the unit of 0.01K', required=True)
     parser.add_argument('--labels', type=str, nargs="+", help='Input directories.', default=None)
     parser.add_argument('--output', type=str, help='Output filename in png.', required=True)
     parser.add_argument('--no-display', action="store_true")
@@ -79,7 +79,6 @@ if __name__ == "__main__":
     parser.add_argument('--exp-beg-time', type=str, help='analysis beg time', required=True)
     parser.add_argument('--wrfout-data-interval', type=int, help='Time interval between each adjacent record in wrfout files in seconds.', required=True)
     parser.add_argument('--frames-per-wrfout-file', type=int, help='Number of frames in each wrfout file.', required=True)
-    parser.add_argument('--number-of-harmonics', type=int, help='Number of frames in each wrfout file.', default=None)
     parser.add_argument('--varnames', type=str, nargs="+", help="Varnames to do the analysis.", required=True)
     parser.add_argument('--linestyles', type=str, nargs="+", help="Varnames to do the analysis.", required=True)
     parser.add_argument('--linecolors', type=str, nargs="+", help="Varnames to do the analysis.", required=True)
@@ -181,7 +180,6 @@ if __name__ == "__main__":
                 wrf_preprocess.genAnalysis(ds_base, wsm.data_interval),
             ]).mean(dim="time")
 
-
         Nx = len(ds_base.coords["west_east"])
         X_sU = DX * np.arange(Nx+1)
         X_sT = (X_sU[1:] + X_sU[:-1]) / 2
@@ -251,35 +249,30 @@ if __name__ == "__main__":
 
         data.append(d)
 
-    # Convert data into a function of wvn
+    # Convert data into a function of dSST
     tracking = dict()
     for varname in args.varnames:
 
         mags = np.zeros((len(data),))
         angs = np.zeros_like(mags)
-        Lxs = np.zeros_like(mags)
-        tracking_wnms = np.array(args.tracking_wnms)
-
+        dSSTs = np.array(args.dSSTs, dtype=float) / 100.0
 
         for i, d in enumerate(data):
  
             dd = d[varname]
 
-            tracking_wnm = args.tracking_wnms[i]
-            adj_phase_rad = - 0.5 / (dd["Nx"] / tracking_wnm) * 2 * np.pi
+
+            adj_phase_rad = - 0.5 / (dd["Nx"] / args.tracking_wnm) * 2 * np.pi
             adj_cpx = np.cos(adj_phase_rad) + 1j * np.sin(adj_phase_rad)
              
 
-            sp = dd["sp"][tracking_wnm] * adj_cpx
+            sp = dd["sp"][args.tracking_wnm] * adj_cpx
             
-            
-
             mags[i] = np.abs(sp)
             angs[i] = np.angle(sp, deg=True)
-            Lxs[i] = d[varname]["Lx"] / tracking_wnm
         
             
-        tracking[varname] = dict(mags=mags, angs=angs, Lxs=Lxs) 
+        tracking[varname] = dict(mags=mags, angs=angs, dSSTs=dSSTs) 
 
 
 
@@ -347,13 +340,13 @@ if __name__ == "__main__":
 
         mags = _tracking["mags"]
         angs = _tracking["angs"]
-        Lxs = _tracking["Lxs"] / 1e3
+        dSSTs = _tracking["dSSTs"]
         #wnms = _tracking["wnms"]
 
-        rel_mags = mags / mags[0] * 100
+        rel_mags = mags / np.amax(mags) * 100
 
-        _ax1.plot(Lxs, rel_mags, marker='o', linestyle=linestyle, color=linecolor, label=varname_label)
-        _ax2.plot(Lxs, angs, marker='o', linestyle=linestyle, color=linecolor, label=varname_label)
+        _ax1.plot(dSSTs, rel_mags, marker='o', linestyle=linestyle, color=linecolor, label=varname_label)
+        _ax2.plot(dSSTs, angs, marker='o', linestyle=linestyle, color=linecolor, label=varname_label)
         
 
         if i == 0: 
@@ -365,13 +358,13 @@ if __name__ == "__main__":
 
 
     #label_wvlen = np.array(args.labeled_wvlen) * 1e3
-    xticks = Lxs
-    xticklabels = ["%d" % np.round(Lx) for Lx in (Lxs) ]
+    xticks = dSSTs
+    xticklabels = ["%.1f" % dSST for dSST in (dSSTs) ]
 
     for _ax in ax.flatten():
         _ax.grid()
-        _ax.set_xticks(Lxs, labels=xticklabels)
-        _ax.set_xlabel("Wavelength [ km ]")
+        _ax.set_xticks(dSSTs, labels=xticklabels)
+        _ax.set_xlabel("$\\Delta \\mathrm{SST}$ [ K ]")
         _ax.legend(loc="lower right")
  
     for _ax in ax[:, 0].flatten():

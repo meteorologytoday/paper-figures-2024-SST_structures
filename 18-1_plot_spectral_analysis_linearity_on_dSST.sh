@@ -11,21 +11,22 @@ hrs_end=$(( 24 * 10 ))
 
 
 thumbnail_skip=0
-for tracking_wnm in 1 ; do
 #for bl_scheme in MYNN25 MYJ YSU; do
+for wnm in 010 ; do
 for bl_scheme in MYNN25 ; do
-for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW lab_FIXEDDOMAIN_SST_sine_DRY ; do
+for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do
 
-    output_dir=$fig_dir/spectral_analysis_tracking_wnm${tracking_wnm}
+    output_dir=$fig_dir/spectral_analysis_linearity_on_dSST
+    
     mkdir -p $output_dir
     
     input_dirs_base=""
     input_dirs=""
     labels=""
-    wnms=""
+    dSSTs=""
     for Ug in 20 ; do
-    for wnm in 004 005 007 010 020 040 ; do
-    for dT in 300; do
+    for dT in 000 050 100 150 200 250 300; do
+    #for dT in 000 300; do
     
         if [[ "$target_lab" =~ "SEMIWET" ]]; then
             mph=off
@@ -46,7 +47,7 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW lab_FIXEDDOMAIN_SST_sine_DRY 
         input_dir_base="$input_dir_root/$casename_base"
         input_dirs_base="$input_dirs_base $input_dir_base"
 
-        wnms="$wnms $wnm"
+        dSSTs="$dSSTs $dT"
 
     done
     done
@@ -57,39 +58,42 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW lab_FIXEDDOMAIN_SST_sine_DRY 
         "dashed"
         "dotted"
         "dashdot"
+        "solid"
+        "dashed"
     )
 
     linecolors=(
         "black"
         "black"
         "black"
-        "black"
+        "red"
+        "blue"
+        "blue"
     )
 
 
-    output_file=$output_dir/spectral_analysis_${target_lab}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
+    output_file=$output_dir/linearity_on_dSST_${target_lab}_wnm${wnm}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
 
-    eval "python3 src/plot_spectral_analysis_trace_wnm.py    \
+    eval "python3 src/plot_spectral_analysis_trace_dSST.py    \
         --input-dirs $input_dirs                   \
         --input-dirs-base $input_dirs_base         \
         --output $output_file                      \
         --no-display                               \
-        --tracking-wnms $wnms                      \
+        --tracking-wnm $wnm                        \
+        --dSSTs  $dSSTs                            \
         --time-rng $hrs_beg $hrs_end               \
         --exp-beg-time '2001-01-01 00:00:00'       \
         --time-rng $hrs_beg $hrs_end               \
         --wrfout-data-interval 3600                \
         --frames-per-wrfout-file 12                \
-        --number-of-harmonics 22                   \
         --labeled-wvlen 100 200 500                \
         --linestyles ${linestyles[@]}              \
         --linecolors ${linecolors[@]}              \
         --thumbnail-skip $thumbnail_skip           \
-        --varnames SST TA UA VA 
+        --varnames SST TOA QOA CH UA VA 
     "
 
     thumbnail_skip=$(( $thumbnail_skip + 2 ))
 
-done
 done
 done

@@ -20,11 +20,21 @@ echo "Making final figures... "
 #echo "Figure 1: Merge SST map and spectrum analysis... "
 #svg_stack.py --direction=h $fig_dir/sst_analysis_map_20170101.svg $fig_dir/sst_analysis_spec_20170101.svg > $fig_dir/merged-sst_analysis.svg
 
+echo "Figure 7: Merge Fourier analysis... "
+fixed_dSST=100
+fixed_wnm=010
+svg_stack.py \
+    --direction=v \
+    $fig_dir/spectral_analysis_linearity_on_dSST/linearity_on_dSST_lab_FIXEDDOMAIN_SST_sine_WETLWSW_wnm${fixed_wnm}_MYNN25_hr120-240.svg \
+    $fig_dir/spectral_analysis_tracking_wnm/spectral_analysis_lab_FIXEDDOMAIN_SST_sine_WETLWSW_dT${fixed_dSST}_MYNN25_hr120-240.svg \
+    > $fig_dir/merged-spectral_analysis_wnm${fixed_wnm}_dSST${fixed_dSST}_MYNN25_hr120-240.svg
+
+
 
 echo "Figure 2: Merge experiment design and vertical profile..."
 svg_stack.py \
     --direction=h \
-    $fig_static_dir/experiment_design_2.svg \
+    $fig_static_dir/experiment_design_3.svg \
     $fig_dir/input_sounding_woML.svg \
     > $fig_dir/merged-exp.svg
 
@@ -51,14 +61,15 @@ done
 
 
 # Merging the phase diagram
-echo "Figure 6: Merge snapshots... "
+echo "Figure 6: Merge phase diagram... "
+fixed_dSST=100
+fixed_wnm=010
 svg_stack.py \
     --direction=v \
-    $fig_dir/dF_flux_decomposition_varying_dSST/lab_FIXEDDOMAIN_SST_sine_WETLWSW/dF_flux_decomposition_onefig_varying_dSST_MYNN25_hr120-240.svg \
-    $fig_dir/dF_flux_decomposition_varying_wnm/lab_FIXEDDOMAIN_SST_sine_WETLWSW/dF_flux_decomposition_onefig_varying_wnm_MYNN25_hr120-240.svg \
-    > $fig_dir/merged-dF_flux_decomposition_varying_dSST_wnm_MYNN25_hr120-240.svg
+    $fig_dir/dF_flux_decomposition_varying_dSST/lab_FIXEDDOMAIN_SST_sine_WETLWSW/dF_flux_decomposition_onefig_wnm${fixed_wnm}_varying_dSST_MYNN25_hr120-240.svg \
+    $fig_dir/dF_flux_decomposition_varying_wnm/lab_FIXEDDOMAIN_SST_sine_WETLWSW/dF_flux_decomposition_onefig_dSST${fixed_dSST}_varying_wnm_MYNN25_hr120-240.svg \
+    > $fig_dir/merged-dF_flux_decomposition_wnm${fixed_wnm}_dSST${fixed_dSST}_MYNN25_hr120-240.svg
 
-echo "Figure 8: Merging the spectral analysis graph..."
 svg_stack.py \
     --direction=v \
     $fig_dir/spectral_analysis_tracking_wnm1/spectral_analysis_lab_FIXEDDOMAIN_SST_sine_WETLWSW_MYNN25_hr120-240.svg \
@@ -67,12 +78,13 @@ svg_stack.py \
 
 
 
-echo "Figure 9: Merging the AR dependency graph"
+
+echo "Figure 9: Merging the misc phase diagram..."
 svg_stack.py \
     --direction=h \
-    $fig_dir/AR_dependency/lab_FIXEDDOMAIN_SST_sine_WETLWSW/AR_dependency_varying_dSST_hr120-240.svg  \
-    $fig_dir/AR_dependency/lab_FIXEDDOMAIN_SST_sine_WETLWSW/AR_dependency_varying_wnm_hr120-240.svg    \
-    > $fig_dir/merged-AR_dependency_hr120-240.svg
+    $fig_dir/phase_misc/lab_FIXEDDOMAIN_SST_sine_WETLWSW/phase_misc_wnm010_varying_dSST_hr120-240.svg \
+    $fig_dir/phase_misc/lab_FIXEDDOMAIN_SST_sine_WETLWSW/phase_misc_dSST100_varying_wnm_hr120-240.svg \
+    > $fig_dir/merged-phase_misc_hr120-240.svg
 
 
 name_pairs=(
@@ -81,11 +93,12 @@ name_pairs=(
     timeseries/timeseries_wnm010_U20_dT100_MYNN25_timeseries_smooth-25_000-360.svg                   fig03
     merged-snapshot_wnm010_U20_dT100_part1.svg                                                       fig04
     merged-snapshot_wnm010_U20_dT100_part2.svg                                                       fig05
-    merged-dF_flux_decomposition_varying_dSST_wnm_MYNN25_hr120-240.svg                               fig06
-    spectral_analysis/spectral_analysis_lab_FIXEDDOMAIN_SST_sine_WETLWSW_MYNN25_wnm010_hr120-240.svg fig07
-    merged-spectral_analysis_tracking_wnm1_MYNN25_hr120-240.svg                                      fig08
-    merged-AR_dependency_hr120-240.svg                                                               fig09
-    snapshots_vertical-60/VERTICAL_abs_avg-TRUE_wnm010_120-240.svg                                   fig10
+    merged-dF_flux_decomposition_wnm010_dSST100_MYNN25_hr120-240.svg                                 fig06
+#    spectral_analysis/spectral_analysis_lab_FIXEDDOMAIN_SST_sine_WETLWSW_MYNN25_wnm010_hr120-240.svg fig07
+    merged-spectral_analysis_wnm010_dSST100_MYNN25_hr120-240.svg                                     fig07
+    spectral_analysis_tracking_wnm1/spectral_analysis_lab_FIXEDDOMAIN_SST_sine_WETLWSW_dT100_MYNN25_hr120-240.svg fig08
+    merged-phase_misc_hr120-240.svg                                                                  fig08
+    snapshots_vertical-60/VERTICAL_abs_avg-TRUE_wnm010_120-240.svg                                   fig09
     merged-snapshot_wnm004_U20_dT300_part1.svg                                                       figS01
     merged-snapshot_wnm004_U20_dT300_part2.svg                                                       figS02
 

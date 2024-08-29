@@ -32,18 +32,18 @@ for analysis_style in STYLE1 ; do
 
     for avg_before_analysis in "TRUE" ; do
     #for _bl_scheme in MYNN25  MYJ YSU ; do
-    for _bl_scheme in MYJ YSU ; do
+    for _bl_scheme in MYNN25 MYJ YSU ; do
     #for _bl_scheme in YSU ; do
-    for target_lab in  lab_FIXEDDOMAIN_SST_sine_WETLWSW lab_FIXEDDOMAIN_SST_sine_DRY; do 
+    for target_lab in  lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do #lab_FIXEDDOMAIN_SST_sine_DRY; do 
 
     for wnm in 000 004 005 007 010 020 040 ; do
 
-        if [ "$wnm" = "004" ]; then
+        if [ "$wnm" = "004" ] || [ "$wnm" = "010" ]; then
 
             dTs=( 300 000 050 100 150 200 250 300 )
 
         else
-            dTs=( 000 300 )
+            dTs=( 000 100 300 )
         fi
             
 

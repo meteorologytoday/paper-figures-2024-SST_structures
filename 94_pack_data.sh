@@ -9,22 +9,20 @@ Ugs="20"
 dSSTs="000 050 100 150 200 250 300"
 
 bl_schemes=(
-    MYNN25
-    YSU
+#    MYNN25
     MYJ
+#    YSU
 )
 target_labs=(
     lab_FIXEDDOMAIN_SST_sine_WETLWSW
-    lab_FIXEDDOMAIN_SST_sine_DRY
+#    lab_FIXEDDOMAIN_SST_sine_DRY
 )
 
 input_params=(
-    wnm  004   $(( 24 * 0 )) $(( 24 * 3 ))
-    wnm  004   $(( 24 * 5 )) $(( 24 * 10 ))
-    dSST 300   $(( 24 * 5 )) $(( 24 * 10 ))
-    wnm  004   $(( 24 * 0 )) $(( 24 * 5 ))
-    dSST 300   $(( 24 * 0 )) $(( 24 * 5 ))
+    dSST 100   $(( 24 * 5 )) $(( 24 * 10 ))
+    wnm  010   $(( 24 * 5 )) $(( 24 * 10 ))
 )
+
 
 nparams=4
 nproc=1
