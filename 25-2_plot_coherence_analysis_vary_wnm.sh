@@ -1,8 +1,8 @@
 #!/bin/bash
 
 source 00_setup.sh
-
-
+source 98_trapkill.sh
+nproc=10
 
 time_avg_interval=60   # minutes
 
@@ -10,21 +10,23 @@ hrs_beg=$(( 24 * 5 ))
 hrs_end=$(( 24 * 10 ))
 
 
-thumbnail_skip=2
-#for bl_scheme in MYNN25 MYJ YSU; do
+thumbnail_skip=0
+for dT in 100 ; do
 for bl_scheme in MYNN25 ; do
 for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do
 
-    output_dir=$fig_dir/spectral_analysis_tracking_wnm${tracking_wnm}
+    output_dir=$fig_dir/coherence_analysis
+    
     mkdir -p $output_dir
     
     input_dirs_base=""
     input_dirs=""
     labels=""
-    wnms=""
+    dSSTs=""
     for Ug in 20 ; do
-    for wnm in 004 005 007 010 020 040 ; do
-    for dT in 100; do
+    for wnm in 004 005 007 010 020 040; do
+    #for wnm in 004 010 ; do
+    #for wnm in 004 005 ; do
     
         if [[ "$target_lab" =~ "SEMIWET" ]]; then
             mph=off
@@ -45,48 +47,58 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do
         input_dir_base="$input_dir_root/$casename_base"
         input_dirs_base="$input_dirs_base $input_dir_base"
 
-        wnms="$wnms $wnm"
+        tracking_wnms="$tracking_wnms $wnm"
 
     done
     done
-    done
+        
+    varnames=(
+        UA
+    )
 
     linestyles=(
         "solid"
-        "dashed"
-        "dotted"
-#        "dashdot"
     )
 
     linecolors=(
         "black"
-        "black"
-        "black"
-#        "orange"
     )
 
-    output_file=$output_dir/spectral_analysis_${target_lab}_dT${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
 
-    eval "python3 src/plot_spectral_analysis_trace_wnm.py    \
+    output_file=$output_dir/coherence_on_dSST_vary_wnm_${target_lab}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
+
+    eval "python3 src/plot_coherence_vary_wnm.py    \
         --input-dirs $input_dirs                   \
         --input-dirs-base $input_dirs_base         \
         --output $output_file                      \
         --no-display                               \
-        --tracking-wnms $wnms                      \
+        --no-legend                                \
         --time-rng $hrs_beg $hrs_end               \
         --exp-beg-time '2001-01-01 00:00:00'       \
         --time-rng $hrs_beg $hrs_end               \
         --wrfout-data-interval 3600                \
         --frames-per-wrfout-file 12                \
-        --number-of-harmonics 22                   \
         --labeled-wvlen 100 200 500                \
         --linestyles ${linestyles[@]}              \
         --linecolors ${linecolors[@]}              \
-        --thumbnail-skip $thumbnail_skip           \
-        --varnames DIVA DIVA90PR CONA90PR
-    "
+        --tracking-wnms ${tracking_wnms[@]}        \
+        --varnames "${varnames[@]}"                \
+        --ctl-varname SST                          \
+        --thumbnail-skip $thumbnail_skip           
+    " &
 
-    thumbnail_skip=$(( $thumbnail_skip + 2 ))
+    thumbnail_skip=$(( $thumbnail_skip + 1 ))
+
+    nproc_cnt=$(( $nproc_cnt + 1 ))
+    if (( $nproc_cnt >= $nproc )) ; then
+        echo "Max batch_cnt reached: $nproc"
+        wait
+        nproc_cnt=0
+    fi
 
 done
 done
+done
+
+wait
+echo "Done."

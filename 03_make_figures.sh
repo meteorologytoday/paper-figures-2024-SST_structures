@@ -27,18 +27,18 @@ plot_codes=(
     $sh 12_plot_sounding.sh                                 "BLANK"
  
     # Fig 3
-    $sh 15_plot_timeseries_see_steady_state.sh              "BLANK"
+    $sh 13_plot_timeseries.sh                               "BLANK"
    
     # Fig 4 and 5
-    $sh 13_plot_system_response.sh                          "BLANK"
+    $sh 15_plot_system_response.sh                          "BLANK"
     
     # Fig 6
-    $sh 19-1_plot_misc_vary_dSST.sh "BLANK"
-    $sh 19-2_plot_misc_vary_wnm.sh  "BLANK"
+    $sh 16-1_plot_misc_vary_dSST.sh                         "BLANK"
+    $sh 16-2_plot_misc_vary_wnm.sh                          "BLANK"
 
     # Fig 7
-    $sh 16-1_plot_dF_flux_decomposition_vary_dSST.sh        "BLANK"
-    $sh 16-2_plot_dF_flux_decomposition_vary_wnm.sh         "BLANK"
+    $sh 17-1_plot_dF_flux_decomposition_vary_dSST.sh        "BLANK"
+    $sh 17-2_plot_dF_flux_decomposition_vary_wnm.sh         "BLANK"
     
     # Fig 8
     $sh 18-1_plot_spectral_analysis_linearity_on_dSST.sh    "BLANK"
@@ -46,9 +46,10 @@ plot_codes=(
 
 )
 
-N=$(( ${#plot_codes[@]} / 3 ))
+nparams=3
+N=$(( ${#plot_codes[@]} / $nparams ))
 echo "We have $N file(s) to run..."
-for i in $( seq 1 $(( ${#plot_codes[@]} / 3 )) ) ; do
+for i in $( seq 1 $(( ${#plot_codes[@]} / $nparams )) ) ; do
     
     {
         PROG="${plot_codes[$(( (i-1) * 3 + 0 ))]}"

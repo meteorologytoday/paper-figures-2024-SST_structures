@@ -324,8 +324,8 @@ print("Plotting decomposition...")
 
 
 figsize, gridspec_kw = tool_fig_config.calFigParams(
-    w = 5,
-    h = 3,
+    w = 6 * 0.8,
+    h = 4 * 0.8,
     wspace = 1.0,
     hspace = 0.7,
     w_left = 1.0,
@@ -416,20 +416,22 @@ for i, varname in enumerate(args.varnames):
         title_param = "$L$"
  
     _ax.set_title("(%s) $\\delta$%s as a function of %s" % (args.thumbnail_numbering[i], _plot_info["label"], title_param, ) )
-    _ax.set_ylabel("[ %s ] " % (_plot_info["unit"]))
+    _ax.set_ylabel("[ %s ] " % (_plot_info["unit"]), size=15)
     _ax.grid(visible=True)
 
     if ylim is not None:
         _ax.set_ylim(ylim)
 
     if args.varying_param == "dSST":
-        _ax.set_xlabel("$\\Delta \\mathrm{SST}$ [ $\\mathrm{K}$ ]")
+        xlabel = "$\\Delta \\mathrm{SST}$ [ $\\mathrm{K}$ ]"
     elif args.varying_param == "Ug":
-        _ax.set_xlabel("$U_\\mathrm{g}$ [ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
+        xlabel = "$U_\\mathrm{g}$ [ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]"
     elif args.varying_param == "Lx":
-        _ax.set_xlabel("$ L $ [ $\\mathrm{km} $ ]")
+        xlabel = "$ L $ [ $\\mathrm{km} $ ]"
     elif args.varying_param == "wnm":
-        _ax.set_xlabel("$ L $ [ $\\mathrm{km} $ ]")
+        xlabel = "$ L $ [ $\\mathrm{km} $ ]"
+        
+    _ax.set_xlabel(xlabel, size=15)
 
 
     _ax.legend()

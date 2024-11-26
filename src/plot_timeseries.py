@@ -292,7 +292,8 @@ plot_infos = dict(
         offset = 273.15,
         label = "$\\overline{\\Theta}_A$",
         unit = "$ \\mathrm{K} $",
-        ylim = [12, 17],
+        #ylim = [12, 17],
+        #ylim = [12, 17],
     ),
 
     TOA_m = dict(
@@ -417,7 +418,7 @@ plot_infos = dict(
     WND_sfc = dict(
         label = "$\\overline{U}_A $",
         unit = "$ \\mathrm{m} / \\mathrm{s} $",
-        ylim = [10, 20],
+        #ylim = [10, 20],
     ),
 
     CH = dict(

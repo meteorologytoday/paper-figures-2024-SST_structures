@@ -409,9 +409,23 @@ _ax.plot(X_sT, ds_base["PBLH"], color="magenta", linestyle=":")
 _ax.plot(X_sT, ds["PBLH"], color="magenta", linestyle="--")
 
 
-_ax.set_title("(%s) $\\delta_\\vartheta w$ [$\\mathrm{cm} / \\mathrm{s}$]" % (_thumbnail_numbering,))
+_ax.set_title("(%s) $\\delta w$ [$\\mathrm{cm} / \\mathrm{s}$]" % (_thumbnail_numbering,))
 
 # Begin the line plots
+
+# Thumbnail: Theta_O Theta_A SST
+_ax, _thumbnail_numbering = nextAxes()
+dTA_mean = np.mean(diff_ds["TA"])
+dTO_mean = np.mean(diff_ds["TO"])
+dTSK_mean = np.mean(diff_ds["TSK"])
+_ax.plot(X_sT, diff_ds["TO"] - dTO_mean, color='black', linestyle="-")
+_ax.plot(X_sT, diff_ds["TA"] - dTA_mean, color='black', linestyle="--")
+_ax.plot(X_sT, diff_ds["TSK"] - dTSK_mean, color='red', linestyle=":")
+
+_ax.set_title("(%s) $\\delta \\mathrm{SST}'$ (red :), $\\delta \\Theta'_O$ (black -), and $\\delta \\Theta'_A$ (black --).\n$ \\left( \\delta \\overline{\\mathrm{SST}}, \\delta \\overline{\\Theta}_O, \\delta \\overline{\\Theta}_A \\right) = \\left( %.2f, %.2f, %.2f \\right) \\, \\mathrm{K}$" % (_thumbnail_numbering, dTSK_mean, dTO_mean, dTA_mean))
+_ax.set_ylabel("[ $ \\mathrm{K}$ ]", color="black")
+_ax.set_ylim(args.part1_SST_rng)
+
 
 
 # Thumbnail: The 500m layer U V
@@ -430,7 +444,7 @@ _ax.plot(X_sT, U500 - U500_mean, color="black", linestyle="--")
 _ax.plot(X_sT, V500 - V500_mean, color="black", linestyle=":")
 _ax.plot(X_sT, WND500 - WND500_mean, color="black", linestyle="-")
 
-_ax.set_title("(%s) $\\delta_\\vartheta U_\\mathrm{500m}'$ (-), $\\delta_\\vartheta u'_\\mathrm{500m}$ (--), and $\\delta_\\vartheta v'_\\mathrm{500m}$ (:).\n $\\delta_\\vartheta \\overline{U}_\\mathrm{500m} = %.2f \\, \\mathrm{m} / \\mathrm{s}$. $\\left( \\delta_\\vartheta \\overline{u}_{\\mathrm{500m}}, \\delta_\\vartheta \\overline{v}_{\\mathrm{500m}}\\right) = \\left( %.2f, %.2f \\right) \\, \\mathrm{m} / \\mathrm{s}$. " % (_thumbnail_numbering, WND500_mean, U500_mean, V500_mean,))
+_ax.set_title("(%s) $\\delta U_\\mathrm{500m}'$ (-), $\\delta u'_\\mathrm{500m}$ (--), and $\\delta v'_\\mathrm{500m}$ (:).\n $\\delta \\overline{U}_\\mathrm{500m} = %.2f \\, \\mathrm{m} / \\mathrm{s}$. $\\left( \\delta \\overline{u}_{\\mathrm{500m}}, \\delta \\overline{v}_{\\mathrm{500m}}\\right) = \\left( %.2f, %.2f \\right) \\, \\mathrm{m} / \\mathrm{s}$. " % (_thumbnail_numbering, WND500_mean, U500_mean, V500_mean,))
 _ax.set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
 _ax.set_ylim(args.part1_U500_rng)
 """
@@ -441,11 +455,11 @@ _ax, _thumbnail_numbering = nextAxes()
 U10_mean = np.mean(diff_ds["U10"])
 V10_mean = np.mean(diff_ds["V10"])
 WND10_mean = np.mean(diff_ds["WND10"])
-_ax.plot(X_sT, diff_ds["U10"] - U10_mean, color="black", linestyle="--", label="$\\delta_\\vartheta U_{\\mathrm{10m}} - \\delta_\\vartheta \\overline{U}_{\\mathrm{10m}}$")
-_ax.plot(X_sT, diff_ds["V10"] - V10_mean, color="black", linestyle=":", label="$\\delta_\\vartheta V_{\\mathrm{10m}} - \\delta_\\vartheta \\overline{V}_{\\mathrm{10m}}$")
-_ax.plot(X_sT, diff_ds["WND10"] - WND10_mean, color="black", linestyle="-",   label="$\\left| \\vec{U}_{\\mathrm{10m}} \\right| - \\delta_\\vartheta \\overline{\\left| \\vec{U}_{\\mathrm{10m}} \\right|}$")
+_ax.plot(X_sT, diff_ds["U10"] - U10_mean, color="black", linestyle="--", label="$\\delta U_{\\mathrm{10m}} - \\delta \\overline{U}_{\\mathrm{10m}}$")
+_ax.plot(X_sT, diff_ds["V10"] - V10_mean, color="black", linestyle=":", label="$\\delta V_{\\mathrm{10m}} - \\delta \\overline{V}_{\\mathrm{10m}}$")
+_ax.plot(X_sT, diff_ds["WND10"] - WND10_mean, color="black", linestyle="-",   label="$\\left| \\vec{U}_{\\mathrm{10m}} \\right| - \\delta \\overline{\\left| \\vec{U}_{\\mathrm{10m}} \\right|}$")
 
-_ax.set_title("(%s) $\\delta_\\vartheta U_\\mathrm{10m}'$ (-), $\\delta_\\vartheta u'_\\mathrm{10m}$ (--), and $\\delta_\\vartheta v'_\\mathrm{10m}$ (:).\n $\\delta_\\vartheta \\overline{U}_\\mathrm{10m} = %.2f \\, \\mathrm{m} / \\mathrm{s}$. $\\left( \\delta_\\vartheta \\overline{u}_{\\mathrm{10m}}, \\delta_\\vartheta \\overline{v}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right) \\, \\mathrm{m} / \\mathrm{s}$. " % (_thumbnail_numbering, WND10_mean, U10_mean, V10_mean,))
+_ax.set_title("(%s) $\\delta U_\\mathrm{10m}'$ (-), $\\delta u'_\\mathrm{10m}$ (--), and $\\delta v'_\\mathrm{10m}$ (:).\n $\\delta \\overline{U}_\\mathrm{10m} = %.2f \\, \\mathrm{m} / \\mathrm{s}$. $\\left( \\delta \\overline{u}_{\\mathrm{10m}}, \\delta \\overline{v}_{\\mathrm{10m}}\\right) = \\left( %.2f, %.2f \\right) \\, \\mathrm{m} / \\mathrm{s}$. " % (_thumbnail_numbering, WND10_mean, U10_mean, V10_mean,))
 _ax.set_ylabel("[ $ \\mathrm{m} / \\mathrm{s} $ ]", color="black")
 _ax.set_ylim(args.part1_U10_rng)
 
@@ -470,10 +484,10 @@ _ax.plot(X_sT, ( VOR500 - VOR500_mean ) * 1e5, color="black", linestyle="--")
 
 _ax_twinx.plot(X_sT, (PRECIP - PRECIP_mean)*86400, color='black', linestyle=":", label="$P$")
 
-_ax.set_title("(%s) $\\delta_\\vartheta \\mathrm{D}'_\\mathrm{500m}$ (-), $\\delta_\\vartheta \\zeta'_\\mathrm{500m}$ (--), and $\\delta_\\vartheta P'$ (:).\n$\\left(\\delta_\\vartheta \\overline{D}_\\mathrm{500m}, \\delta_\\vartheta \\overline{\\zeta}_\\mathrm{500m} \\right) = \\left( %.2f, %.2f \\right) \\times 10^{-5} \\, \\mathrm{s}^{-1}$. $\\delta_\\vartheta \\overline{P} = %.2f \\, \\mathrm{mm} / \\mathrm{day} $ " % (_thumbnail_numbering, DIV500_mean*1e5, VOR500_mean*1e5, PRECIP_mean*86400))
+_ax.set_title("(%s) $\\delta \\mathrm{D}'_\\mathrm{500m}$ (-), $\\delta \\zeta'_\\mathrm{500m}$ (--), and $\\delta P'$ (:).\n$\\left(\\delta \\overline{D}_\\mathrm{500m}, \\delta \\overline{\\zeta}_\\mathrm{500m} \\right) = \\left( %.2f, %.2f \\right) \\times 10^{-5} \\, \\mathrm{s}^{-1}$. $\\delta \\overline{P} = %.2f \\, \\mathrm{mm} / \\mathrm{day} $ " % (_thumbnail_numbering, DIV500_mean*1e5, VOR500_mean*1e5, PRECIP_mean*86400))
 
 _ax.set_ylabel("[ $ \\times 10^{-5} \\, \\mathrm{s}^{-1}$ ]", color="black")
-_ax_twinx.set_ylabel("$\\delta_\\vartheta P'$ [ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
+_ax_twinx.set_ylabel("$\\delta P'$ [ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
 _ax.set_ylim(args.part1_DIVVOR500_rng)
 _ax_twinx.set_ylim(args.part1_PRECIP_rng)
 """
@@ -493,10 +507,10 @@ _ax.plot(X_sU[:-1], ( diff_ds["DIV10"] - DIV10_mean ) * 1e5, color="black", line
 _ax.plot(X_sU[:-1], ( diff_ds["VOR10"] - VOR10_mean ) * 1e5, color="black", linestyle="--")
 _ax_twinx.plot(X_sT, (PRECIP - PRECIP_mean)*86400, color='black', linestyle=":", label="$P$")
 
-_ax.set_title("(%s) $\\delta_\\vartheta \\mathrm{D}'_\\mathrm{10m}$ (-), $\\delta_\\vartheta \\zeta'_\\mathrm{10m}$ (--), and $\\delta_\\vartheta P'$ (:).\n$\\left(\\delta_\\vartheta \\overline{D}_\\mathrm{10m}, \\delta_\\vartheta \\overline{\\zeta}_\\mathrm{10m} \\right) = \\left( %.2f, %.2f \\right) \\times 10^{-5} \\, \\mathrm{s}^{-1}$. $\\delta_\\vartheta \\overline{P} = %.2f \\, \\mathrm{mm} / \\mathrm{day} $ " % (_thumbnail_numbering, DIV10_mean*1e5, VOR10_mean*1e5, PRECIP_mean*86400))
+_ax.set_title("(%s) $\\delta \\mathrm{D}'_\\mathrm{10m}$ (-), $\\delta \\zeta'_\\mathrm{10m}$ (--), and $\\delta P'$ (:).\n$\\left(\\delta \\overline{D}_\\mathrm{10m}, \\delta \\overline{\\zeta}_\\mathrm{10m} \\right) = \\left( %.2f, %.2f \\right) \\times 10^{-5} \\, \\mathrm{s}^{-1}$. $\\delta \\overline{P} = %.2f \\, \\mathrm{mm} / \\mathrm{day} $ " % (_thumbnail_numbering, DIV10_mean*1e5, VOR10_mean*1e5, PRECIP_mean*86400))
 
 _ax.set_ylabel("[ $ \\times 10^{-5} \\, \\mathrm{s}^{-1}$ ]", color="black")
-_ax_twinx.set_ylabel("$\\delta_\\vartheta P'$ [ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
+_ax_twinx.set_ylabel("$\\delta P'$ [ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
 _ax.set_ylim(args.part1_DIVVOR10_rng)
 _ax_twinx.set_ylim(args.part1_PRECIP_rng)
 
@@ -515,33 +529,22 @@ _ax.plot(X_sT, (PRECIP - PRECIP_mean)*86400, color='black', label="$P$")
 _ax_twinx = _ax.twinx()
 _ax_twinx.plot(X_sT, (W1km - W1km_mean) * 1e2, color='black', linestyle="--")
 
-_ax.set_title("(%s) $\\delta_\\vartheta P'$ (-) and $\\delta_\\vartheta W'_{\\mathrm{1km}}$ (--). $\\delta_\\vartheta \\overline{P} = %.2f \\, \\mathrm{mm} / \\mathrm{day}$, $\\delta_\\vartheta \\overline{W}_\\mathrm{1km} = %.1f \\, \\mathrm{cm} / \\mathrm{s}$" % (_thumbnail_numbering, PRECIP_mean*86400, W1km_mean*1e2))
+_ax.set_title("(%s) $\\delta P'$ (-) and $\\delta W'_{\\mathrm{1km}}$ (--). $\\delta \\overline{P} = %.2f \\, \\mathrm{mm} / \\mathrm{day}$, $\\delta \\overline{W}_\\mathrm{1km} = %.1f \\, \\mathrm{cm} / \\mathrm{s}$" % (_thumbnail_numbering, PRECIP_mean*86400, W1km_mean*1e2))
 
-_ax.set_ylabel("$\\delta_\\vartheta P'$ [ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
-_ax_twinx.set_ylabel("$\\delta_\\vartheta W'$ [ $ \\mathrm{cm} \\, / \\, \\mathrm{s} $ ]", color="black")
+_ax.set_ylabel("$\\delta P'$ [ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
+_ax_twinx.set_ylabel("$\\delta W'$ [ $ \\mathrm{cm} \\, / \\, \\mathrm{s} $ ]", color="black")
 """
 
 # vapor
 _ax, _thumbnail_numbering = nextAxes()
 dQO_mean = np.mean(diff_ds["QO"])
 dQA_mean = np.mean(diff_ds["QA"])
-_ax.plot(X_sT, ( diff_ds["QO"] - dQO_mean ) * 1e3, color='black', linestyle="-", label="$\\delta_\\vartheta Q_O^* - \\delta_\\vartheta \\overline{Q}^*_O$")
-_ax.plot(X_sT, ( diff_ds["QA"] - dQA_mean ) * 1e3, color='black', linestyle="--",  label="$\\delta_\\vartheta Q_A - \\delta_\\vartheta \\overline{Q}_A$")
-_ax.set_title("(%s) $\\delta_\\vartheta Q'_O$ (-) and $\\delta_\\vartheta Q'_A$ (--). $\\left(\\delta_\\vartheta \\overline{Q}_O^*, \\delta_\\vartheta \\overline{Q}_A \\right) = \\left( %.2f, %.2f \\right)$ g / kg" % (_thumbnail_numbering, dQO_mean*1e3, dQA_mean*1e3))
+_ax.plot(X_sT, ( diff_ds["QO"] - dQO_mean ) * 1e3, color='black', linestyle="-", label="$\\delta Q_O^* - \\delta \\overline{Q}^*_O$")
+_ax.plot(X_sT, 20*( diff_ds["QA"] - dQA_mean ) * 1e3, color='black', linestyle="--",  label="$\\delta Q_A - \\delta \\overline{Q}_A$")
+_ax.set_title("(%s) $\\delta Q'_O$ (-) and $20 \\times \\delta Q'_A$ (--). $\\left(\\delta \\overline{Q}_O^*, \\delta \\overline{Q}_A \\right) = \\left( %.2f, %.2f \\right)$ g / kg" % (_thumbnail_numbering, dQO_mean*1e3, dQA_mean*1e3))
 _ax.set_ylabel("[ $ \\mathrm{g} \\, / \\, \\mathrm{kg}$ ]", color="black")
 _ax.set_ylim(args.part1_Q_rng)
 
-
-# SST
-_ax, _thumbnail_numbering = nextAxes()
-dTA_mean = np.mean(diff_ds["TA"])
-dTO_mean = np.mean(diff_ds["TO"])
-_ax.plot(X_sT, diff_ds["TO"] - dTO_mean, color='black', linestyle="-")
-_ax.plot(X_sT, diff_ds["TA"] - dTA_mean, color='black', linestyle="--")
-
-_ax.set_title("(%s) $\\delta_\\vartheta \\Theta^*'_O$ (-) and $\\delta_\\vartheta \\Theta'_A$ (--). $ \\left( \\delta_\\vartheta \\overline{\\Theta}_O, \\delta_\\vartheta \\overline{\\Theta}_A \\right) = \\left( %.2f, %.2f \\right) \\, {}^\\circ \\mathrm{C}$" % (_thumbnail_numbering, dTO_mean, dTA_mean))
-_ax.set_ylabel("[ $ \\mathrm{K}$ ]", color="black")
-_ax.set_ylim(args.part1_SST_rng)
 
 
 
@@ -621,7 +624,7 @@ iii = 0
 _ax = ax[0, iii]
 _ax.plot(diff_ds_ref_stat["T"], ref_Z_T, 'k-', label="$\\overline{\\theta}$")
 _ax.plot(diff_ds_ref_stat["THETAV"], ref_Z_T, 'r--', label="$\\overline{\\theta_v}$")
-_ax.set_title("(%s) $ \\delta_\\vartheta \\overline{\\theta}$ (-), $\\delta_\\vartheta \\overline{\\theta}_v$ (--)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+_ax.set_title("(%s) $ \\delta \\overline{\\theta}$ (-), $\\delta \\overline{\\theta}_v$ (--)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{K}$ ]")
 _ax.set_xlim(args.part2_THETA_rng)
 #_ax.legend(loc="upper right")
@@ -631,7 +634,7 @@ iii += 1
 _ax = ax[0, iii]
 _ax.plot(diff_ds_ref_stat["Nfreq"] * 1e2, ref_Z_W, 'k-', label="$N$")
 _ax.plot(diff_ds_ref_stat["NVfreq"] * 1e2, ref_Z_W, 'r--', label="$N_v$")
-_ax.set_title("(%s) $\\delta_\\vartheta N$ (-), $\\delta_\\vartheta N_v$ (--)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+_ax.set_title("(%s) $\\delta N$ (-), $\\delta N_v$ (--)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\times 10^{-2} \\mathrm{s}^{-1}$ ]")
 _ax.set_xlim(args.part2_Nfreq_rng)
 #_ax.legend(loc="upper right")
@@ -643,7 +646,7 @@ _ax.plot(diff_ds_ref_stat["WND"], ref_Z_T, linestyle="-", color="black")
 _ax.plot(diff_ds_ref_stat["U"], ref_Z_T, linestyle="--", color="blue")#, ref_Z_T)
 _ax.plot(diff_ds_ref_stat["V"], ref_Z_T, linestyle=":", color="red")#, ref_Z_T)
 
-_ax.set_title("(%s) $\\delta_\\vartheta U $ (-), $\\delta_\\vartheta \\overline{u}$ (--), $\\delta_\\vartheta \\overline{v}$ (..)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+_ax.set_title("(%s) $\\delta U $ (-), $\\delta \\overline{u}$ (--), $\\delta \\overline{v}$ (..)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
 _ax.set_xlim(args.part2_U_rng)
 iii += 1
@@ -654,7 +657,7 @@ iii += 1
 _ax = ax[0, iii]
 _ax.plot(diff_ds_ref_stat["WND"], ref_Z_T, color="black")
 
-_ax.set_title("(%s) $\\delta_\\vartheta \\left| \\overline{\\vec{U}} \\right|$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+_ax.set_title("(%s) $\\delta \\left| \\overline{\\vec{U}} \\right|$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
 _ax.set_xlim(args.U_rng)
 iii += 1
@@ -663,7 +666,7 @@ iii += 1
 # TKE
 _ax = ax[0, iii]
 _ax.plot(diff_ds_ref_stat["QKE"]/2, ref_Z_T, color="black")
-_ax.set_title("(%s) $\\delta_\\vartheta \\overline{\\mathrm{TKE}}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+_ax.set_title("(%s) $\\delta \\overline{\\mathrm{TKE}}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
 _ax.set_xlim(args.part2_TKE_rng)
 iii+=1
@@ -674,7 +677,7 @@ iii+=1
 _ax = ax[0, iii]
 _ax.plot(diff_ds_ref_stat["QVAPOR"] * 1e3, ref_Z_T, color="black")
 
-_ax.set_title("(%s) $\\delta_\\vartheta \\overline{Q}_\\mathrm{vapor}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+_ax.set_title("(%s) $\\delta \\overline{Q}_\\mathrm{vapor}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
 _ax.set_xlabel("[ $\\mathrm{g} \\, / \\, \\mathrm{kg}$ ]")
 _ax.set_xlim(args.part2_Q_rng)
 iii += 1
@@ -685,7 +688,7 @@ if args.part2_tke_analysis == "TRUE":
     # TKE
     _ax = ax[0, iii]
     _ax.plot(diff_ds_ref_stat["QKE"]/2, ref_Z_T)
-    _ax.set_title("(%s) $\\delta_\\vartheta \\overline{\\mathrm{TKE}}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+    _ax.set_title("(%s) $\\delta \\overline{\\mathrm{TKE}}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
     _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
     _ax.set_xlim(args.part2_TKE_rng)
     iii+=1

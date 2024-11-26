@@ -10,12 +10,11 @@ hrs_beg=$(( 24 * 5 ))
 hrs_end=$(( 24 * 10 ))
 
 
-thumbnail_skip=2
-#for bl_scheme in MYNN25 MYJ YSU; do
+thumbnail_skip=0
 for bl_scheme in MYNN25 ; do
 for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do
 
-    output_dir=$fig_dir/spectral_analysis_tracking_wnm${tracking_wnm}
+    output_dir=$fig_dir/DIV_analysis_tracking_wnm${tracking_wnm}
     mkdir -p $output_dir
     
     input_dirs_base=""
@@ -65,9 +64,9 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do
 #        "orange"
     )
 
-    output_file=$output_dir/spectral_analysis_${target_lab}_dT${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
+    output_file=$output_dir/DIV_analysis_${target_lab}_dT${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
 
-    eval "python3 src/plot_spectral_analysis_trace_wnm.py    \
+    eval "python3 src/plot_mixed_response_vary_L.py    \
         --input-dirs $input_dirs                   \
         --input-dirs-base $input_dirs_base         \
         --output $output_file                      \
@@ -83,10 +82,11 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do
         --linestyles ${linestyles[@]}              \
         --linecolors ${linecolors[@]}              \
         --thumbnail-skip $thumbnail_skip           \
+        --no-title                                 \
         --varnames DIVA DIVA90PR CONA90PR
     "
 
-    thumbnail_skip=$(( $thumbnail_skip + 2 ))
+    thumbnail_skip=$(( $thumbnail_skip + 1 ))
 
 done
 done

@@ -174,7 +174,6 @@ def preprocessing(
     V_sfc = V_T.isel(bottom_top=0)
     WND_sfc = (U_sfc**2 + V_sfc**2)**0.5
     WND_sfc = WND_sfc.rename("WND_sfc")
-    RHO_sfc = ds["RHO"].isel(bottom_top=0).rename("RHO_sfc")
 
     HFX_from_FLHC = ds["FLHC"] * TOA
     QFX_from_FLQC = ds["FLQC"] * QOA
@@ -188,21 +187,15 @@ def preprocessing(
     merge_data.append(QFX_from_FLQC)
     merge_data.append(LH_from_FLQC)
 
-    CH = ds["FLHC"] / WND_sfc / RHO_sfc
+    CH = ds["FLHC"] / WND_sfc
     CH = CH.rename("CH")
     
-    CQ = ds["FLQC"] / WND_sfc / RHO_sfc
-    CQ = CQ.rename("CQ") 
-
-    CD_est = ds["UST"] / WND_sfc
-    CD_est = CD_est.rename("CD_est") 
-
+    CQ = ds["FLQC"] / WND_sfc
+    CQ = CQ.rename("CQ")
 
     merge_data.append(WND_sfc)
-    merge_data.append(RHO_sfc)
     merge_data.append(CH)
     merge_data.append(CQ)
-    merge_data.append(CD_est)
 
 
     TTL_RAIN = ds["RAINNC"] + ds["RAINC"] #+ ds["RAINSH"] + ds["SNOWNC"] + ds["HAILNC"] + ds["GRAUPELNC"]
@@ -250,149 +243,60 @@ def analysisStyle1(
 
     dCH = diffVar("CH")
     dCQ = diffVar("CQ")
-    dCD = diffVar("CD")
-    dRHO = diffVar("RHO_sfc")
     dWND = diffVar("WND_sfc")
     dTOA = diffVar("TOA")
     dQOA = diffVar("QOA")
-
-
-    # Sensible heat flux
    
-    dRHO_CH_WND_TOA = (dRHO * ds_base["CH"] * ds_base["WND_sfc"] * ds_base["TOA"]).mean(dim="west_east").rename("dRHO_CH_WND_TOA")
-    RHO_dCH_WND_TOA = (ds_base["RHO_sfc"] * dCH * ds_base["WND_sfc"] * ds_base["TOA"]).mean(dim="west_east").rename("RHO_dCH_WND_TOA")
-    RHO_CH_dWND_TOA = (ds_base["RHO_sfc"] * ds_base["CH"] * dWND * ds_base["TOA"]).mean(dim="west_east").rename("RHO_CH_dWND_TOA")
-    RHO_CH_WND_dTOA = (ds_base["RHO_sfc"] * ds_base["CH"] * ds_base["WND_sfc"] * dTOA).mean(dim="west_east").rename("RHO_CH_WND_dTOA")
+    dCH_WND_TOA = (dCH * ds_base["WND_sfc"] * ds_base["TOA"]).mean(dim="west_east").rename("dCH_WND_TOA")
+    CH_dWND_TOA = (ds_base["CH"] * dWND * ds_base["TOA"]).mean(dim="west_east").rename("CH_dWND_TOA")
+    CH_WND_dTOA = (ds_base["CH"] * ds_base["WND_sfc"] * dTOA).mean(dim="west_east").rename("CH_WND_dTOA")
 
+    CH_dWND_dTOA = (ds_base["CH"] * dWND * dTOA).mean(dim="west_east").rename("CH_dWND_dTOA")
+    dCH_WND_dTOA = (dCH * ds_base["WND_sfc"] * dTOA).mean(dim="west_east").rename("dCH_WND_dTOA")
+    dCH_dWND_TOA = (dCH * dWND * ds_base["TOA"]).mean(dim="west_east").rename("dCH_dWND_TOA")
 
- 
-    dRHO_dCH_WND_TOA = (dRHO * dCH * ds_base["WND_sfc"] * ds_base["TOA"]).mean(dim="west_east").rename("dRHO_dCH_WND_TOA")
-    dRHO_CH_dWND_TOA = (dRHO * ds_base["CH"] * dWND * ds_base["TOA"]).mean(dim="west_east").rename("dRHO_CH_dWND_TOA")
-    dRHO_CH_WND_dTOA = (dRHO * ds_base["CH"] * ds_base["WND_sfc"] * dTOA).mean(dim="west_east").rename("dRHO_CH_WND_dTOA")
-    RHO_dCH_dWND_TOA = (ds_base["RHO_sfc"] * dCH * dWND * ds_base["TOA"]).mean(dim="west_east").rename("RHO_dCH_dWND_TOA")
-    RHO_dCH_WND_dTOA = (ds_base["RHO_sfc"] * dCH * ds_base["WND_sfc"] * dTOA).mean(dim="west_east").rename("RHO_dCH_WND_dTOA")
-   
-    RHO_CH_dWND_dTOA = (ds_base["RHO_sfc"] * ds_base["CH"] * dWND * dTOA).mean(dim="west_east").rename("RHO_CH_dWND_dTOA")
-
-
-
-    RHO_dCH_dWND_dTOA = (ds_base["RHO_sfc"] * dCH * dWND * dTOA).mean(dim="west_east").rename("RHO_dCH_dWND_dTOA")
-    dRHO_CH_dWND_dTOA = (dRHO * ds_base["CH"] * dWND * dTOA).mean(dim="west_east").rename("dRHO_CH_dWND_dTOA")
-    dRHO_dCH_WND_dTOA = (dRHO * dCH * ds_base["WND_sfc"] * dTOA).mean(dim="west_east").rename("dRHO_dCH_WND_dTOA")
-    dRHO_dCH_dWND_TOA = (dRHO * dCH * dWND * ds_base["TOA"]).mean(dim="west_east").rename("dRHO_dCH_dWND_TOA")
+    dCH_dWND_dTOA = (dCH * dWND * dTOA).mean(dim="west_east").rename("dCH_dWND_dTOA")
     
-    dRHO_dCH_dWND_dTOA = (dRHO * dCH * dWND * dTOA).mean(dim="west_east").rename("dRHO_dCH_dWND_dTOA")
     
-   
-    HFX_34 = (RHO_dCH_dWND_dTOA + dRHO_CH_dWND_dTOA + dRHO_dCH_WND_dTOA + dRHO_dCH_dWND_TOA + dRHO_dCH_dWND_dTOA).rename("HFX_34")
+    dCQ_WND_QOA = (dCQ * ds_base["WND_sfc"] * ds_base["QOA"]).mean(dim="west_east").rename("dCQ_WND_QOA")
+    CQ_dWND_QOA = (ds_base["CQ"] * dWND * ds_base["QOA"]).mean(dim="west_east").rename("CQ_dWND_QOA")
+    CQ_WND_dQOA = (ds_base["CQ"] * ds_base["WND_sfc"] * dQOA).mean(dim="west_east").rename("CQ_WND_dQOA")
     
-    HFX_RES = (HFX_34 + dRHO_dCH_WND_TOA + dRHO_CH_dWND_TOA + dRHO_CH_WND_dTOA).rename("HFX_RES")
- 
-    # Latent heat flux
-    dRHO_CQ_WND_QOA = (dRHO * ds_base["CQ"] * ds_base["WND_sfc"] * ds_base["QOA"]).mean(dim="west_east").rename("dRHO_CQ_WND_QOA")
-    RHO_dCQ_WND_QOA = (ds_base["RHO_sfc"] * dCQ * ds_base["WND_sfc"] * ds_base["QOA"]).mean(dim="west_east").rename("RHO_dCQ_WND_QOA")
-    RHO_CQ_dWND_QOA = (ds_base["RHO_sfc"] * ds_base["CQ"] * dWND * ds_base["QOA"]).mean(dim="west_east").rename("RHO_CQ_dWND_QOA")
-    RHO_CQ_WND_dQOA = (ds_base["RHO_sfc"] * ds_base["CQ"] * ds_base["WND_sfc"] * dQOA).mean(dim="west_east").rename("RHO_CQ_WND_dQOA")
-
-
- 
-    dRHO_dCQ_WND_QOA = (dRHO * dCQ * ds_base["WND_sfc"] * ds_base["QOA"]).mean(dim="west_east").rename("dRHO_dCQ_WND_QOA")
-    dRHO_CQ_dWND_QOA = (dRHO * ds_base["CQ"] * dWND * ds_base["QOA"]).mean(dim="west_east").rename("dRHO_CQ_dWND_QOA")
-    dRHO_CQ_WND_dQOA = (dRHO * ds_base["CQ"] * ds_base["WND_sfc"] * dQOA).mean(dim="west_east").rename("dRHO_CQ_WND_dQOA")
-    RHO_dCQ_dWND_QOA = (ds_base["RHO_sfc"] * dCQ * dWND * ds_base["QOA"]).mean(dim="west_east").rename("RHO_dCQ_dWND_QOA")
-    RHO_dCQ_WND_dQOA = (ds_base["RHO_sfc"] * dCQ * ds_base["WND_sfc"] * dQOA).mean(dim="west_east").rename("RHO_dCQ_WND_dQOA")
-   
-    RHO_CQ_dWND_dQOA = (ds_base["RHO_sfc"] * ds_base["CQ"] * dWND * dQOA).mean(dim="west_east").rename("RHO_CQ_dWND_dQOA")
-
-
-
-    RHO_dCQ_dWND_dQOA = (ds_base["RHO_sfc"] * dCQ * dWND * dQOA).mean(dim="west_east").rename("RHO_dCQ_dWND_dQOA")
-    dRHO_CQ_dWND_dQOA = (dRHO * ds_base["CQ"] * dWND * dQOA).mean(dim="west_east").rename("dRHO_CQ_dWND_dQOA")
-    dRHO_dCQ_WND_dQOA = (dRHO * dCQ * ds_base["WND_sfc"] * dQOA).mean(dim="west_east").rename("dRHO_dCQ_WND_dQOA")
-    dRHO_dCQ_dWND_QOA = (dRHO * dCQ * dWND * ds_base["QOA"]).mean(dim="west_east").rename("dRHO_dCQ_dWND_QOA")
+    dCQ_dWND_QOA = (dCQ * dWND * ds_base["QOA"]).mean(dim="west_east").rename("dCQ_dWND_QOA")
+    CQ_dWND_dQOA = (ds_base["CQ"] * dWND * dQOA).mean(dim="west_east").rename("CQ_dWND_dQOA")
+    dCQ_WND_dQOA = (dCQ * ds_base["WND_sfc"] * dQOA).mean(dim="west_east").rename("dCQ_WND_dQOA")
     
-    dRHO_dCQ_dWND_dQOA = (dRHO * dCQ * dWND * dQOA).mean(dim="west_east").rename("dRHO_dCQ_dWND_dQOA")
+    dCQ_dWND_dQOA = (dCQ * dWND * dQOA).mean(dim="west_east").rename("dCQ_dWND_dQOA")
     
-    QFX_34 = (RHO_dCQ_dWND_dQOA + dRHO_CQ_dWND_dQOA + dRHO_dCQ_WND_dQOA + dRHO_dCQ_dWND_QOA + dRHO_dCQ_dWND_dQOA).rename("QFX_34")
-    QFX_RES = (QFX_34 + dRHO_dCQ_WND_QOA + dRHO_CQ_dWND_QOA + dRHO_CQ_WND_dQOA).rename("QFX_RES")
- 
-
-    # momentum flux
-    dRHO_CD_WND2 = (dRHO * ds_base["CD"] * ds_base["WND_sfc"]**2).mean(dim="west_east").rename("dRHO_CD_WND2")
-    RHO_dCD_WND2 = (ds_base["RHO_sfc"] * dCD * ds_base["WND_sfc"]**2).mean(dim="west_east").rename("RHO_dCD_WND2")
-    RHO_CD_2WNDdWND = (ds_base["RHO_sfc"] * ds_base["CD"] * 2 * ds_base["WND_sfc"] * dWND).mean(dim="west_east").rename("RHO_CD_2WNDdWND")
-    
-    dRHO_dCD_WND2 = (dRHO * dCD * ds_base["WND_sfc"]**2).mean(dim="west_east").rename("dRHO_dCD_WND2")
-    dRHO_CD_2WNDdWND = (dRHO * ds_base["CD"] * 2 * ds_base["WND_sfc"] * dWND).mean(dim="west_east").rename("dRHO_CD_2WNDdWND")
-    RHO_dCD_2WNDdWND = (ds_base["RHO_sfc"] * dCD * 2 * ds_base["WND_sfc"] * dWND).mean(dim="west_east").rename("RHO_dCD_2WNDdWND")
-    RHO_CD_dWND2 = (ds_base["RHO_sfc"] * ds_base["CD"] * dWND**2).mean(dim="west_east").rename("RHO_CD_dWND2")
-
-    
-    RHO_dCD_dWND2 = (ds_base["RHO_sfc"] * dCD * dWND**2).mean(dim="west_east").rename("RHO_dCD_dWND2")
-    dRHO_CD_dWND2 = (dRHO * ds_base["CD"] * dWND**2).mean(dim="west_east").rename("dRHO_CD_dWND2")
-    dRHO_dCD_2WNDdWND = (dRHO * dCD * 2 * ds_base["WND_sfc"] * dWND).mean(dim="west_east").rename("dRHO_dCD_2WNDdWND")
-    
-    dRHO_dCD_dWND2 = (dRHO * dCD * dWND**2).mean(dim="west_east").rename("dRHO_dCD_dWND2")
-
-    MFX_34 = (RHO_dCD_dWND2 + dRHO_CD_dWND2 + dRHO_dCD_2WNDdWND + dRHO_dCD_dWND2).rename("MFX_34")
-    MFX_RES = (MFX_34 + dRHO_dCD_WND2 + dRHO_CD_2WNDdWND).rename("MFX_RES")
-    
-    # ======================
-
     
     dHFX_approx = (
-        
-          dRHO_CH_WND_TOA
-        + RHO_dCH_WND_TOA
-        + RHO_CH_dWND_TOA
-        + RHO_CH_WND_dTOA
 
-        + dRHO_dCH_WND_TOA
-        + dRHO_CH_dWND_TOA
-        + dRHO_CH_WND_dTOA
-        + RHO_dCH_dWND_TOA
-        + RHO_dCH_WND_dTOA
-        + RHO_CH_dWND_dTOA
+          dCH_WND_TOA
+        + CH_dWND_TOA
+        + CH_WND_dTOA
 
-        + HFX_34 
- 
+        + CH_dWND_dTOA
+        + dCH_WND_dTOA
+        + dCH_dWND_TOA
+
+        + dCH_dWND_dTOA
+    
     ).rename("dHFX_approx")
 
 
     dQFX_approx = (
- 
-          dRHO_CQ_WND_QOA
-        + RHO_dCQ_WND_QOA
-        + RHO_CQ_dWND_QOA
-        + RHO_CQ_WND_dQOA
-
-        + dRHO_dCQ_WND_QOA
-        + dRHO_CQ_dWND_QOA
-        + dRHO_CQ_WND_dQOA
-        + RHO_dCQ_dWND_QOA
-        + RHO_dCQ_WND_dQOA
-        + RHO_CQ_dWND_dQOA
-
-        + QFX_34   
         
+          dCQ_WND_QOA
+        + CQ_dWND_QOA
+        + CQ_WND_dQOA
+
+        + CQ_dWND_dQOA 
+        + dCQ_WND_dQOA 
+        + dCQ_dWND_QOA 
+
+        + dCQ_dWND_dQOA
+
     ).rename("dQFX_approx")
-
-
-    dMFX_approx = (
- 
-          dRHO_CD_WND2 
-        + RHO_dCD_WND2 
-        + RHO_CD_2WNDdWND 
-    
-        + dRHO_dCD_WND2 
-        + dRHO_CD_2WNDdWND 
-        + RHO_dCD_2WNDdWND 
-        + RHO_CD_dWND2 
-    
-        + MFX_34 
-        
-    ).rename("dMFX_approx")
-
 
     dLH_approx = (Lq * dQFX_approx).rename("dLH_approx")
     
@@ -412,76 +316,31 @@ def analysisStyle1(
     merge_data = []
         
     merge_data.extend([
-        dMFX_approx,
         dHFX_approx, dQFX_approx, dLH_approx,
         dHFX, dQFX, dLH,
         dHFX_from_FLHC, dQFX_from_FLQC, dLH_from_FLQC,
 
+        #dHFX_approx2,
 
-        # Sensible heat flux
-        dRHO_CH_WND_TOA,
-        RHO_dCH_WND_TOA,
-        RHO_CH_dWND_TOA,
-        RHO_CH_WND_dTOA,
-     
-        dRHO_dCH_WND_TOA,
-        dRHO_CH_dWND_TOA,
-        dRHO_CH_WND_dTOA,
-        RHO_dCH_dWND_TOA,
-        RHO_dCH_WND_dTOA,
-        RHO_CH_dWND_dTOA,
+        dCH_WND_TOA,
+        CH_dWND_TOA,
+        CH_WND_dTOA,
 
-        RHO_dCH_dWND_dTOA,
-        dRHO_CH_dWND_dTOA,
-        dRHO_dCH_WND_dTOA,
-        dRHO_dCH_dWND_TOA,
+        dCH_dWND_TOA,
+        CH_dWND_dTOA,
+        dCH_WND_dTOA,
+        dCH_dWND_dTOA,
         
-        dRHO_dCH_dWND_dTOA,
-       
-        HFX_34,
-        HFX_RES,
-     
-        # Latent heat flux
-        dRHO_CQ_WND_QOA,
-        RHO_dCQ_WND_QOA,
-        RHO_CQ_dWND_QOA,
-        RHO_CQ_WND_dQOA,
-     
-        dRHO_dCQ_WND_QOA,
-        dRHO_CQ_dWND_QOA,
-        dRHO_CQ_WND_dQOA,
-        RHO_dCQ_dWND_QOA,
-        RHO_dCQ_WND_dQOA,
-        RHO_CQ_dWND_dQOA,
-
-        RHO_dCQ_dWND_dQOA,
-        dRHO_CQ_dWND_dQOA,
-        dRHO_dCQ_WND_dQOA,
-        dRHO_dCQ_dWND_QOA,
-        
-        dRHO_dCQ_dWND_dQOA,
-        
-        QFX_34,
-        QFX_RES,
-
-        # momentum flux
-        dRHO_CD_WND2,
-        RHO_dCD_WND2,
-        RHO_CD_2WNDdWND,
-        
-        dRHO_dCD_WND2,
-        dRHO_CD_2WNDdWND,
-        RHO_dCD_2WNDdWND,
-        RHO_CD_dWND2,
-        
-        RHO_dCD_dWND2,
-        dRHO_CD_dWND2,
-        dRHO_dCD_2WNDdWND,
-        
-        dRHO_dCD_dWND2,
-
-        MFX_34,
-        MFX_RES,
+ 
+        dCQ_WND_QOA,
+        CQ_dWND_QOA,
+        CQ_WND_dQOA,       
+ 
+        dCQ_dWND_QOA,
+        CQ_dWND_dQOA,
+        dCQ_WND_dQOA,
+        dCQ_dWND_dQOA,
+ 
     ])
 
     return merge_data 

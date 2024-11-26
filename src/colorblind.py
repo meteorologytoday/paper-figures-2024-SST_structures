@@ -18,4 +18,17 @@ for k, c in BW8color.items():
 
 
 
+if __name__ == "__main__": # Plot color example
 
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as patches
+
+    fig, ax = plt.subplots()
+
+    # Create a rectangle
+    rect = patches.Rectangle((0.1, 0.1), 0.5, 0.3, facecolor='blue', edgecolor='red')
+
+    # Add the rectangle to the axes
+    ax.add_patch(rect)
+
+    plt.show()

@@ -1,6 +1,8 @@
 #!/bin/bash
 
 source 00_setup.sh
+    
+how_many_cycles_to_plot=2
 
 
 beg_days=(
@@ -28,7 +30,8 @@ bl_schemes=(
 source 98_trapkill.sh
 
 for dT in 100; do
-for wnm in 010 004 ; do #020 ; do
+#for wnm in 010 004 ; do #020 ; do
+for wnm in 010 ; do
 for U in "20" ; do
 for target_lab in "${target_labs[@]}" ; do
 for _bl_scheme in "${bl_schemes[@]}" ; do
@@ -78,7 +81,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
 
     mkdir -p $output_dir
 
-    part1_x_rng=$( python3 -c "print(\"%.3f\" % ( $Lx / float('${wnm}'.lstrip('0')) , ))" )
+    part1_x_rng=$( python3 -c "print(\"%.3f\" % ( $how_many_cycles_to_plot * $Lx / float('${wnm}'.lstrip('0')) , ))" )
 
 
     for beg_day in "${beg_days[@]}"; do

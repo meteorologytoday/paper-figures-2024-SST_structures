@@ -46,7 +46,6 @@ plot_infos = dict(
         label = "$C_{Q}$",
     ), 
 
-
     UA = dict(
         selector = dict(bottom_top=0),
         wrf_varname = "U",
@@ -62,37 +61,9 @@ plot_infos = dict(
     ), 
 
 
-    VORA = dict(
-        selector = dict(bottom_top=0),
-        wrf_varname = "VOR",
-        label = "$\\zeta_{A}$",
-        unit = "$\\mathrm{s}^{-1}$",
-    ), 
-
-    DIVA = dict(
-        selector = dict(bottom_top=0),
-        wrf_varname = "DIV",
-        label = "$D_{A}$",
-        unit = "$\\mathrm{s}^{-1}$",
-    ), 
-
-    DIVA90PR = dict(
-        selector = dict(bottom_top=0),
-        wrf_varname = "DIV",
-        label = "$D^{\\mathrm{90}}_{A}$",
-        unit = "$\\mathrm{s}^{-1}$",
-    ), 
-
-    CONA90PR = dict(
-        selector = dict(bottom_top=0),
-        wrf_varname = "DIV",
-        label = "$C^{\\mathrm{90}}_{A}$",
-        unit = "$\\mathrm{s}^{-1}$",
-    ), 
-
-
 
 )
+
 
 
 if __name__ == "__main__":
@@ -109,13 +80,14 @@ if __name__ == "__main__":
     parser.add_argument('--wrfout-data-interval', type=int, help='Time interval between each adjacent record in wrfout files in seconds.', required=True)
     parser.add_argument('--frames-per-wrfout-file', type=int, help='Number of frames in each wrfout file.', required=True)
     parser.add_argument('--number-of-harmonics', type=int, help='Number of frames in each wrfout file.', default=None)
-    parser.add_argument('--varnames', type=str, nargs="+", help="Varnames to do the analysis.", required=True)
+    parser.add_argument('--ctl-varname', type=str, help="The varname to be the forcing.", required=True)
+    parser.add_argument('--varnames', type=str, nargs="+", help="Varnames to do the linar response.", required=True)
     parser.add_argument('--linestyles', type=str, nargs="+", help="Varnames to do the analysis.", required=True)
     parser.add_argument('--linecolors', type=str, nargs="+", help="Varnames to do the analysis.", required=True)
     parser.add_argument('--thumbnail-numbering', type=str, default="abcdefghijklmn")
-    parser.add_argument('--thumbnail-skip', type=int, default=0)
     parser.add_argument('--labeled-wvlen', type=int, nargs="*", help='Number of frames in each wrfout file.', default=[])
     parser.add_argument('--wrfout-suffix', type=str, default="")
+    parser.add_argument('--magnitude-threshold', type=float, help='The threshold that set direction=0 if magnitude is too low.', default=1e-5)
 
 
 
@@ -129,22 +101,16 @@ if __name__ == "__main__":
         
         labels = [ "%d" % i for i in range(len(args.input_dirs)) ]
         
-    elif len(labels) != len(args.input_dirs):
-        raise Exception("Length of `--labels` (%d) does not equal to length of `--input-dirs` (%d). " % (
+    elif len(labels) < len(args.input_dirs):
+        raise Exception("Length of `--labels` (%d) does not equal or exceed to length of `--input-dirs` (%d). " % (
             len(labels),
             len(args.input_dirs),
         ))
 
-    if len(args.linestyles) != len(args.varnames):
-        raise Exception("Length of `--linestyles` (%d) does not equal to length of `--varnames` (%d). " % (
+    if len(args.linestyles) < len(args.input_dirs):
+        raise Exception("Length of `--linestyles` (%d) does not equal or exceed to length of `--input-dirs` (%d). " % (
             len(args.linestyles),
-            len(args.varnames),
-        ))
-
-    if len(args.linecolors) != len(args.varnames):
-        raise Exception("Length of `--linecolors` (%d) does not equal to length of `--varnames` (%d). " % (
-            len(args.linecolors),
-            len(args.varnames),
+            len(args.input_dirs),
         ))
 
 
@@ -181,7 +147,8 @@ if __name__ == "__main__":
     
     # Loading     
                 
-    data = [] 
+   
+    data = []
 
     for i in range(len(args.input_dirs)):
         
@@ -202,7 +169,7 @@ if __name__ == "__main__":
                 verbose=False,
                 inclusive="left",
             )
-
+            
             DX = ds_base.attrs["DX"]
 
             ds_base = xr.merge([
@@ -214,10 +181,9 @@ if __name__ == "__main__":
         Nx = len(ds_base.coords["west_east"])
         X_sU = DX * np.arange(Nx+1)
         X_sT = (X_sU[1:] + X_sU[:-1]) / 2
-        freq = np.fft.fftfreq(Nx, d=DX)
-
-        freq_N = Nx // 2
         
+        freq = np.fft.fftfreq(Nx, d=DX)
+        freq_N = Nx // 2
          
      
         print("Loading the %d-th wrf dir: %s" % (i, input_dir,))
@@ -232,14 +198,20 @@ if __name__ == "__main__":
             verbose=False,
             inclusive="left",
         )
-            
+ 
         ds = xr.merge([
             ds,
             wrf_preprocess.genAnalysis(ds, wsm.data_interval),
         ]).mean(dim="time")
         
-        d = dict()
-        for varname in args.varnames + ["SST",]:
+        d_anom = dict()
+
+        for varname in args.varnames + [args.ctl_varname,]:
+
+            if varname in d_anom:
+                print("Varname %s is already loaded. Skip." % (varname,))
+                continue
+
             plot_info = plot_infos[varname]
 
             selector = plot_info["selector"] if "selector" in plot_info else None
@@ -248,11 +220,9 @@ if __name__ == "__main__":
             da_base = ds_base[wrf_varname]
             da = ds[wrf_varname]
 
-
             if selector is not None:
                 da_base = da_base.isel(**selector)
                 da      = da.isel(**selector)
-           
              
             if "south_north" in da.dims:
                 da = da.isel(south_north=0)
@@ -269,69 +239,52 @@ if __name__ == "__main__":
                 dvar = ( dvar[1:] + dvar[:-1] ) / 2
  
             # Compute transfer function
-            d[varname] = dict(
-                sp = np.fft.fft(dvar) / Nx,
-                freq = freq,
-                Lx = DX * Nx,
-                Nx = Nx,
-                dvar = dvar,
-            )
+            d_anom[varname] = dvar
 
+
+
+           
+        X0 = d_anom[args.ctl_varname]
+        sp_X0 = np.fft.fft(X0) / Nx
+        d = dict()
+        for varname in args.varnames:
+            
+            print("Doing coherence analysis of %s" % (varname,)) 
+            X1 = d_anom[varname]
+            sp_X1 = np.fft.fft(X1) / Nx
+            
+            G_X0X1 = 2 * np.real(sp_X0 * np.conjugate(sp_X1))
+            G_X0X0 = np.abs(sp_X0)**2
+            G_X1X1 = np.abs(sp_X1)**2
+           
+
+            coherence = G_X0X1 / (G_X0X0 * G_X1X1)
+            
+            test_signal = G_X0X0 * G_X1X1 
+    
+            #coherence[test_signal < 1e-5] = np.nan
+            print("G_X0X0: ", G_X0X0[:11])
+            print("G_X1X1: ", G_X1X1[:11])
+            print("G_X0X1: ", G_X0X1[:11])
+            print("coherence: ", coherence[:11])
+            d[varname] = dict(
+                coherence = coherence,
+                freq = freq,
+            )
+ 
+            
 
         data.append(d)
 
-    # Convert data into a function of wvn
-    tracking = dict()
-    for varname in args.varnames:
-
-        mags = np.zeros((len(data),))
-        angs = np.zeros_like(mags)
-        Lxs = np.zeros_like(mags)
-        tracking_wnms = np.array(args.tracking_wnms)
-
-        if varname in ["DIVA90PR", "CONA90PR"]:
-
-            tmp = np.zeros((len(data),))
-            for i, d in enumerate(data):
-     
-                dd = d[varname]["dvar"]
-                tracking_wnm = args.tracking_wnms[i]
-                
-                if varname == "CONA90PR":
-                    dd = - dd
 
 
-                # Calculate the 90th percentile
-                threshold = np.percentile(dd, 90)
+    if args.number_of_harmonics is None:
+        
+        cut_off = freq_N
 
-                # Get the values greater than or equal to the threshold
-                tmp[i] = np.mean(dd[dd >= threshold]) 
-                Lxs[i] = d[varname]["Lx"] / tracking_wnm
-            
-            tracking[varname] = dict(data=tmp, Lxs=Lxs)
-
-        else:
-            for i, d in enumerate(data):
-     
-                dd = d[varname]
-
-                tracking_wnm = args.tracking_wnms[i]
-                adj_phase_rad = - 0.5 / (dd["Nx"] / tracking_wnm) * 2 * np.pi
-                adj_cpx = np.cos(adj_phase_rad) + 1j * np.sin(adj_phase_rad)
-                 
-
-                sp = dd["sp"][tracking_wnm] * adj_cpx
-                
-                
-
-                mags[i] = np.abs(sp)
-                angs[i] = np.angle(sp, deg=True)
-                Lxs[i] = d[varname]["Lx"] / tracking_wnm
-            
-                
-            tracking[varname] = dict(mags=mags, angs=angs, Lxs=Lxs) 
-
-
+    else:
+        
+        cut_off = args.number_of_harmonics
 
     # Plot data
     print("Loading Matplotlib...")
@@ -354,9 +307,9 @@ if __name__ == "__main__":
     import matplotlib.ticker as mticker
     import cartopy.crs as ccrs
     import tool_fig_config
-    import colorblind
-    ncol = 2
-    nrow = 1
+
+    ncol = 1
+    nrow = len(args.input_dirs)
 
     figsize, gridspec_kw = tool_fig_config.calFigParams(
         w = 6,
@@ -382,68 +335,47 @@ if __name__ == "__main__":
         squeeze=False,
     )
     
-    for i, varname in enumerate(args.varnames):
-        
-        _tracking = tracking[varname]
-        plot_info = plot_infos[varname]
+    
+    label_wvlen = np.array(args.labeled_wvlen) * 1e3
+    label_freq = label_wvlen**(-1) 
+    label_wvlen_text = ["%d" % wvlen for wvlen in (label_wvlen / 1e3) ]
+    
+    for i, _d in enumerate(data):
+       
+        _ax = ax[i, 0]
+        label = args.labels[i]
 
-        linestyle = args.linestyles[i]
-        linecolor = colorblind.BW8color[args.linecolors[i]]
 
-        varname_label = plot_info["label"] if "label" in plot_info else varname
-        varname_label = "$\\delta$%s" % (varname_label,)
-
-        _ax1 = ax[0, 0]
-        _ax2 = ax[0, 1]
-        Lxs = _tracking["Lxs"] / 1e3
-
-        if varname in ["DIVA90PR", "CONA90PR"]:
+        for j, varname in enumerate(args.varnames):
             
-            d = _tracking["data"]
-            rel_mags = d / d[0] * 100
-            _ax1.plot(Lxs, rel_mags, marker='o', linestyle=linestyle, color=linecolor, label=varname_label)
+    
+            _dd = _d[varname]
+            plot_info = plot_infos[varname]
 
-        else:
-            mags = _tracking["mags"]
-            angs = _tracking["angs"]
+            linestyle = args.linestyles[i]
+            linecolor = args.linecolors[i]
 
-            #wnms = _tracking["wnms"]
-            rel_mags = mags / mags[0] * 100
+            varname_label = plot_info["label"] if "label" in plot_info else varname
+            unit = plot_info["unit"] if "unit" in plot_info else "???"
+ 
+            x = freq[1:cut_off]
 
-            _ax1.plot(Lxs, rel_mags, marker='o', linestyle=linestyle, color=linecolor, label=varname_label)
-            _ax2.plot(Lxs, angs, marker='o', linestyle=linestyle, color=linecolor, label=varname_label)
+            coherence = _dd["coherence"][1:cut_off]
+ 
+            _ax.plot( x, coherence, label=labels[i], marker='o', linestyle=linestyle, color=linecolor)
             
 
-        if i == 0: 
-            #_ax1.set_ylabel("[ %s ]" % (unit,))
-            _ax1.set_title("(%s) Relative magnitude of the linear response" % (args.thumbnail_numbering[args.thumbnail_skip+0],))
-            _ax2.set_title("(%s) Phase angle of the linear response" % (args.thumbnail_numbering[args.thumbnail_skip+1],))
 
-
-
-
-    #label_wvlen = np.array(args.labeled_wvlen) * 1e3
-    xticks = Lxs
-    xticklabels = ["%d" % np.round(Lx) for Lx in (Lxs) ]
-
-    for _ax in ax.flatten():
+            
+        _ax.set_title("(%s) %s" % (args.thumbnail_numbering[i], label))
         _ax.grid()
-        _ax.set_xticks(Lxs, labels=xticklabels)
+        _ax.set_xticks(label_freq, labels=label_wvlen_text)
         _ax.set_xlabel("Wavelength [ km ]")
-        _ax.legend(loc="lower right")
- 
-    for _ax in ax[:, 0].flatten():
-        #_ax.set_ylim([-180, 180])
-        #_ax.set_yticks(np.linspace(0, 1, 11) * 100)
-        #_ax.set_yticks(np.arange(-180, 210, 30))
-        _ax.set_ylabel("[ $\\%$ ]")
         
-    for _ax in ax[:, 1].flatten():
         #_ax.set_ylim([-180, 180])
-        _ax.set_yticks(np.arange(-180, 90, 30))
-        _ax.set_ylabel("[ deg ]")
- 
-               
+        #_ax.set_yticks(np.arange(-180, 210, 30))
+        _ax.set_ylabel("Coherence [ None ]")
+                
 
     if args.output != "":
         print("Saving output: ", args.output) 

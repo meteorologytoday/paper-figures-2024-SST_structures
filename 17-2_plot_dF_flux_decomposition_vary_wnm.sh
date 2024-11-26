@@ -32,7 +32,7 @@ for hr in 120-240 ; do
         --LH-rng  -5 15 \
         --HFX-rng -5 10 \
         --spacing 4.0 \
-        --thumbnail-numbering cdefg \
+        --thumbnail-numbering abcdefg \
         --domain-size $Lx \
         --no-display
             

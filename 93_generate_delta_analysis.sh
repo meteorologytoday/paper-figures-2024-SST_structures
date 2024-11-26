@@ -16,35 +16,28 @@ time_avg_interval=60   # minutes
 batch_cnt_limit=3
 nproc=10
 
-#batch_cnt_limit=1
-#nproc=1
-
-
-
-trap "exit" INT TERM
-trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
+source 98_trapkill.sh
 
 for analysis_style in STYLE1 ; do
 
 
-    output_dir_root=$gendata_dir/delta_analysis_style-$analysis_style
+    output_dir_root=$gendata_dir/delta_analysis_style_new-$analysis_style
 
 
     for avg_before_analysis in "TRUE" ; do
-    #for _bl_scheme in MYNN25  MYJ YSU ; do
-    for _bl_scheme in MYNN25 MYJ YSU ; do
-    #for _bl_scheme in YSU ; do
+    for _bl_scheme in MYNN25  MYJ YSU ; do
     for target_lab in  lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do #lab_FIXEDDOMAIN_SST_sine_DRY; do 
 
-    for wnm in 000 004 005 007 010 020 040 ; do
+    #for wnm in 000 004 005 007 010 020 040 ; do
+    for wnm in 004 005 007 010 020 040 000 ; do
 
-        if [ "$wnm" = "004" ] || [ "$wnm" = "010" ]; then
+#        if [ "$wnm" = "004" ] || [ "$wnm" = "010" ]; then
 
-            dTs=( 300 000 010 030 050 100 150 200 250 300 )
+            dTs=( 100 000 010 030 050 100 150 200 250 300 )
 
-        else
-            dTs=( 000 100 300 )
-        fi
+#        else
+#            dTs=( 000 100 300 )
+#        fi
             
 
     for dT in "${dTs[@]}" ; do

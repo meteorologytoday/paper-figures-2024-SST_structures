@@ -6,12 +6,12 @@ dhr=24
 
 wnms="004 005 007 010 020 040"
 Ugs="20"
-dSSTs="000 050 100 150 200 250 300"
+dSSTs="000 010 030 050 100 150 200 250 300"
 
 bl_schemes=(
-#    MYNN25
+    MYNN25
     MYJ
-#    YSU
+    YSU
 )
 target_labs=(
     lab_FIXEDDOMAIN_SST_sine_WETLWSW
@@ -19,15 +19,15 @@ target_labs=(
 )
 
 input_params=(
-    dSST 100   $(( 24 * 5 )) $(( 24 * 10 ))
     wnm  010   $(( 24 * 5 )) $(( 24 * 10 ))
+    dSST 100   $(( 24 * 5 )) $(( 24 * 10 ))
 )
 
 
 nparams=4
 nproc=1
 
-analysis_root=$gendata_dir/delta_analysis_style-STYLE1
+analysis_root=$gendata_dir/delta_analysis_style_new-STYLE1/
 
 
 N=$(( ${#input_params[@]} / $nparams ))

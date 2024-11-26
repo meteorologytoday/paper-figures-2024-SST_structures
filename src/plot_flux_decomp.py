@@ -28,7 +28,8 @@ args = parser.parse_args()
 
 print(args)
 
-ncols = 2
+plotted_fluxes = ["sensible", "latent", "momentum"]
+ncols = len(plotted_fluxes)
 nrows = 1
         
 if args.varying_param == "wnm" and args.domain_size is None:
@@ -53,6 +54,240 @@ coord_x = ds.coords[args.varying_param]
 
 
 if args.delta_analysis:
+
+    plot_infos = dict(
+
+        # Sensible
+        dRHO_CH_WND_TOA = dict(
+            label = "$ \\delta \\overline{\\rho}_A \\, \\overline{C}_H \\, \\overline{U}_A \\, \\overline{\\Theta}_{OA} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        RHO_dCH_WND_TOA = dict(
+            label = "$\\overline{ \\rho }_A \\, \\delta \\overline{C}_H \\, \\overline{U}_A \\, \\overline{\\Theta}_{OA} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        RHO_CH_dWND_TOA = dict(
+            label = "$\\overline{ \\rho }_A \\, \\overline{C}_H \\, \\delta \\overline{U}_A \\, \\overline{\\Theta}_{OA} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        RHO_CH_WND_dTOA = dict(
+            label = "$\\overline{ \\rho }_A \\, \\overline{C}_H \\, \\overline{U}_A \\,  \\delta \\overline{\\Theta}_{OA} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+
+
+        dRHO_dCH_WND_TOA = dict(
+            label = "$\\overline{ \\delta \\rho \\, \\delta C_H } \\, \\overline{\\Theta}_{OA}$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        dRHO_CH_dWND_TOA = dict(
+            label = "$\\overline{C}_H \\, \\overline{\\Theta}_{OA} \\, \\overline{ \\delta \\rho \\, \\delta U_A } $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        dRHO_CH_WND_dTOA = dict(
+            label = "$\\overline{C}_H \\, \\overline{U}_{A} \\, \\overline{ \\delta \\rho \\, \\delta \\Theta_{OA} } $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        RHO_dCH_dWND_TOA = dict(
+            label = "$\\overline{\\rho}_A \\, \\overline{\\Theta}_{OA} \\, \\overline{ \\delta C_H \\, \\delta U_A} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        RHO_dCH_WND_dTOA = dict(
+            label = "$\\overline{\\rho}_A \\, \\overline{U}_A \\, \\overline{ \\delta C_H \\, \\delta \\Theta_{OA}} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        RHO_CH_dWND_dTOA = dict(
+            label = "$\\overline{\\rho}_A \\, \\overline{C}_H \\, \\overline{ \\delta U_A \\, \\delta \\Theta_{OA}} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        HFX_34 = dict(
+            label = "$r_\\mathrm{sen}$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        HFX_RES = dict(
+            label = "$R_\\mathrm{sen}$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+
+        
+        # Latent
+        dRHO_CQ_WND_QOA = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\delta \\overline{\\rho}_A \\, \\overline{C}_Q \\, \\overline{U}_A \\, \\overline{Q}_{OA} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        RHO_dCQ_WND_QOA = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\overline{ \\rho }_A \\, \\delta \\overline{C}_Q \\, \\overline{U}_A \\, \\overline{Q}_{OA} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        RHO_CQ_dWND_QOA = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\overline{ \\rho }_A \\, \\overline{C}_Q \\, \\delta \\overline{U}_A \\, \\overline{Q}_{OA} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        RHO_CQ_WND_dQOA = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\overline{ \\rho }_A \\, \\overline{C}_Q \\, \\overline{U}_A \\,  \\delta \\overline{Q}_{OA} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+
+
+        dRHO_dCQ_WND_QOA = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\overline{ \\delta \\rho \\, \\delta C_Q } \\, \\overline{Q}_{OA}$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        dRHO_CQ_dWND_QOA = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\overline{C}_Q \\, \\overline{Q}_{OA} \\, \\overline{ \\delta \\rho \\, \\delta U_A } $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        dRHO_CQ_WND_dQOA = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\overline{C}_Q \\, \\overline{U}_{A} \\, \\overline{ \\delta \\rho \\, \\delta Q_{OA} } $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        RHO_dCQ_dWND_QOA = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\overline{\\rho}_A \\, \\overline{Q}_{OA} \\, \\overline{ \\delta C_Q \\, \\delta U_A} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        RHO_dCQ_WND_dQOA = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\overline{\\rho}_A \\, \\overline{U}_A \\, \\overline{ \\delta C_Q \\, \\delta Q_{OA}} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        RHO_CQ_dWND_dQOA = dict(
+            factor = 2.5e6,
+            label = "$L_Q \\overline{\\rho}_A \\, \\overline{C}_Q \\, \\overline{ \\delta U_A \\, \\delta Q_{OA}} $",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        QFX_34 = dict(
+            factor = 2.5e6,
+            label = "$r_\\mathrm{lat}$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+        QFX_RES = dict(
+            factor = 2.5e6,
+            label = "$R_\\mathrm{lat}$",
+            unit = "$ \\mathrm{W} / \\mathrm{m}^2 $",
+        ),
+
+
+        # Momentum
+        dRHO_CD_WND2 = dict(
+            label = "$\\delta \\overline{\\rho}_A \\,  \\overline{C}_D \\, \\overline{U}^2_A $",
+            unit = "$ \\mathrm{kg} / \\mathrm{m} / \\mathrm{s}^2 $",
+        ),
+
+        RHO_dCD_WND2 = dict(
+            label = "$\\overline{ \\rho}_A \\,  \\delta \\overline{C}_D \\, \\overline{U}^2_A $",
+            unit = "$ \\mathrm{kg} / \\mathrm{m} / \\mathrm{s}^2 $",
+        ),
+
+        RHO_CD_2WNDdWND = dict(
+            label = "$ 2 \\overline{ \\rho}_A \\,  \\overline{C}_D \\, \\overline{U}_A \\, \\delta \\overline{U}_A $",
+            unit = "$ \\mathrm{kg} / \\mathrm{m} / \\mathrm{s}^2 $",
+        ),
+
+        dRHO_dCD_WND2 = dict(
+            label = "$ \\overline{U}_A^2 \\, \\overline{ \\delta \\rho \\, \\delta C_D }$",
+            unit = "$ \\mathrm{kg} / \\mathrm{m} / \\mathrm{s}^2 $",
+        ),
+
+        dRHO_CD_2WNDdWND = dict(
+            label = "$ 2 \\overline{C}_D \\, \\overline{U}_A \\, \\overline{ \\delta \\rho_A \\, \\delta U_A }$",
+            unit = "$ \\mathrm{kg} / \\mathrm{m} / \\mathrm{s}^2 $",
+        ),
+
+        RHO_dCD_2WNDdWND = dict(
+            label = "$ 2 \\overline{\\rho}_A \\, \\overline{U}_A \\, \\overline{ \\delta C_D \\, \\delta U_A }$",
+            unit = "$ \\mathrm{kg} / \\mathrm{m} / \\mathrm{s}^2 $",
+        ),
+
+        RHO_CD_dWND2 = dict(
+            label = "$ \\overline{ \\rho}_A \\, \\overline{C}_D \\, \\overline{\\left( \\delta U_A \\right)^2} $",
+            unit = "$ \\mathrm{kg} / \\mathrm{m} / \\mathrm{s}^2 $",
+        ),
+
+        MFX_34 = dict(
+            label = "$ r_\\mathrm{mom} $",
+            unit = "$ \\mathrm{kg} / \\mathrm{m} / \\mathrm{s}^2 $",
+        ),
+
+        MFX_RES = dict(
+            label = "$ R_\\mathrm{mom} $",
+            unit = "$ \\mathrm{kg} / \\mathrm{m} / \\mathrm{s}^2 $",
+        ),
+
+
+ 
+        dMFX_approx = dict(
+            factor = 1,
+            label = "$\\delta \\overline{\\tau}$",
+            unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+            bracket = False,
+        ),
+
+
+        dHFX = dict(
+            factor = 1,
+            label = "$\\delta \\overline{F}_\\mathrm{sen}$",
+            unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+            bracket = False,
+        ),
+
+        dLH = dict(
+            factor = 1,
+            label = "$\\delta \\overline{F}_\\mathrm{lat}$",
+            unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+            bracket = False,
+        ),
+
+     
+        dHFX_approx = dict(
+            factor = 1,
+            label = "Approx $\\delta \\overline{F_\\mathrm{sen}}$",
+            unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+        ),
+
+        dLH_approx = dict(
+            factor = 1,
+            label = "Approx $ \\delta \\overline{F_\\mathrm{lat}}$",
+            unit = "$ \\mathrm{W} \\, / \\, \\mathrm{m}^2 $",
+            
+            #
+        ),
+
+
+    )
+
+    """
+    # Old decomposition: RHO is part of exchange coefficients
 
     plot_infos = dict(
 
@@ -169,6 +404,7 @@ if args.delta_analysis:
 
     )
 
+    """
 
 
 else:
@@ -369,18 +605,20 @@ else:
 import matplotlib.pyplot as plt
 print("Done")
 
+import colorblind 
+
 
 print("Plotting decomposition...")
 
 
 figsize, gridspec_kw = tool_fig_config.calFigParams(
-    w = 6,
-    h = 4,
+    w = 6 * 0.8,
+    h = 4 * 0.8,
     wspace = 1.0,
     hspace = 0.7,
     w_left = 1.0,
     w_right = 1.0,
-    h_bottom = 1.0,
+    h_bottom = 2.0,
     h_top = 1.0,
     ncol = ncols,
     nrow = nrows,
@@ -401,24 +639,150 @@ fig, ax = plt.subplots(
 ax_flattened = ax.flatten()
 
 
-for k, heatflx in enumerate(["Sensible", "Latent"]):
+for k, flux_type in enumerate(plotted_fluxes):
+
 
     _ax = ax_flattened[k]
 
 
     if args.delta_analysis:
 
-        varnames = dict(
-            Sensible = ["dHFX", "dCH_WND_TOA", "CH_dWND_TOA", "CH_WND_dTOA", "CH_dWND_dTOA", "dCH_WND_dTOA", "dCH_dWND_TOA", "dCH_dWND_dTOA",],
-            Latent   = ["dLH", "dCQ_WND_QOA", "CQ_dWND_QOA", "CQ_WND_dQOA", "CQ_dWND_dQOA", "dCQ_WND_dQOA", "dCQ_dWND_QOA", "dCQ_dWND_dQOA",],
-        )[heatflx]
+        # When rho is included in exchange coefficients
+        varnames_styles = dict(
+ 
+            sensible_full = [
 
+                "dHFX",
+                "dRHO_CH_WND_TOA",
+                "RHO_dCH_WND_TOA",
+                "RHO_CH_dWND_TOA",
+                "RHO_CH_WND_dTOA",
+             
+                "dRHO_dCH_WND_TOA",
+                "dRHO_CH_dWND_TOA",
+                "dRHO_CH_WND_dTOA",
+                "RHO_dCH_dWND_TOA",
+                "RHO_dCH_WND_dTOA",
+                "RHO_CH_dWND_dTOA",
+
+                "HFX_34",
+     
+            ],
+
+            latent_full   = [
+
+                "dLH",
+                
+                "dRHO_CQ_WND_QOA",
+                "RHO_dCQ_WND_QOA",
+                "RHO_CQ_dWND_QOA",
+                "RHO_CQ_WND_dQOA",
+             
+                "dRHO_dCQ_WND_QOA",
+                "dRHO_CQ_dWND_QOA",
+                "dRHO_CQ_WND_dQOA",
+                "RHO_dCQ_dWND_QOA",
+                "RHO_dCQ_WND_dQOA",
+                "RHO_CQ_dWND_dQOA",
+
+                "QFX_34",
+            ],
+
+            momentum_full = [
+
+                "dMFX_approx",
+                "dRHO_CD_WND2",
+                "RHO_dCD_WND2",
+                "RHO_CD_2WNDdWND",
+                
+                "dRHO_dCD_WND2",
+                "dRHO_CD_2WNDdWND",
+                "RHO_dCD_2WNDdWND",
+                "RHO_CD_dWND2",
+                
+                "MFX_34",
+           ], 
+           
+           sensible = [
+
+                ( "dHFX", "black", "-" ),
+                ( "dRHO_CH_WND_TOA", "bluishgreen", "-" ),
+                ( "RHO_dCH_WND_TOA", "skyblue", "-" ),
+                ( "RHO_CH_dWND_TOA", "orange", "-" ),
+                ( "RHO_CH_WND_dTOA", "reddishpurple", "-" ),
+             
+                ( "RHO_dCH_dWND_TOA", "bluishgreen", "--" ),
+                ( "RHO_dCH_WND_dTOA", "orange", "--" ),
+                ( "RHO_CH_dWND_dTOA", "skyblue", "--" ),
+
+                ( "HFX_RES", "yellow", ":"),
+     
+            ],
+
+            latent   = [
+
+                ( "dLH", "black", "-" ),
+                
+                ( "dRHO_CQ_WND_QOA", "bluishgreen", "-" ),
+                ( "RHO_dCQ_WND_QOA", "skyblue", "-" ),
+                ( "RHO_CQ_dWND_QOA", "orange", "-" ),
+                ( "RHO_CQ_WND_dQOA", "reddishpurple", "-" ),
+             
+                ( "RHO_dCQ_dWND_QOA", "bluishgreen", "--" ),
+                ( "RHO_dCQ_WND_dQOA", "orange", "--" ),
+                ( "RHO_CQ_dWND_dQOA", "skyblue", "--" ),
+
+                ( "QFX_RES", "yellow", ":" ),
+            ],
+
+            momentum = [
+
+                ( "dMFX_approx", "black", "-" ),
+                ( "dRHO_CD_WND2", "bluishgreen", "-" ),
+                ( "RHO_dCD_WND2", "skyblue", "-" ),
+                ( "RHO_CD_2WNDdWND", "reddishpurple", "-" ),
+                
+                ( "RHO_dCD_2WNDdWND", "orange", "--" ),
+                ( "RHO_CD_dWND2", "skyblue", "--" ),
+                
+                ( "MFX_RES", "yellow", ":"),
+           ] 
+        )[flux_type]
+
+        """
+        # When rho is included in exchange coefficients
+        varnames = dict(
+            
+            sensible = [
+                "dHFX",
+                "dCH_WND_TOA",
+                "CH_dWND_TOA",
+                "CH_WND_dTOA",
+                "CH_dWND_dTOA",
+                "dCH_WND_dTOA",
+                "dCH_dWND_TOA",
+                "dCH_dWND_dTOA",
+            ],
+
+            latent   = [
+                "dLH",
+                "dCQ_WND_QOA",
+                "CQ_dWND_QOA",
+                "CQ_WND_dQOA",
+                "CQ_dWND_dQOA",
+                "dCQ_WND_dQOA",
+                "dCQ_dWND_QOA",
+                "dCQ_dWND_dQOA",
+            ],
+            
+        )[flux_type]
+        """
 
     else:
         varnames = dict(
             Sensible = ["HFX", "CQ_WND_TOA", "WND_TOA_cx_mul_C_H", "CQ_TOA_cx_mul_WND", "CQ_WND_cx_mul_TOA"],
             Latent   = ["LH",  "CQ_WND_QOA", "WND_QOA_cx_mul_C_Q", "CQ_QOA_cx_mul_WND", "CQ_WND_cx_mul_QOA"],
-        )[heatflx]
+        )[flux_type]
 
     if args.varying_param == "dSST":
         title_param = "$\\Delta \\mathrm{SST}$"
@@ -428,29 +792,26 @@ for k, heatflx in enumerate(["Sensible", "Latent"]):
         title_param = "$L$"
     elif args.varying_param == "wnm":
         title_param = "$L$"
+
+
+    vartext = dict(
+        sensible = "$\\delta \\overline{F}_\\mathrm{sen}$",
+        latent   = "$\\delta \\overline{F}_\\mathrm{lat}$",
+        momentum = "$\\delta \\overline{\\tau}$",
+    )
  
     _ax.set_title(
-        "(%s) %s heat flux as a function of %s" % (
+        "(%s) %s as a function of %s" % (
             args.thumbnail_numbering[k],
-            heatflx,
+            vartext[flux_type],
             title_param,
-        )
+        ),
+        size=20,
     )
-    for i, varname in enumerate(varnames):
+    for i, (varname, color, linestyle) in enumerate(varnames_styles):
 
 
-        color, linestyle = [
-            ("black",      "solid"),
-            ("red",        "solid"),
-            ("dodgerblue", "dashed"),
-            ("magenta",    "dotted"),
-            ("green",      "dashdot"),
-            ("black",      "dashed"),
-            ("red",        "dashed"),
-            ("dodgerblue", "solid"),
-        ][i]
-
-        
+        color = colorblind.BW8color[color]
 
         _plot_info = plot_infos[varname]
         
@@ -498,34 +859,36 @@ for k, heatflx in enumerate(["Sensible", "Latent"]):
             
         _ax.errorbar(_coord_x, d_m, yerr=d_s, fmt='o-', markersize=6, capsize=5, color=color, linewidth=1.5, elinewidth=1.5, linestyle=linestyle, label=label)
 
-        _ax.set_ylabel("[ %s ] " % (_plot_info["unit"]))
+        _ax.set_ylabel("[ %s ] " % (_plot_info["unit"]), size=15)
 
         _ax.grid(visible=True)
 
 
-
+    xlabel_text = ""
     if args.varying_param == "dSST":
-        _ax.set_xlabel("$\\Delta \\mathrm{SST}$ [ $\\mathrm{K}$ ]")
+        xlabel_text = "$\\Delta \\mathrm{SST}$ [ $\\mathrm{K}$ ]"
     elif args.varying_param == "Ug":
-        _ax.set_xlabel("$U_\\mathrm{g}$ [ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
+        xlabel_text = "$U_\\mathrm{g}$ [ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]"
     elif args.varying_param == "Lx":
-        _ax.set_xlabel("$ L $ [ $\\mathrm{km} $ ]")
+        xlabel_text = "$ L $ [ $\\mathrm{km} $ ]"
     elif args.varying_param == "wnm":
-        _ax.set_xlabel("$ L $ [ $\\mathrm{km} $ ]")
+        xlabel_text = "$ L $ [ $\\mathrm{km} $ ]"
 
+
+    _ax.set_xlabel(xlabel_text, size=15)
         #_ax.set_xlabel("$ H^2_{\\mathrm{pbl}} / L $ [ $\\mathrm{m} $ ]")
         #_ax.set_xlabel("$ L^{-1} $ [ $\\mathrm{km}^{-1} $ ]")
 
 
     """
-    if heatflx == "Sensible":
+    if flux_type == "Sensible":
         _ax.set_ylim(args.HFX_rng)
-    elif heatflx == "Latent":
+    elif flux_type == "Latent":
         _ax.set_ylim(args.LH_rng)
     """
 
 
-    _ax.legend()
+    _ax.legend(loc="upper center", ncols=3, mode="expand", bbox_to_anchor=(0., -0.25, 1., .102))
 
 
 

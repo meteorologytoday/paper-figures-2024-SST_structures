@@ -25,7 +25,7 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do
     labels=""
     dSSTs=""
     for Ug in 20 ; do
-    for dT in 000 050 100 150 200 250 300; do
+    for dT in 000 010 030 050 100 150 200 250 300; do
     #for dT in 000 300; do
     
         if [[ "$target_lab" =~ "SEMIWET" ]]; then

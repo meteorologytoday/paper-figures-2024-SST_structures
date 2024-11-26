@@ -72,7 +72,7 @@ plot_infos = dict(
     DIVA = dict(
         selector = dict(bottom_top=0),
         wrf_varname = "DIV",
-        label = "$D_{A}$",
+        label = "$D_{A}$ wavelength = $L$",
         unit = "$\\mathrm{s}^{-1}$",
     ), 
 
@@ -104,6 +104,7 @@ if __name__ == "__main__":
     parser.add_argument('--labels', type=str, nargs="+", help='Input directories.', default=None)
     parser.add_argument('--output', type=str, help='Output filename in png.', required=True)
     parser.add_argument('--no-display', action="store_true")
+    parser.add_argument('--no-title', action="store_true")
     parser.add_argument('--time-rng', type=int, nargs=2, help="Time range in hours after --exp-beg-time", required=True)
     parser.add_argument('--exp-beg-time', type=str, help='analysis beg time', required=True)
     parser.add_argument('--wrfout-data-interval', type=int, help='Time interval between each adjacent record in wrfout files in seconds.', required=True)
@@ -116,8 +117,6 @@ if __name__ == "__main__":
     parser.add_argument('--thumbnail-skip', type=int, default=0)
     parser.add_argument('--labeled-wvlen', type=int, nargs="*", help='Number of frames in each wrfout file.', default=[])
     parser.add_argument('--wrfout-suffix', type=str, default="")
-
-
 
     args = parser.parse_args()
 
@@ -355,7 +354,7 @@ if __name__ == "__main__":
     import cartopy.crs as ccrs
     import tool_fig_config
     import colorblind
-    ncol = 2
+    ncol = 1
     nrow = 1
 
     figsize, gridspec_kw = tool_fig_config.calFigParams(
@@ -391,10 +390,8 @@ if __name__ == "__main__":
         linecolor = colorblind.BW8color[args.linecolors[i]]
 
         varname_label = plot_info["label"] if "label" in plot_info else varname
-        varname_label = "$\\delta$%s" % (varname_label,)
 
         _ax1 = ax[0, 0]
-        _ax2 = ax[0, 1]
         Lxs = _tracking["Lxs"] / 1e3
 
         if varname in ["DIVA90PR", "CONA90PR"]:
@@ -411,13 +408,10 @@ if __name__ == "__main__":
             rel_mags = mags / mags[0] * 100
 
             _ax1.plot(Lxs, rel_mags, marker='o', linestyle=linestyle, color=linecolor, label=varname_label)
-            _ax2.plot(Lxs, angs, marker='o', linestyle=linestyle, color=linecolor, label=varname_label)
             
 
-        if i == 0: 
-            #_ax1.set_ylabel("[ %s ]" % (unit,))
+        if ( not args.no_title ) and i == 0: 
             _ax1.set_title("(%s) Relative magnitude of the linear response" % (args.thumbnail_numbering[args.thumbnail_skip+0],))
-            _ax2.set_title("(%s) Phase angle of the linear response" % (args.thumbnail_numbering[args.thumbnail_skip+1],))
 
 
 
@@ -429,22 +423,12 @@ if __name__ == "__main__":
     for _ax in ax.flatten():
         _ax.grid()
         _ax.set_xticks(Lxs, labels=xticklabels)
-        _ax.set_xlabel("Wavelength [ km ]")
-        _ax.legend(loc="lower right")
+        _ax.set_xlabel("$L$ [ km ]")
+        _ax.legend()
  
     for _ax in ax[:, 0].flatten():
-        #_ax.set_ylim([-180, 180])
-        #_ax.set_yticks(np.linspace(0, 1, 11) * 100)
-        #_ax.set_yticks(np.arange(-180, 210, 30))
         _ax.set_ylabel("[ $\\%$ ]")
         
-    for _ax in ax[:, 1].flatten():
-        #_ax.set_ylim([-180, 180])
-        _ax.set_yticks(np.arange(-180, 90, 30))
-        _ax.set_ylabel("[ deg ]")
- 
-               
-
     if args.output != "":
         print("Saving output: ", args.output) 
         fig.savefig(args.output, dpi=200)
