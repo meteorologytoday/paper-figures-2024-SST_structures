@@ -27,7 +27,7 @@ input_params=(
 nparams=4
 nproc=1
 
-analysis_root=$gendata_dir/delta_analysis_style_new-STYLE1/
+analysis_root=$gendata_dir/delta_analysis_style-STYLE1/
 
 
 N=$(( ${#input_params[@]} / $nparams ))

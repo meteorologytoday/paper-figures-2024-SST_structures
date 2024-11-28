@@ -18,10 +18,9 @@ nproc=10
 
 source 98_trapkill.sh
 
-for analysis_style in STYLE1 ; do
+for analysis_style in STYLE1 ; do 
 
-
-    output_dir_root=$gendata_dir/delta_analysis_style_new-$analysis_style
+    output_dir_root=$gendata_dir/delta_analysis_style-$analysis_style
 
 
     for avg_before_analysis in "TRUE" ; do
