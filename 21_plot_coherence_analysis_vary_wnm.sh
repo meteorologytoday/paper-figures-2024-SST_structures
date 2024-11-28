@@ -13,7 +13,7 @@ hrs_end=$(( 24 * 10 ))
 thumbnail_skip=0
 for dT in 100 ; do
 for bl_scheme in MYNN25 ; do
-for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do
+for target_lab in lab_FULL ; do
 
     output_dir=$fig_dir/coherence_analysis
     
@@ -28,11 +28,9 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do
     #for wnm in 004 010 ; do
     #for wnm in 004 005 ; do
     
-        if [[ "$target_lab" =~ "SEMIWET" ]]; then
-            mph=off
-        elif [[ "$target_lab" =~ "WET" ]]; then
+        if [[ "$target_lab" =~ "FULL" ]]; then
             mph=on
-        elif [[ "$target_lab" =~ "DRY" ]]; then
+        elif [[ "$target_lab" =~ "SIMPLE" ]]; then
             mph=off
         fi
 

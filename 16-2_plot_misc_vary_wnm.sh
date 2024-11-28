@@ -6,7 +6,7 @@ exp_names=""
 input_dir_root=$data_dir/$target_lab
 
 
-for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do
+for target_lab in lab_FULL ; do
 for Ug in 20 ; do
 for dSST in 100 ; do
 for hr in 120-240  ; do

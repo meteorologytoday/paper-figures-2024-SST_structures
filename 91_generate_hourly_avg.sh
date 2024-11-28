@@ -9,8 +9,8 @@ exp_names=""
 
 output_dir_root=$preavg_dir
 
-hrs_beg=$(( 24 * 5 ))
-hrs_end=$(( 24 * 12 ))
+hrs_beg=$(( 24 * 0 ))
+hrs_end=$(( 24 * 16 ))
 
 
 time_avg_interval=60   # minutes
@@ -18,26 +18,17 @@ time_avg_interval=60   # minutes
 batch_cnt_limit=2
 nproc=10
 
-#batch_cnt_limit=1
-#nproc=1
-
-
 
 for _bl_scheme in MYNN25 MYJ YSU ; do
-#for _bl_scheme in MYJ YSU ; do
-for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do #lab_FIXEDDOMAIN_SST_sine_DRY ; do 
+for target_lab in lab_FULL lab_SIMPLE ; do 
 for wnm in 000 010 004 005 007 010 020 040 ; do
-#for dT in 000 010 030 050 100 150 200 250 ; do
 for dT in 000 010 030 050 100 150 200 250 ; do
-#for dT in 100 ; do
 for U in 20 ; do
 
-    if [[ "$target_lab" =~ "SEMIWET" ]]; then
+    if [[ "$target_lab" =~ "SIMPLE" ]]; then
         mph=off
-    elif [[ "$target_lab" =~ "WET" ]]; then
+    elif [[ "$target_lab" =~ "FULL" ]]; then
         mph=on
-    elif [[ "$target_lab" =~ "DRY" ]]; then
-        mph=off
     fi
 
     if [[ "$wnm" = "000" ]] && [[ "$dT" != "000" ]] ; then
@@ -47,9 +38,6 @@ for U in 20 ; do
     if [[ "$wnm" != "000" ]] && [[ "$dT" = "000" ]] ; then
         continue
     fi
-
-
-
 
     casename="case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}"
     input_dir_root=$data_sim_dir/$target_lab

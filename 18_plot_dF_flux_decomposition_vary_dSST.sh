@@ -9,7 +9,7 @@ parameter=dT
 output_dir=$fig_dir/dF_total_flux_decomposition/$parameter
 
 
-for target_lab in lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do
+for target_lab in lab_FULL ; do
 for Ug in 20 ; do
 for wnm in 010 ; do
 #for bl_scheme in MYNN25 YSU MYJ; do

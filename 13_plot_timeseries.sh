@@ -24,10 +24,10 @@ for dT in 100 ; do
 
 
     input_dirs=(
-        $preavg_dir/lab_FIXEDDOMAIN_SST_sine_DRY/case_mph-off_wnm000_U20_dT000_${bl_scheme}
-        $preavg_dir/lab_FIXEDDOMAIN_SST_sine_DRY/case_mph-off_wnm${wnm}_U20_dT${dT}_${bl_scheme}
-        $preavg_dir/lab_FIXEDDOMAIN_SST_sine_WETLWSW/case_mph-on_wnm000_U20_dT000_${bl_scheme}
-        $preavg_dir/lab_FIXEDDOMAIN_SST_sine_WETLWSW/case_mph-on_wnm${wnm}_U20_dT${dT}_${bl_scheme}
+        $preavg_dir/lab_SIMPLE/case_mph-off_wnm000_U20_dT000_${bl_scheme}
+        $preavg_dir/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_${bl_scheme}
+        $preavg_dir/lab_FULL/case_mph-on_wnm000_U20_dT000_${bl_scheme}
+        $preavg_dir/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_${bl_scheme}
     )
 
 

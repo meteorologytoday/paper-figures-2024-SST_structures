@@ -14,8 +14,8 @@ bl_schemes=(
     YSU
 )
 target_labs=(
-    lab_FIXEDDOMAIN_SST_sine_WETLWSW
-#    lab_FIXEDDOMAIN_SST_sine_DRY
+    lab_FULL
+#    lab_SIMPLE
 )
 
 input_params=(
@@ -65,11 +65,9 @@ for i in $( seq 1 $N ) ; do
     for bl_scheme in "${bl_schemes[@]}" ; do
     for target_lab in "${target_labs[@]}" ; do       
         
-        if [[ "$target_lab" =~ "SEMIWET" ]]; then
-            mph=off
-        elif [[ "$target_lab" =~ "WET" ]]; then
+        if [[ "$target_lab" =~ "FULL" ]]; then
             mph=on
-        elif [[ "$target_lab" =~ "DRY" ]]; then
+        elif [[ "$target_lab" =~ "SIMPLE" ]]; then
             mph=off
         fi
 

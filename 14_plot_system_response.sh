@@ -17,8 +17,8 @@ nproc=1
 proc_cnt=0
 
 target_labs=(
-    lab_FIXEDDOMAIN_SST_sine_WETLWSW
-    lab_FIXEDDOMAIN_SST_sine_DRY
+    lab_FULL
+    lab_SIMPLE
 )
 
 bl_schemes=(
@@ -39,19 +39,13 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
     thumbnail_skip_part1=0
     thumbnail_skip_part2=0
 
-    if [[ "$target_lab" =~ "SEMIWET" ]]; then
-        mph=off
-        #W_levs=( -10 10 11 )
-        W_levs=( -2 2 21 )
-        thumbnail_skip_part1=5
-        thumbnail_skip_part2=6
-    elif [[ "$target_lab" =~ "WET" ]]; then
+    if [[ "$target_lab" =~ "FULL" ]]; then
         mph=on
         #W_levs=( -50 50 11 )
         W_levs=( -2 2 21 )
         thumbnail_skip_part1=5
         thumbnail_skip_part2=5
-    elif [[ "$target_lab" =~ "DRY" ]]; then
+    elif [[ "$target_lab" =~ "SIMPLE" ]]; then
         mph=off
         W_levs=( -2 2 21 )
     fi
@@ -65,11 +59,13 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
         tke_analysis=FALSE 
     fi 
 
-    if [[ "$target_lab" =~ "WETLWSW" ]]; then
-        exp_name="FULL."
-    elif [[ "$target_lab" =~ "DRY" ]]; then
-        exp_name="SIMPLE."
+    if [[ "$target_lab" =~ "FULL" ]]; then
+        exp_name="FULL"
+    elif [[ "$target_lab" =~ "SIMPLE" ]]; then
+        exp_name="SIMPLE"
     fi
+
+    exp_name="${exp_name}."
 
 
     part2_tke_analysis=FALSE

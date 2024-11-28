@@ -26,9 +26,8 @@ for analysis_style in STYLE1 ; do
 
     for avg_before_analysis in "TRUE" ; do
     for _bl_scheme in MYNN25  MYJ YSU ; do
-    for target_lab in  lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do #lab_FIXEDDOMAIN_SST_sine_DRY; do 
+    for target_lab in  lab_FULL lab_SIMPLE ; do
 
-    #for wnm in 000 004 005 007 010 020 040 ; do
     for wnm in 004 005 007 010 020 040 000 ; do
 
 #        if [ "$wnm" = "004" ] || [ "$wnm" = "010" ]; then
@@ -43,11 +42,9 @@ for analysis_style in STYLE1 ; do
     for dT in "${dTs[@]}" ; do
     for U in 20 ; do
 
-        if [[ "$target_lab" =~ "SEMIWET" ]]; then
-            mph=off
-        elif [[ "$target_lab" =~ "WET" ]]; then
+        if [[ "$target_lab" =~ "FULL" ]]; then
             mph=on
-        elif [[ "$target_lab" =~ "DRY" ]]; then
+        elif [[ "$target_lab" =~ "SIMPLE" ]]; then
             mph=off
         fi
 

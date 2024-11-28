@@ -9,16 +9,14 @@ source 00_setup.sh
 
 
 for _bl_scheme in MYNN25 MYJ YSU ; do
-for target_lab in  lab_FIXEDDOMAIN_SST_sine_DRY lab_FIXEDDOMAIN_SST_sine_WETLWSW ; do 
+for target_lab in  lab_SIMPLE lab_FULL ; do 
 for U in 20 ; do
 for wnm in 004 005 007 010 020 040 ; do
 
-    if [[ "$target_lab" =~ "SEMIWET" ]]; then
+    if [[ "$target_lab" =~ "SIMPLE" ]]; then
         mph=off
-    elif [[ "$target_lab" =~ "WET" ]]; then
+    elif [[ "$target_lab" =~ "FULL" ]]; then
         mph=on
-    elif [[ "$target_lab" =~ "DRY" ]]; then
-        mph=off
     fi
 
     lab_root=$preavg_dir/$target_lab

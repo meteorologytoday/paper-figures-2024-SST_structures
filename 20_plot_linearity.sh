@@ -13,7 +13,7 @@ hrs_end=$(( 24 * 10 ))
 thumbnail_skip=0
 for dT in 100 ; do
 for bl_scheme in MYNN25 ; do
-for target_lab in lab_FIXEDDOMAIN_SST_sine_DRY lab_FIXEDDOMAIN_SST_sine_WETLWSW; do
+for target_lab in lab_SIMPLE lab_FULL; do
 
     output_dir=$fig_dir/linearity_analysis
     
@@ -28,12 +28,10 @@ for target_lab in lab_FIXEDDOMAIN_SST_sine_DRY lab_FIXEDDOMAIN_SST_sine_WETLWSW;
     for wnm in 004 005 007 010 020 040; do
     #for wnm in 004 005 ; do
     
-        if [[ "$target_lab" =~ "SEMIWET" ]]; then
-            mph=off
-        elif [[ "$target_lab" =~ "WET" ]]; then
+        if [[ "$target_lab" =~ "FULL" ]]; then
             mph=on
             title="FULL"
-        elif [[ "$target_lab" =~ "DRY" ]]; then
+        elif [[ "$target_lab" =~ "SIMPLE" ]]; then
             mph=off
             title="SIMPLE"
         fi
