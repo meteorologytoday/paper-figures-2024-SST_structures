@@ -3,7 +3,7 @@
 source 00_setup.sh
 source 98_trapkill.sh
 
-nproc_cnt_limit=2
+nproc_cnt_limit=1
 
 output_fig_dir=$fig_dir/timeseries
 

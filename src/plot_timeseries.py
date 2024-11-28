@@ -109,10 +109,9 @@ def loadData(input_dir):
         if "west_east" in ds.dims:
             ds = ds.mean(dim=dim)
 
-    ds = ds.rolling(time=args.smooth, center=True).mean()
+    ds_computed = ds.rolling(time=args.smooth, center=True).mean().compute()
 
-
-    return ds
+    return ds_computed
    
     
 
@@ -131,6 +130,7 @@ for i, input_dir in enumerate(args.input_dirs):
 
         print("[%d] Take difference... " % (i,))
         ds = ds - ds_base
+
 
     data.append(ds)
 
@@ -614,3 +614,4 @@ if not args.no_display:
     print("Showing figure...")
     plt.show()
 
+print("Program plot_timeseries.py ends.")

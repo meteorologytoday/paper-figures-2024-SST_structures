@@ -364,7 +364,7 @@ if __name__ == "__main__":
         _ax1 = ax[0, 0]
         _ax1.plot(Ls / 1e3, data["linearity"][varname], marker='o', linestyle=linestyle, color=linecolor, label=varname_label)
         
-    _ax1.set_ylabel("Linearity [ None ]")
+    _ax1.set_ylabel("$\\beta\\left( k \\right)$")
     _ax1.set_ylim(args.ylim)
 
         

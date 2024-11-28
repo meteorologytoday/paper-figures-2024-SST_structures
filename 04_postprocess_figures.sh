@@ -17,31 +17,28 @@ mkdir -p $finalfig_svg_dir
 
 echo "Making final figures... "
 
-#echo "Figure 1: Merge SST map and spectrum analysis... "
-#svg_stack.py --direction=h $fig_dir/sst_analysis_map_20170101.svg $fig_dir/sst_analysis_spec_20170101.svg > $fig_dir/merged-sst_analysis.svg
-
-echo "Figure 7: Merge Fourier analysis... "
-fixed_dSST=100
-fixed_wnm=010
-svg_stack.py \
-    --direction=v \
-    $fig_dir/spectral_analysis_linearity_on_dSST/linearity_on_dSST_lab_FIXEDDOMAIN_SST_sine_WETLWSW_wnm${fixed_wnm}_MYNN25_hr120-240.svg \
-    $fig_dir/spectral_analysis_tracking_wnm/spectral_analysis_lab_FIXEDDOMAIN_SST_sine_WETLWSW_dT${fixed_dSST}_MYNN25_hr120-240.svg \
-    > $fig_dir/merged-spectral_analysis_wnm${fixed_wnm}_dSST${fixed_dSST}_MYNN25_hr120-240.svg
-
-
+if [ ] ; then
+echo "Figure 1: Merge SST map and spectrum analysis... "
+svg_stack.py                                \
+    --direction=h                           \
+    $fig_dir/sst_analysis_map_20170101.svg  \
+    $fig_dir/sst_analysis_spec_20170101.svg \
+    > $fig_dir/merged-sst_analysis.svg
+fi
 
 echo "Figure 2: Merge experiment design and vertical profile..."
-svg_stack.py \
-    --direction=h \
+svg_stack.py                                \
+    --direction=h                           \
     $fig_static_dir/experiment_design_3.svg \
-    $fig_dir/input_sounding_woML.svg \
+    $fig_dir/input_sounding_woML.svg        \
     > $fig_dir/merged-exp.svg
 
-echo "Figure 3: Merge snapshots... "
 
-for dT in 100 300; do
-for wnm in 004 010 ; do
+
+
+echo "Figure 4: Merge snapshots... "
+for dT in 100; do
+for wnm in 010 ; do
     
     svg_stack.py \
         --direction=h \
@@ -58,25 +55,15 @@ for wnm in 004 010 ; do
 done
 done
 
-
-
-# Merging the phase diagram
-echo "Figure 6: Merge phase diagram... "
+if [ ] ; then
+echo "Figure 7: Merge Fourier analysis... "
 fixed_dSST=100
 fixed_wnm=010
 svg_stack.py \
     --direction=v \
-    $fig_dir/dF_flux_decomposition_varying_dSST/lab_FIXEDDOMAIN_SST_sine_WETLWSW/dF_flux_decomposition_onefig_wnm${fixed_wnm}_varying_dSST_MYNN25_hr120-240.svg \
-    $fig_dir/dF_flux_decomposition_varying_wnm/lab_FIXEDDOMAIN_SST_sine_WETLWSW/dF_flux_decomposition_onefig_dSST${fixed_dSST}_varying_wnm_MYNN25_hr120-240.svg \
-    > $fig_dir/merged-dF_flux_decomposition_wnm${fixed_wnm}_dSST${fixed_dSST}_MYNN25_hr120-240.svg
-
-
-#svg_stack.py \
-#    --direction=v \
-#    $fig_dir/spectral_analysis_tracking_wnm1/spectral_analysis_lab_FIXEDDOMAIN_SST_sine_WETLWSW_MYNN25_hr120-240.svg \
-#    $fig_dir/spectral_analysis_tracking_wnm1/spectral_analysis_lab_FIXEDDOMAIN_SST_sine_DRY_MYNN25_hr120-240.svg \
-#    > $fig_dir/merged-spectral_analysis_tracking_wnm1_MYNN25_hr120-240.svg
-
+    $fig_dir/spectral_analysis_linearity_on_dSST/linearity_on_dSST_lab_FIXEDDOMAIN_SST_sine_WETLWSW_wnm${fixed_wnm}_MYNN25_hr120-240.svg \
+    $fig_dir/spectral_analysis_tracking_wnm/spectral_analysis_lab_FIXEDDOMAIN_SST_sine_WETLWSW_dT${fixed_dSST}_MYNN25_hr120-240.svg \
+    > $fig_dir/merged-spectral_analysis_wnm${fixed_wnm}_dSST${fixed_dSST}_MYNN25_hr120-240.svg
 
 
 echo "Figure 9: Merging the misc phase diagram..."
@@ -86,23 +73,14 @@ svg_stack.py \
     $fig_dir/phase_misc/lab_FIXEDDOMAIN_SST_sine_WETLWSW/phase_misc_dSST100_varying_wnm_hr120-240.svg \
     > $fig_dir/merged-phase_misc_hr120-240.svg
 
+fi
+
 echo "Figure 10: Merge linearity"
-svg_stack.py \
+svg_stack.py      \
     --direction=h \
     $fig_dir/linearity_analysis/linearity_vary_wnm_lab_FIXEDDOMAIN_SST_sine_DRY_dSST100_MYNN25_hr120-240.svg \
     $fig_dir/linearity_analysis/linearity_vary_wnm_lab_FIXEDDOMAIN_SST_sine_WETLWSW_dSST100_MYNN25_hr120-240.svg \
     > $fig_dir/merged-linearity_vary_wnm_MYNN25_hr120-240.svg
-
-sleep 5
-
-#echo "Figure 10: Merging the linearity diagram..."
-#svg_stack.py \
-#    --direction=h \
-#    $fig_dir/coherence_analysis/coherence_on_dSST_lab_FIXEDDOMAIN_SST_sine_WETLWSW_wnm010_MYNN25_hr120-240.svg \
-#    $fig_dir/coherence_analysis/coherence_on_dSST_lab_FIXEDDOMAIN_SST_sine_WETLWSW_wnm004_MYNN25_hr120-240.svg \
-#    > $fig_dir/merged-coherence_analysis_hr120-240.svg
-
-
 
 name_pairs=(
     sst_analysis_20170101.svg                                                                        fig01
@@ -116,8 +94,8 @@ name_pairs=(
     dF_flux_decomposition_varying_wnm/lab_FIXEDDOMAIN_SST_sine_WETLWSW/dF_flux_decomposition_onefig_dSST100_varying_wnm_MYNN25_hr120-240.svg   fig09
     merged-linearity_vary_wnm_MYNN25_hr120-240.svg                                                   fig10 
     coherence_analysis/coherence_on_dSST_vary_wnm_lab_FIXEDDOMAIN_SST_sine_WETLWSW_dSST100_MYNN25_hr120-240.svg fig11
-    merged-snapshot_wnm004_U20_dT300_part1.svg                                                       figS01
-    merged-snapshot_wnm004_U20_dT300_part2.svg                                                       figS02
+#    merged-snapshot_wnm004_U20_dT300_part1.svg                                                       figS01
+#    merged-snapshot_wnm004_U20_dT300_part2.svg                                                       figS02
 #    merged-spectral_analysis_wnm010_dSST100_MYNN25_hr120-240.svg                                     fig09
 )
 
