@@ -14,35 +14,33 @@ This is the code to generate the figures of the paper "Examining the SST Tendenc
 # Reproducing Figures
 
 1. Clone this project.
-2. Download the file `data.zip` from [XXX](http://XXX)
-3. Unzip the folder `data` from `data.zip` into this git project root folder (i.e., the same folder containing this `README.md` file).
-4. Run `00_runall.sh`.
-5. The figures are generated in the folder `final_figures`.
-
-
-
-
-
-
+2. Download the file `gendata.tar.gz` from [XXX](http://XXX)
+3. Decompress the folder `gendata` with `tar -xzvf gendata.tar.gz` into this git project root folder (i.e., the same folder containing this `README.md` file).
+4. Run `03_make_figures.sh`.
+5. Run `04_postprocess_figures.sh`.
+6. The figures are generated in the folder `final_figures`.
 
 # Notes
 
-## WRF's phase diagram of flux analysis
+## For authors to create `gendata` from `data`
 
-- Run `51_generate_flux_analysis.sh`
-- Run `61_collect_flux.sh` runs to generate nc files
-- Run `71_plot_WRF_phase.sh` to plot.
+- Run `91_generate_hourly_avg.sh` to produce hourly mean data every 12 hours.
+- Run `92_make_softlinks.sh` to make proper softlinks. For dSST=0 case is shared across different SST wavenumbers/wavelengths.
+- Run `93_generate_delta_analysis.sh` to generate analysis for air-sea flux decompositions.
+- Run `94_pack_data.sh` to pack data generated from `93_generate_delta_analysis.sh` into single netCDF files.
 
 # Figures
 
 1. SST map and spectrum
 2. Exp design + vertical profile
-3. Check steady state of WET and DRY
-4. WET and DRY timeseries (H\_{pbl}, T\_A, F\_sen ... etc)
-5. WET Hovmoeller (RAINNC and QCLOUD)
-6. DRY sensible heat flux decomposition
-7. DRY comparison to SQ15 ( HFX )
-8. WET comparison to SQ15 ( HFX and LH )
-9. IVT enhancement spectrum ( dSST vs Lx )
+3. Time series.
+4. Atmospheric response plot part 1: cross-section.
+5. Atmospheric response plot part 2: horizontal mean.
+6. IWV and precipitation as functions of dSST and wavelength L.
+7. Divergence and convergence analysis.
+8. Air-sea flux decomposition as a function of dSST.
+9. Air-sea flux decomposition as a function of wavelength L.
+10. Linearity as a function of wavelength L.
+11. Coherence analysis.
 
 
