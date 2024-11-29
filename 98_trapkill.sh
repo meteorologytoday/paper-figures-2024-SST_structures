@@ -10,8 +10,8 @@ else
 
     echo "___TRAPKILL___ is not set. Do it now."
 
-    trap "exit" INT TERM
-    trap "echo 'Exiting... ready to kill jobs... '; kill 0" EXIT
+    trap 'exit' INT TERM
+    trap 'echo "Exiting... ready to kill jobs... "; kill $$' EXIT
 
     ___TRAPKILL___=TRUE
 fi

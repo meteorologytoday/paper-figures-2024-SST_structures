@@ -41,7 +41,8 @@ linecolors = ['orange', 'blue', 'reddishpurple', 'bluishgreen', 'vermillion']
 lat_span = args.lat_rng[1] - args.lat_rng[0]
 lon_span = args.lon_rng[1] - args.lon_rng[0]
 
-ds = xr.open_dataset(args.input_file, decode_times=False).isel(depth=0, time=0)
+# depth = 5 => 10m deep
+ds = xr.open_dataset(args.input_file, decode_times=False).isel(depth=5, time=0)
 
 lon = ds.coords["lon"].to_numpy()
 

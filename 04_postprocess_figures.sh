@@ -17,15 +17,6 @@ mkdir -p $finalfig_svg_dir
 
 echo "Making final figures... "
 
-if [ ] ; then
-echo "Figure 1: Merge SST map and spectrum analysis... "
-svg_stack.py                                \
-    --direction=h                           \
-    $fig_dir/sst_analysis_map_20170101.svg  \
-    $fig_dir/sst_analysis_spec_20170101.svg \
-    > $fig_dir/merged-sst_analysis.svg
-fi
-
 echo "Figure 2: Merge experiment design and vertical profile..."
 svg_stack.py                                \
     --direction=h                           \
@@ -55,7 +46,6 @@ for wnm in 010 ; do
 done
 done
 
-if [ ] ; then
 echo "Figure 7: Merge Fourier analysis... "
 fixed_dSST=100
 fixed_wnm=010
@@ -73,7 +63,6 @@ svg_stack.py \
     $fig_dir/phase_misc/lab_FULL/phase_misc_dSST100_varying_wnm_hr120-240.svg \
     > $fig_dir/merged-phase_misc_hr120-240.svg
 
-fi
 
 echo "Figure 10: Merge linearity"
 svg_stack.py      \
@@ -83,7 +72,7 @@ svg_stack.py      \
     > $fig_dir/merged-linearity_vary_wnm_MYNN25_hr120-240.svg
 
 name_pairs=(
-    sst_analysis_20170101.svg                                                                        fig01
+    sst_analysis_20240101.svg                                                                        fig01
     merged-exp.svg                                                                                   fig02
     timeseries/timeseries_wnm010_U20_dT100_MYNN25_timeseries_smooth-25_000-360.svg                   fig03
     merged-snapshot_wnm010_U20_dT100_part1.svg                                                       fig04
