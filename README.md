@@ -16,9 +16,10 @@ This is the code to generate the figures of the paper "Examining the SST Tendenc
 1. Clone this project.
 2. Download the file `gendata.tar.gz` from [XXX](http://XXX)
 3. Decompress the folder `gendata` with `tar -xzvf gendata.tar.gz` into this git project root folder (i.e., the same folder containing this `README.md` file).
-4. Run `03_make_figures.sh`.
-5. Run `04_postprocess_figures.sh`.
-6. The figures are generated in the folder `final_figures`.
+4. Run `94_pack_data.sh`.
+5. Run `03_make_figures.sh`.
+6. Run `04_postprocess_figures.sh`.
+7. The figures are generated in the folder `final_figures`.
 
 # Notes
 
