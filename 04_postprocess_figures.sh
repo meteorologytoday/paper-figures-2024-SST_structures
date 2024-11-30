@@ -20,7 +20,7 @@ echo "Making final figures... "
 echo "Figure 2: Merge experiment design and vertical profile..."
 svg_stack.py                                \
     --direction=h                           \
-    $fig_static_dir/experiment_design_3.svg \
+    $fig_static_dir/experiment_design.svg \
     $fig_dir/input_sounding_woML.svg        \
     > $fig_dir/merged-exp.svg
 

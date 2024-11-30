@@ -22,23 +22,23 @@ mkdir -p $fig_dir
 plot_codes=(
 
     # Fig 1
-#    $sh 11_plot_ocean_SST_analysis.sh
+    $sh 11_plot_ocean_SST_analysis.sh
     
     # Fig 2
-#    $sh 12_plot_sounding.sh
+    $sh 12_plot_sounding.sh
  
     # Fig 3
-#    $sh 13_plot_timeseries.sh
+    $sh 13_plot_timeseries.sh
    
     # Fig 4 and 5
-#    $sh 14_plot_system_response.sh
+    $sh 14_plot_system_response.sh
     
     # Fig 6
     $sh 16-1_plot_misc_vary_dSST.sh
     $sh 16-2_plot_misc_vary_wnm.sh
 
     # Fig 7
-#    $sh 17_plot_DIV_analysis.sh
+    $sh 17_plot_DIV_analysis.sh
 
     # Fig 8
     $sh 18_plot_dF_flux_decomposition_vary_dSST.sh
@@ -47,10 +47,10 @@ plot_codes=(
     $sh 19_plot_dF_flux_decomposition_vary_wnm.sh
     
     # Fig 10
-#    $sh 20_plot_linearity.sh
+    $sh 20_plot_linearity.sh
 
     # Fig 11
-#    $sh 21_plot_coherence_analysis_vary_wnm.sh
+    $sh 21_plot_coherence_analysis_vary_wnm.sh
 
 )
 
