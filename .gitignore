@@ -27,3 +27,4 @@ gendata/*
 *.swp
 !figures_static/*
 gendata
+sim_data/*
