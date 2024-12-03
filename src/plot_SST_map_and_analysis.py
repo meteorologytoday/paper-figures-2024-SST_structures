@@ -122,6 +122,9 @@ selected_idx = plot_wvlens < args.cutoff_wvlen
 plot_wvlens = plot_wvlens[selected_idx]
 plot_specden = plot_specden[:, selected_idx]
 
+print("Shape of plot_specden: ", plot_specden.shape)
+
+
 plot_freqs = 1.0 / plot_wvlens
 
 print("plot_wvlens: ", plot_wvlens)
@@ -200,7 +203,6 @@ cb.ax.set_xlabel("SST [ ${}^\\circ\\mathrm{C}$ ]")
 
 
 _ax = ax_flatten[1]
-#mappable = _ax.contourf(coords["lon"], coords["lat"], SST_hp, SST_hp_levs, cmap="bwr", extend="both")
 mappable = _ax.contourf(coords["lon"], coords["lat"], SST_za, SST_hp_levs, cmap="bwr", extend="both")
 cax = tool_fig_config.addAxesNextToAxes(fig, _ax, "bottom", thickness=0.03, spacing=0.17)
 cb = plt.colorbar(mappable, cax=cax, orientation="horizontal", pad=0.00)
@@ -223,7 +225,21 @@ _ax = ax_flatten[2]
 _ax2 = _ax.twiny()
 
 for i in range(number_of_lat_rngs):
-    _ax.plot(np.log10(plot_freqs), np.log10(np.mean(plot_specden[lat_band_idxes[i], :], axis=0)), color=colorblind.BW8color[linecolors[i]], alpha=0.9, linestyle="dashed", linewidth=2, label="%d~%d" % (lat_band_rngs[i][0], lat_band_rngs[i][1]))
+    
+    _ax.plot(
+        np.log10(plot_freqs),
+        np.log10(
+            np.mean(
+                plot_specden[lat_band_idxes[i], :],
+                axis=0,
+            )
+        ), 
+        color=colorblind.BW8color[linecolors[i]],
+        alpha=0.9,
+        linestyle="dashed",
+        linewidth=2,
+        label="%d~%d" % (lat_band_rngs[i][0], lat_band_rngs[i][1]),
+    )
 
 _ax.plot(np.log10(plot_freqs), np.log10(np.mean(plot_specden, axis=0)), "k-", linewidth=2, label="All")
 _ax.legend()
@@ -247,7 +263,7 @@ _ax.grid(True)
 _ax.set_xlabel("Wavenumber [cycle / deg]")
 
 _ax.set_ylabel("Spectral Intensity [$ \\mathrm{K}^2 $]")
-_ax.set_title("(c) Spectrum density", pad=15)
+_ax.set_title("(c) Spectral density", pad=15)
 
 if args.output != "":
     print("Saving output: ", args.output) 
