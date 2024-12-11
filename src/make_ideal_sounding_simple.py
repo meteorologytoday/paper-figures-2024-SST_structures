@@ -169,7 +169,7 @@ ax[0].plot(T - offset, z_W_plot, label="$T$")
 ax[0].plot(theta - offset, z_W_plot, label="$\\theta$")
 #ax[0].plot(theta_e - offset, z_W_plot, label="$\\theta_e$")
 
-ax[1].plot(N2**0.5 * 1e2, z_T_plot, label="$N$")
+ax[1].plot(N2 * 1e4, z_T_plot, label="$N^2$")
 #ax[1].plot(RH, z_W_plot, label="RH")
 #ax[1].twiny().plot(w_W, z_W_plot, label="mixing ratio")
 
@@ -178,10 +178,10 @@ ax[1].plot(N2**0.5 * 1e2, z_T_plot, label="$N$")
 
 
 ax[0].set_title("(%s) Temperature" % args.thumbnail_numbering[0] )
-ax[1].set_title("(%s) Brunt–Väisälä frequency $N$" % args.thumbnail_numbering[1] )
+ax[1].set_title("(%s) Squared Brunt–Väisälä\nfrequency $N^2$" % args.thumbnail_numbering[1] )
 
 ax[0].set_xlabel("[ $\\mathrm{K}$ ]")
-ax[1].set_xlabel("[ $\\times 10^{-2} \\, \\mathrm{s}^{-1}$ ]")
+ax[1].set_xlabel("[ $\\times 10^{-4} \\, \\mathrm{s}^{-2}$ ]")
     
 ax[0].legend()
 

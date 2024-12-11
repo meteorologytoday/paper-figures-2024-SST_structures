@@ -103,7 +103,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
             part1_TKE_levs=(-1 1 11)
 
             part2_THETA_rng=(-2 10)
-            part2_Nfreq_rng=(-1.5 1.5)
+            part2_Nfreq2_rng=(-5 5)
             part2_TKE_rng=(-1 1)
             part2_DTKE_rng=(-1 1)
             part2_U_rng=(-1.5 1.5)
@@ -121,7 +121,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
             part1_TKE_levs=(-1 1 11)
 
             part2_THETA_rng=(-2 10)
-            part2_Nfreq_rng=(-1.5 1.5)
+            part2_Nfreq2_rng=(-5 5)
             part2_TKE_rng=(-1 1)
             part2_DTKE_rng=(-1 1)
             part2_U_rng=(-1.5 1.5)
@@ -155,7 +155,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
             --part1-W-levs ${part1_W_levs[@]} \
             --part1-TKE-levs ${part1_TKE_levs[@]} \
             --part2-THETA-rng ${part2_THETA_rng[@]} \
-            --part2-Nfreq-rng ${part2_Nfreq_rng[@]} \
+            --part2-Nfreq2-rng ${part2_Nfreq2_rng[@]} \
             --part2-TKE-rng ${part2_TKE_rng[@]} \
             --part2-DTKE-rng ${part2_DTKE_rng[@]} \
             --part2-U-rng ${part2_U_rng[@]} \

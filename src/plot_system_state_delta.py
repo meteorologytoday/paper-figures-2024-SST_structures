@@ -42,7 +42,7 @@ parser.add_argument('--part1-x-rolling', type=int, help='The plotted height rng 
 
 
 parser.add_argument('--part2-THETA-rng', type=float, nargs=2, help='Theta range in K', default=[None, None])
-parser.add_argument('--part2-Nfreq-rng', type=float, nargs=2, help='Theta range in 1e-2/s^2', default=[None, None])
+parser.add_argument('--part2-Nfreq2-rng', type=float, nargs=2, help='Theta range in 1e-2/s^2', default=[None, None])
 parser.add_argument('--part2-TKE-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
 parser.add_argument('--part2-DTKE-rng', type=float, nargs=2, help='The plotted surface wind in m/s', default=[None, None])
 parser.add_argument('--part2-U-rng', type=float, nargs=2, help='U range in m/s', default=[None, None])
@@ -219,14 +219,19 @@ def loadData(input_dir):
         dfdz[-1] = np.nan
 
         return dfdz 
-        
-    NVfreq = ((g0 / 300.0 * ddz(ds_ref_stat["THETAV"]))**0.5).rename("NVfreq")
-    Nfreq = ((g0 / 300.0 * ddz(ds_ref_stat["THETA"]))**0.5).rename("Nfreq")
+ 
+
+    NVfreq2 = (g0 / 300.0 * ddz(ds_ref_stat["THETAV"])).rename("NVfreq2")
+    Nfreq2  = (g0 / 300.0 * ddz(ds_ref_stat["THETA"])).rename("Nfreq2")
+
+       
+    #NVfreq = ((g0 / 300.0 * ddz(ds_ref_stat["THETAV"]))**0.5).rename("NVfreq")
+    #Nfreq = ((g0 / 300.0 * ddz(ds_ref_stat["THETA"]))**0.5).rename("Nfreq")
 
     #WND = (ds_ref_stat["U"]**2 +  ds_ref_stat["V"]**2)**0.5
     #WND = WND.rename("WND")
 
-    ds_ref_stat = xr.merge([ds_ref_stat, NVfreq, Nfreq])
+    ds_ref_stat = xr.merge([ds_ref_stat, NVfreq2, Nfreq2])
 
     if args.part1_x_rolling != 1:
 
@@ -632,11 +637,11 @@ iii += 1
 
 # Stability
 _ax = ax[0, iii]
-_ax.plot(diff_ds_ref_stat["Nfreq"] * 1e2, ref_Z_W, 'k-', label="$N$")
-_ax.plot(diff_ds_ref_stat["NVfreq"] * 1e2, ref_Z_W, 'r--', label="$N_v$")
-_ax.set_title("(%s) $\\delta N$ (-), $\\delta N_v$ (--)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
-_ax.set_xlabel("[ $\\times 10^{-2} \\mathrm{s}^{-1}$ ]")
-_ax.set_xlim(args.part2_Nfreq_rng)
+_ax.plot(diff_ds_ref_stat["Nfreq2"] * 1e4, ref_Z_W, 'k-', label="$N^2$")
+_ax.plot(diff_ds_ref_stat["NVfreq2"] * 1e4, ref_Z_W, 'r--', label="$N^2_v$")
+_ax.set_title("(%s) $\\delta N^2$ (-), $\\delta N^2_v$ (--)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+_ax.set_xlabel("[ $\\times 10^{-4} \\mathrm{s}^{-2}$ ]")
+_ax.set_xlim(args.part2_Nfreq2_rng)
 #_ax.legend(loc="upper right")
 iii += 1
 
