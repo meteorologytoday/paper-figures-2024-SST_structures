@@ -28,3 +28,6 @@ gendata/*
 !figures_static/*
 gendata
 sim_data/*
+*.tar.gz
+*.tar
+
