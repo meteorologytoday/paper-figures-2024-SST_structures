@@ -23,6 +23,11 @@ This is the code to generate the figures of the paper "Examining the SST Tendenc
 
 # Notes
 
+## Download data
+
+You can programmitically download the data using Zenedo access token. The code to download the data is in `download/download.py`
+
+
 ## For authors to create `gendata` from `data`
 
 - Run `91_generate_hourly_avg.sh` to produce hourly mean data every 12 hours.

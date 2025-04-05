@@ -3,6 +3,7 @@ import requests
 ACCESS_TOKEN = "sKuuQOA2d1lrkBY4PP0a15Qd909qD4UYvRDSfItRGWt6IM55wjVUgz6kIQuf"
 record_id = "14247083"
 
+chunk_size = 20 * 1024 * 1024  # 20 MB
 
 
 
@@ -23,6 +24,10 @@ print(download_urls)
 
 for filename, url in zip(filenames, download_urls):
     print("Downloading:", filename)
-    r = requests.get(url, params={'access_token': ACCESS_TOKEN})
-    with open(filename, 'wb') as f:
-        f.write(r.content)
+
+    with requests.get(url, params={'access_token': ACCESS_TOKEN}, stream=True) as r:
+        r.raise_for_status()  # Optional: raise error for bad responses
+        with open(filename, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=chunk_size):
+                if chunk:  # filter out keep-alive chunks
+                    f.write(chunk)
