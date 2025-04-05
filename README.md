@@ -14,7 +14,7 @@ This is the code to generate the figures of the paper "Examining the SST Tendenc
 # Reproducing Figures
 
 1. Clone this project.
-2. Download files `data.tar.gz` and `gendata.tar.gz` from [Zenodo.org](https://zenodo.org/records/14247083?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjdhYjZmMWQ4LWFhZDctNDViNy1hZTZlLWY0NzA3OWMyZWY4YSIsImRhdGEiOnt9LCJyYW5kb20iOiI1YzFmYTMyNTY3YjM2ZGIwZjdiMDY5OTYxNWQ1YjJiZiJ9.64REpR8jV1907i5UubGb7ZUlXwZAFtQuVyTCDxxhIegLW_oZxKNrXFytxYeVwoa6QcgbC-NVUOzppaadJ-CjQg) to this project folder.
+2. Download files `data.tar.gz` and `gendata.tar.gz` from [Zenodo.org](https://zenodo.org/records/14247083) to this project folder.
 3. Decompress the files `data.tar.gz` and `gendata.tar.gz` with the command `tar -xzvf [filename]`. You should see two directories generated: `data` and `gendata`.
 4. Run `94_pack_data.sh`.
 5. Run `03_make_figures.sh`.
