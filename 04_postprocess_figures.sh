@@ -32,10 +32,9 @@ for wnm in 000 ; do
     
     svg_stack.py \
         --direction=v \
-        $fig_dir/snapshots_dhr-120/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_MYNN25/snapshot-vertical-profile_120-240.svg \
-        $fig_dir/snapshots_dhr-120/lab_FULL/case_mph-off_wnm${wnm}_U20_dT${dT}_MYNN25/snapshot-vertical-profile_120-240.svg \
+        $fig_dir/snapshots-full_dhr-120/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_MYNN25/snapshot-full-vertical-profile_120-240.svg \
+        $fig_dir/snapshots-full_dhr-120/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_MYNN25/snapshot-full-vertical-profile_120-240.svg \
         > $fig_dir/merged-snapshot-vertical-profile_wnm${wnm}_U20_dT${dT}.svg
-
 done
 done
 

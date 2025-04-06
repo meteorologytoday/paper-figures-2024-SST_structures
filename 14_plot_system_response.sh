@@ -12,7 +12,7 @@ beg_days=(
 dhr=$(( 24 * 5 ))
 output_fig_dir=$fig_dir/snapshots_dhr-${dhr}
 
-nproc=1
+nproc=5
 
 proc_cnt=0
 
@@ -68,7 +68,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
     exp_name="${exp_name}."
 
 
-    part2_tke_analysis=FALSE
+    part2_tke_analysis=TRUE
 
     input_dir=$gendata_dir/preavg/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}
     output_dir=$output_fig_dir/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}
@@ -123,7 +123,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
             part2_THETA_rng=(-2 10)
             part2_Nfreq2_rng=(-5 5)
             part2_TKE_rng=(-1 1)
-            part2_DTKE_rng=(-1 1)
+            part2_DTKE_rng=(-0.001 0.001)
             part2_U_rng=(-1.5 1.5)
             part2_Q_rng=(-1 1)
   
@@ -167,6 +167,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
             --thumbnail-skip-part1 $thumbnail_skip_part1 \
             --thumbnail-skip-part2 $thumbnail_skip_part2 \
             --part2-tke-analysis $part2_tke_analysis \
+            --plot-part1 --plot-part2 \
             --no-display 
         " &
 

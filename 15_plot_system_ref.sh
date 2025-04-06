@@ -8,7 +8,7 @@ beg_days=(
 )
 
 dhr=$(( 24 * 5 ))
-output_fig_dir=$fig_dir/snapshots_dhr-${dhr}
+output_fig_dir=$fig_dir/snapshots-full_dhr-${dhr}
 
 nproc=5
 
@@ -37,7 +37,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
 
     if [[ "$target_lab" =~ "FULL" ]]; then
         mph=on
-        thumbnail_skip=7
+        thumbnail_skip=6
     elif [[ "$target_lab" =~ "SIMPLE" ]]; then
         mph=off
         thumbnail_skip=0
@@ -72,7 +72,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
         hrs_beg=$( printf "%02d" $(( $beg_day * 24 )) )
         hrs_end=$( printf "%02d" $(( $hrs_beg + $dhr )) )
 
-        output="$output_dir/snapshot-vertical-profile_${hrs_beg}-${hrs_end}.svg"
+        output="$output_dir/snapshot-full-vertical-profile_${hrs_beg}-${hrs_end}.svg"
         extra_title=""
 
         extra_title="${exp_name}${_bl_scheme}."
@@ -85,23 +85,24 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
         Q_rng=(-1 10)
 
 
-        eval "python3 src/plot_vertical_profile.py  \
+        eval "python3 src/plot_system_state_delta.py  \
             --input-dir $input_dir  \
             --exp-beg-time '2001-01-01 00:00:00' \
             --wrfout-data-interval 3600          \
             --frames-per-wrfout-file 12          \
             --time-rng $(( $hrs_beg * 60 )) $(( $hrs_end * 60 ))  \
             --extra-title '$extra_title'         \
-            --z-rng 0 5000 \
-            --THETA-rng ${THETA_rng[@]} \
-            --Nfreq2-rng ${Nfreq2_rng[@]} \
-            --TKE-rng ${TKE_rng[@]} \
-            --DTKE-rng ${DTKE_rng[@]} \
-            --U-rng ${U_rng[@]} \
-            --Q-rng ${Q_rng[@]} \
-            --output $output \
-            --thumbnail-skip $thumbnail_skip \
-            --tke-analysis $tke_analysis \
+            --part2-z-rng 0 5000 \
+            --part2-THETA-rng ${THETA_rng[@]} \
+            --part2-Nfreq2-rng ${Nfreq2_rng[@]} \
+            --part2-TKE-rng ${TKE_rng[@]} \
+            --part2-DTKE-rng ${DTKE_rng[@]} \
+            --part2-U-rng ${U_rng[@]} \
+            --part2-Q-rng ${Q_rng[@]} \
+            --output2 $output \
+            --thumbnail-skip-part2 $thumbnail_skip \
+            --part2-tke-analysis $tke_analysis \
+            --plot-part2 \
             --no-display 
         " &
 
