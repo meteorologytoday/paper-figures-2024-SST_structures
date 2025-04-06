@@ -108,7 +108,7 @@ if np.any(np.isnan(SST)):
 
 SST_za = scipy.signal.detrend(SST, axis=1)
 
-dft_coe = np.fft.fft(SST_za, axis=1)
+dft_coe = np.fft.fft(SST_za, axis=1) * ( dlon / ( 2*np.pi) )
 fftfreq = np.fft.fftfreq(SST_za.shape[1]) / dlon  # cycle / total_longitude_width
 #wvlens = dlon / np.fft.fftfreq(SST_za.shape[1])
 wvlens = fftfreq ** (-1)
@@ -122,13 +122,26 @@ selected_idx = plot_wvlens < args.cutoff_wvlen
 plot_wvlens = plot_wvlens[selected_idx]
 plot_specden = plot_specden[:, selected_idx]
 
+
+
+
 print("Shape of plot_specden: ", plot_specden.shape)
 
 
 plot_freqs = 1.0 / plot_wvlens
 
-print("plot_wvlens: ", plot_wvlens)
+#print("plot_wvlens: ", plot_wvlens)
 
+
+mean_specden = np.mean(plot_specden, axis=0)
+
+print("mean_specden: ", mean_specden.shape)
+print("plot_freq:    ", plot_freqs.shape)
+
+selected = plot_wvlens < 5
+coe = np.polyfit(np.log(plot_freqs[selected]), np.log(mean_specden[selected]), deg=1)
+
+print("Fitting result: coe = ", coe)
 
 # Plot data
 print("Loading Matplotlib...")
@@ -208,6 +221,7 @@ cax = tool_fig_config.addAxesNextToAxes(fig, _ax, "bottom", thickness=0.03, spac
 cb = plt.colorbar(mappable, cax=cax, orientation="horizontal", pad=0.00)
 cb.ax.set_xlabel("SST Anomaly [ K ]")
 
+
 #cs = _ax.contour(coords["lon"], coords["lat"], SST_hp, SST_hp_cntr_levs, colors="black", linewidths=0.5)
 
 for _ax in ax_flatten[:2]:
@@ -238,15 +252,29 @@ for i in range(number_of_lat_rngs):
         alpha=0.9,
         linestyle="dashed",
         linewidth=2,
-        label="%d~%d" % (lat_band_rngs[i][0], lat_band_rngs[i][1]),
+        label="$%d^\\circ\\mathrm{N}$~$%d^\\circ\\mathrm{N}$" % (lat_band_rngs[i][0], lat_band_rngs[i][1]),
     )
 
 _ax.plot(np.log10(plot_freqs), np.log10(np.mean(plot_specden, axis=0)), "k-", linewidth=2, label="All")
-_ax.legend()
+
+def denote(ax, deg, fmt="%d"):
+    trans = transforms.blended_transform_factory(ax.transData, ax.transAxes)
+    _x = deg**(-1)
+    _ax.plot([np.log10(_x)]*2, [0, 1], "r--", transform=trans)
+    _ax.text(np.log10(_x), 0.1, "  $%s~\\mathrm{deg}$" % ( fmt % deg, ), color="r", size=12, ha="left", transform=trans)
+
+denote(_ax, 5)
+denote(_ax, 1)
+
+
+
+
+_ax.legend(fontsize=12)
+
+_ax.set_ylim(args.ylim)
 
 xticks = np.array([-1, -.5, 0, .5, 1])
-yticks = np.array([0, 1, 2, 3])
-
+yticks = _ax.get_yticks()#np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
 _ax.set_xticks(ticks=xticks, labels=["$10^{%.1f}$" % (d, ) for d in xticks])
 _ax.set_yticks(ticks=yticks, labels=["$10^{%d}$" % (d, ) for d in yticks])
@@ -257,12 +285,12 @@ _ax2.set_xlabel("Wavelength [deg / cycle]")
 for __ax in [_ax, _ax2]:
     _ax.set_xlim([xticks[0], xticks[-1]])
 
-_ax.set_ylim(args.ylim)
+
 
 _ax.grid(True)
 _ax.set_xlabel("Wavenumber [cycle / deg]")
 
-_ax.set_ylabel("Spectral Intensity [$ \\mathrm{K}^2 $]")
+_ax.set_ylabel("Spectral Intensity [$ \\mathrm{K}^2 \\; \\cdot \\; \\mathrm{deg}^2 $]")
 _ax.set_title("(c) Spectral density", pad=15)
 
 if args.output != "":
