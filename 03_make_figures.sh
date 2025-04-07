@@ -37,11 +37,11 @@ plot_codes=(
     $sh 14_plot_system_response.sh
     
     # Fig 7
-    $sh 16-1_plot_misc_vary_dSST.sh
-    $sh 16-2_plot_misc_vary_wnm.sh
+    #$sh 16-1_plot_misc_vary_dSST.sh
+    #$sh 16-2_plot_misc_vary_wnm.sh
 
     # Fig 8
-    $sh 17_plot_DIV_analysis.sh
+    #$sh 17_plot_DIV_analysis.sh
 
     # Fig 9
     $sh 18_plot_dF_flux_decomposition_vary_dSST.sh

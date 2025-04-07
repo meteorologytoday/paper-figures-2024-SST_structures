@@ -119,6 +119,10 @@ def preprocessing(
         west_east_stag = X_sU, 
     ))
 
+    if "CD" in ds:
+        print("Dropping CD, calculate myself.")
+        ds = ds.drop_vars("CD")
+
     merge_data = [ds,]
 
     # Cannot use the following to get surface pressure:
@@ -188,14 +192,27 @@ def preprocessing(
     merge_data.append(QFX_from_FLQC)
     merge_data.append(LH_from_FLQC)
 
+    ############# 
+    # IMPORTANT #
+    #############
+    #
+    # The CH computed here contains the factor c_p such that it is dimensional
+    #     CQ               contains            L_q 
+    #
+    # This is to simplify the computation code in the decomposition.
+    #
+    # Please be careful
+    #
+    #
+
     CH = ds["FLHC"] / WND_sfc / RHO_sfc
     CH = CH.rename("CH")
     
     CQ = ds["FLQC"] / WND_sfc / RHO_sfc
     CQ = CQ.rename("CQ") 
 
-    CD_est = ds["UST"] / WND_sfc
-    CD_est = CD_est.rename("CD_est") 
+    CD_est = (ds["UST"] / WND_sfc)**2
+    CD_est = CD_est.rename("CD") 
 
 
     merge_data.append(WND_sfc)

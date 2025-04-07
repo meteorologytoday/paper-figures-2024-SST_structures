@@ -12,8 +12,8 @@ output_dir=$fig_dir/dF_total_flux_decomposition/$parameter
 for target_lab in lab_FULL ; do
 for Ug in 20 ; do
 for wnm in 010 ; do
-#for bl_scheme in MYNN25 YSU MYJ; do
-for bl_scheme in MYNN25 ; do
+for bl_scheme in MYNN25 YSU MYJ; do
+#for bl_scheme in MYNN25 ; do
 for hr in 120-240 ; do
 
     input_file=$gendata_dir/dF_phase_analysis/fixed_wnm/$target_lab/collected_flux_${bl_scheme}_hr${hr}.nc

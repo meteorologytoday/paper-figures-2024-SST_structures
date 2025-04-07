@@ -20,9 +20,9 @@ target_labs=(
 )
 
 bl_schemes=(
-    MYNN25
-#    MYJ
-#    YSU
+#    MYNN25
+    MYJ
+    YSU
 )
 
 source 98_trapkill.sh
@@ -59,8 +59,6 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
 
     exp_name="${exp_name}."
 
-
-    tke_analysis=TRUE
 
     input_dir=$gendata_dir/preavg/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}
     output_dir=$output_fig_dir/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}

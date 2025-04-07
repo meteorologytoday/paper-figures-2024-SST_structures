@@ -16,10 +16,15 @@ This is the code to generate the figures of the paper "Examining the SST Tendenc
 1. Clone this project.
 2. Download files `data.tar.gz` and `gendata.tar.gz` from [Zenodo.org](https://zenodo.org/records/14247083) to this project folder.
 3. Decompress the files `data.tar.gz` and `gendata.tar.gz` with the command `tar -xzvf [filename]`. You should see two directories generated: `data` and `gendata`.
+4. If there is any need to regenerate the "delta analysis", which produce files in `gendata/delta_analysis_style-STYLE1` please run `93_generate_delta_analysis.sh`.
 4. Run `94_pack_data.sh`.
-5. Run `03_make_figures.sh`.
-6. Run `04_postprocess_figures.sh`.
-7. The figures are generated in the folder `final_figures`.
+5. Run `95_generate_coherence_analysis.sh`.
+6. Run `03_make_figures.sh`.
+7. Run `04_postprocess_figures.sh`.
+8. The figures are generated in the folder `final_figures`.
+
+
+
 
 # Notes
 

@@ -2,7 +2,7 @@
 
 source 00_setup.sh
 source 98_trapkill.sh
-nproc=1
+nproc=5
 
 time_avg_interval=60   # minutes
 
@@ -12,8 +12,10 @@ hrs_end=$(( 24 * 10 ))
 
 thumbnail_skip=0
 for dT in 100 ; do
-for bl_scheme in MYNN25 ; do
-for target_lab in lab_SIMPLE lab_FULL; do
+for bl_scheme in MYNN25 MYJ YSU ; do
+#for bl_scheme in  MYJ ; do
+for target_lab in lab_FULL ; do
+#for target_lab in lab_SIMPLE lab_FULL; do
 
     output_dir=$fig_dir/linearity_analysis
     
@@ -96,7 +98,7 @@ for target_lab in lab_SIMPLE lab_FULL; do
         --tracking-wnms ${tracking_wnms[@]}        \
         --varnames "${varnames[@]}"                \
         --thumbnail-skip $thumbnail_skip           \
-        --ylim 0.7 1.02                            \
+        --ylim 0.0 1.02                            \
         --thumbnail-titles "$title"
     " &
 

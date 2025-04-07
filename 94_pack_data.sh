@@ -15,7 +15,7 @@ bl_schemes=(
 )
 target_labs=(
     lab_FULL
-#    lab_SIMPLE
+    lab_SIMPLE
 )
 
 input_params=(

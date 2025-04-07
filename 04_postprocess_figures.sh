@@ -27,47 +27,53 @@ svg_stack.py                                \
 
 
 echo "Figure 4: Merge vertical... "
+for bl_scheme in MYNN25 MYJ YSU ; do 
 for dT in 000; do
 for wnm in 000 ; do
     
     svg_stack.py \
         --direction=v \
-        $fig_dir/snapshots-full_dhr-120/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_MYNN25/snapshot-full-vertical-profile_120-240.svg \
-        $fig_dir/snapshots-full_dhr-120/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_MYNN25/snapshot-full-vertical-profile_120-240.svg \
-        > $fig_dir/merged-snapshot-vertical-profile_wnm${wnm}_U20_dT${dT}.svg
+        $fig_dir/snapshots-full_dhr-120/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-full-vertical-profile_120-240.svg \
+        $fig_dir/snapshots-full_dhr-120/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-full-vertical-profile_120-240.svg \
+        > $fig_dir/merged-snapshot-vertical-profile_wnm${wnm}_U20_dT${dT}_${bl_scheme}.svg
+done
 done
 done
 
 
 
 echo "Figure 5 and 6: Merge snapshots... "
+for bl_scheme in MYNN25 MYJ YSU ; do 
 for dT in 100; do
 for wnm in 010 ; do
     
     svg_stack.py \
         --direction=h \
-        $fig_dir/snapshots_dhr-120/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_MYNN25/snapshot-part1_120-240.svg \
-        $fig_dir/snapshots_dhr-120/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_MYNN25/snapshot-part1_120-240.svg \
-        > $fig_dir/merged-snapshot_wnm${wnm}_U20_dT${dT}_part1.svg
+        $fig_dir/snapshots_dhr-120/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-part1_120-240.svg \
+        $fig_dir/snapshots_dhr-120/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-part1_120-240.svg \
+        > $fig_dir/merged-snapshot_wnm${wnm}_U20_dT${dT}_${bl_scheme}_part1.svg
 
     svg_stack.py \
         --direction=v \
-        $fig_dir/snapshots_dhr-120/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_MYNN25/snapshot-part2_120-240.svg \
-        $fig_dir/snapshots_dhr-120/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_MYNN25/snapshot-part2_120-240.svg \
-        > $fig_dir/merged-snapshot_wnm${wnm}_U20_dT${dT}_part2.svg
+        $fig_dir/snapshots_dhr-120/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-part2_120-240.svg \
+        $fig_dir/snapshots_dhr-120/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-part2_120-240.svg \
+        > $fig_dir/merged-snapshot_wnm${wnm}_U20_dT${dT}_${bl_scheme}_part2.svg
 
 done
 done
+done
 
+sleep 3
 echo "Figure 7: Merge Fourier analysis... "
-fixed_dSST=100
-fixed_wnm=010
-svg_stack.py \
-    --direction=v \
-    $fig_dir/spectral_analysis_linearity_on_dSST/linearity_on_dSST_lab_FULL_wnm${fixed_wnm}_MYNN25_hr120-240.svg \
-    $fig_dir/spectral_analysis_tracking_wnm/spectral_analysis_lab_FULL_dT${fixed_dSST}_MYNN25_hr120-240.svg \
-    > $fig_dir/merged-spectral_analysis_wnm${fixed_wnm}_dSST${fixed_dSST}_MYNN25_hr120-240.svg
-
+for bl_scheme in MYNN25 MYJ YSU ; do 
+    fixed_dSST=100
+    fixed_wnm=010
+    svg_stack.py \
+        --direction=v \
+        $fig_dir/spectral_analysis_linearity_on_dSST/linearity_on_dSST_lab_FULL_wnm${fixed_wnm}_${bl_scheme}_hr120-240.svg \
+        $fig_dir/spectral_analysis_tracking_wnm/spectral_analysis_lab_FULL_dT${fixed_dSST}_${bl_scheme}_hr120-240.svg \
+        > $fig_dir/merged-spectral_analysis_wnm${fixed_wnm}_dSST${fixed_dSST}_${bl_scheme}_hr120-240.svg
+done
 
 echo "Figure 9: Merging the misc phase diagram..."
 svg_stack.py \
@@ -77,26 +83,47 @@ svg_stack.py \
     > $fig_dir/merged-phase_misc_hr120-240.svg
 
 
+sleep 3
 echo "Figure 10: Merge linearity"
-svg_stack.py      \
-    --direction=h \
-    $fig_dir/linearity_analysis/linearity_vary_wnm_lab_SIMPLE_dSST100_MYNN25_hr120-240.svg \
-    $fig_dir/linearity_analysis/linearity_vary_wnm_lab_FULL_dSST100_MYNN25_hr120-240.svg \
-    > $fig_dir/merged-linearity_vary_wnm_MYNN25_hr120-240.svg
-
+for bl_scheme in MYNN25 MYJ YSU ; do 
+    svg_stack.py      \
+       --direction=h \
+        $fig_dir/linearity_analysis/linearity_vary_wnm_lab_SIMPLE_dSST100_${bl_scheme}_hr120-240.svg \
+        $fig_dir/linearity_analysis/linearity_vary_wnm_lab_FULL_dSST100_${bl_scheme}_hr120-240.svg \
+        > $fig_dir/merged-linearity_vary_wnm_${bl_scheme}_hr120-240.svg
+done
 name_pairs=(
     sst_analysis_20240101.svg                                                                        fig01
     merged-exp.svg                                                                                   fig02
     timeseries/timeseries_wnm010_U20_dT100_MYNN25_timeseries_smooth-25_000-360.svg                   fig03
-    merged-snapshot-vertical-profile_wnm000_U20_dT000.svg                                            fig04
-    merged-snapshot_wnm010_U20_dT100_part1.svg                                                       fig05
-    merged-snapshot_wnm010_U20_dT100_part2.svg                                                       fig06
-    merged-phase_misc_hr120-240.svg                                                                  fig07
-    DIV_analysis_tracking_wnm/DIV_analysis_lab_FULL_dT100_MYNN25_hr120-240.svg                       fig08
+    merged-snapshot-vertical-profile_wnm000_U20_dT000_MYNN25.svg                                     fig04
+    merged-snapshot_wnm010_U20_dT100_MYNN25_part1.svg                                                fig05
+    merged-snapshot_wnm010_U20_dT100_MYNN25_part2.svg                                                fig06
+#    merged-phase_misc_hr120-240.svg                                                                  fig07
+#    DIV_analysis_tracking_wnm/DIV_analysis_lab_FULL_dT100_MYNN25_hr120-240.svg                       fig08
     dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_MYNN25_hr120-240.svg  fig09
     dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_MYNN25_hr120-240.svg   fig10
     merged-linearity_vary_wnm_MYNN25_hr120-240.svg                                                   fig11 
-    coherence_analysis/coherence_on_dSST_vary_wnm_lab_FULL_dSST100_MYNN25_hr120-240.svg              fig12
+    coherence_analysis/coherence_on_dSST_vary_wnm_dSST100_MYNN25_hr120-240.svg                       fig12
+
+    merged-snapshot-vertical-profile_wnm000_U20_dT000_MYJ.svg                                        figS01
+    merged-snapshot_wnm010_U20_dT100_MYJ_part1.svg                                                   figS02
+    merged-snapshot_wnm010_U20_dT100_MYJ_part2.svg                                                   figS03
+    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_MYJ_hr120-240.svg  figS04
+    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_MYJ_hr120-240.svg   figS05
+    merged-linearity_vary_wnm_MYJ_hr120-240.svg                                                      figS06 
+    coherence_analysis/coherence_on_dSST_vary_wnm_lab_FULL_dSST100_MYJ_hr120-240.svg                 figS07
+
+
+    merged-snapshot-vertical-profile_wnm000_U20_dT000_YSU.svg                                        figS08
+    merged-snapshot_wnm010_U20_dT100_YSU_part1.svg                                                   figS09
+    merged-snapshot_wnm010_U20_dT100_YSU_part2.svg                                                   figS10
+    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_YSU_hr120-240.svg  figS11
+    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_YSU_hr120-240.svg   figS12
+    merged-linearity_vary_wnm_YSU_hr120-240.svg                                                      figS13
+    coherence_analysis/coherence_on_dSST_vary_wnm_lab_FULL_dSST100_YSU_hr120-240.svg                 figS14
+
+
 )
 
 N=$(( ${#name_pairs[@]} / 2 ))

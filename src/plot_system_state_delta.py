@@ -58,16 +58,23 @@ args = parser.parse_args()
 
 print(args)
 
+base_exists = args.input_dir_base is not None    
+
 if not args.plot_part1 and not args.plot_part2:
     raise Exception("Either one of `--plot-part1` or `--plot-part2` should be activated.")
 
+
 if args.plot_part1:
+    
+    if not base_exists:
+        raise Exception("If `--plot-part1`, base need to be provided.")
+    
     print("Plan to generate plot 1")
 
 if args.plot_part2:
     print("Plan to generate plot 2")
 
-base_exists = args.input_dir_base is not None    
+
 
 
 exp_beg_time = pd.Timestamp(args.exp_beg_time)
@@ -332,7 +339,7 @@ print("Done")
 
 # ======= FIRST PART ========
 
-if args.plot_part1:
+if args.plot_part1 and base_exists:
 
     ncol = 1
     nrow = 5
@@ -364,7 +371,7 @@ if args.plot_part1:
     #time_fmt="%y/%m/%d %Hh"
 
     if args.overwrite_title == "":
-        fig.suptitle("%sTime: %.2f ~ %.2f hr" % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end),))
+        fig.suptitle("%sTime: %d ~ %d hr" % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end),))
         
     else:
         fig.suptitle(args.overwrite_title)
@@ -598,17 +605,31 @@ if args.plot_part1:
 
 if args.plot_part2:
 
+    if base_exists:
+        delta_word = "\\delta"
+    else:
+        delta_word = ""
+
+
+
     print("Generating vertical profile")
 
     ncol = 5
     nrow = 1
 
-    w = [1.5, 1.5, 1.5, 1.5, 1.5]
+    if not has_TKE:
+        ncol -= 1
+
+    w = [1.5,] * ncol
 
     if args.part2_tke_analysis == "TRUE":
 
+        if not has_TKE:
+            raise Exception("TKE analysis is required but there is no TKE in the data")
+
         ncol += 1 
         w = w + [1.5,]
+
 
     figsize, gridspec_kw = tool_fig_config.calFigParams(
         w = w,
@@ -634,7 +655,7 @@ if args.plot_part2:
 
 
     if args.overwrite_title == "":
-        fig.suptitle("%sTime: %.2f ~ %.2f hr" % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end),))
+        fig.suptitle("%sTime: %d ~ %d hr" % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end),))
         
     else:
         fig.suptitle(args.overwrite_title)
@@ -645,7 +666,7 @@ if args.plot_part2:
     _ax = ax[0, iii]
     _ax.plot(diff_ds_ref_stat["THETA"], ref_Z_T, 'k-', label="$\\overline{\\theta}$")
     _ax.plot(diff_ds_ref_stat["THETAV"], ref_Z_T, 'r--', label="$\\overline{\\theta_v}$")
-    _ax.set_title("(%s) $ \\delta \\overline{\\theta}$ (-), $\\delta \\overline{\\theta}_v$ (--)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+    _ax.set_title("(%s) $ %s \\overline{\\theta}$ (-), $ %s \\overline{\\theta}_v$ (--)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii], delta_word, delta_word,))
     _ax.set_xlabel("[ $\\mathrm{K}$ ]")
     _ax.set_xlim(args.part2_THETA_rng)
     #_ax.legend(loc="upper right")
@@ -655,7 +676,7 @@ if args.plot_part2:
     _ax = ax[0, iii]
     _ax.plot(diff_ds_ref_stat["Nfreq2"] * 1e4, ref_Z_W, 'k-', label="$N^2$")
     _ax.plot(diff_ds_ref_stat["NVfreq2"] * 1e4, ref_Z_W, 'r--', label="$N^2_v$")
-    _ax.set_title("(%s) $\\delta N^2$ (-), $\\delta N^2_v$ (--)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+    _ax.set_title("(%s) $ %s N^2$ (-), $ %s N^2_v$ (--)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii], delta_word, delta_word, ))
     _ax.set_xlabel("[ $\\times 10^{-4} \\mathrm{s}^{-2}$ ]")
     _ax.set_xlim(args.part2_Nfreq2_rng)
     #_ax.legend(loc="upper right")
@@ -667,57 +688,39 @@ if args.plot_part2:
     _ax.plot(diff_ds_ref_stat["U"], ref_Z_T, linestyle="--", color="blue")#, ref_Z_T)
     _ax.plot(diff_ds_ref_stat["V"], ref_Z_T, linestyle=":", color="red")#, ref_Z_T)
 
-    _ax.set_title("(%s) $\\delta U $ (-), $\\delta \\overline{u}$ (--), $\\delta \\overline{v}$ (..)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+    _ax.set_title("(%s) $ %s U $ (-), $ %s \\overline{u}$ (--), $ %s \\overline{v}$ (..)" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii], delta_word, delta_word, delta_word, ))
     _ax.set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
     _ax.set_xlim(args.part2_U_rng)
     iii += 1
 
 
-    # WND
-    """
-    _ax = ax[0, iii]
-    _ax.plot(diff_ds_ref_stat["WND"], ref_Z_T, color="black")
-
-    _ax.set_title("(%s) $\\delta \\left| \\overline{\\vec{U}} \\right|$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
-    _ax.set_xlabel("[ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]")
-    _ax.set_xlim(args.U_rng)
-    iii += 1
-    """
-
     # Q
     _ax = ax[0, iii]
     _ax.plot(diff_ds_ref_stat["QVAPOR"] * 1e3, ref_Z_T, color="black")
 
-    _ax.set_title("(%s) $\\delta \\overline{Q}_\\mathrm{vapor}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+    _ax.set_title("(%s) $ %s \\overline{Q}_\\mathrm{vapor}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii], delta_word, ))
     _ax.set_xlabel("[ $\\mathrm{g} \\, / \\, \\mathrm{kg}$ ]")
     _ax.set_xlim(args.part2_Q_rng)
     iii += 1
 
     # TKE
-    _ax = ax[0, iii]
-    _ax.plot(diff_ds_ref_stat["QKE"]/2, ref_Z_T, color="black")
-    _ax.set_title("(%s) $\\delta \\overline{\\mathrm{TKE}}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
-    _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
-    _ax.set_xlim(args.part2_TKE_rng)
-    iii+=1
+
+    if has_TKE:
+        _ax = ax[0, iii]
+        _ax.plot(diff_ds_ref_stat["QKE"]/2, ref_Z_T, color="black")
+        _ax.set_title("(%s) $ %s \\overline{\\mathrm{TKE}}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii], delta_word))
+        _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
+        _ax.set_xlim(args.part2_TKE_rng)
+        iii+=1
 
 
 
     if args.part2_tke_analysis == "TRUE":
-        """
-        # TKE
-        _ax = ax[0, iii]
-        _ax.plot(diff_ds_ref_stat["QKE"]/2, ref_Z_T)
-        _ax.set_title("(%s) $\\delta \\overline{\\mathrm{TKE}}$" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
-        _ax.set_xlabel("[ $\\mathrm{m}^2 \\, / \\, \\mathrm{s}^2$ ]")
-        _ax.set_xlim(args.part2_TKE_rng)
-        iii+=1
-        """
 
         # TKE budget
         _ax = ax[0, iii]
 
-        _ax.set_title("(%s) TKE budget" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii],))
+        _ax.set_title("(%s) $%s \\mathrm{TKE}$ budget" % (args.thumbnail_numbering[args.thumbnail_skip_part2 + iii], delta_word))
         _ax.plot(diff_ds_ref_stat["DQKE_T"] / 2, ref_Z_T,   color="black", linestyle='-', label="$\\frac{\\partial q}{\\partial t}$")
         _ax.plot(diff_ds_ref_stat["QSHEAR_T"]/2, ref_Z_T, color="red", linestyle='-',   label="$q_{sh}$")
         _ax.plot(diff_ds_ref_stat["QBUOY_T"]/2, ref_Z_T,  color="blue", linestyle='-',  label="$q_{bu}$")

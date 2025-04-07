@@ -22,9 +22,9 @@ target_labs=(
 )
 
 bl_schemes=(
-    MYNN25
-#    MYJ
-#    YSU
+#    MYNN25
+    MYJ
+    YSU
 )
 
 source 98_trapkill.sh
@@ -43,8 +43,8 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
         mph=on
         #W_levs=( -50 50 11 )
         W_levs=( -2 2 21 )
-        thumbnail_skip_part1=5
-        thumbnail_skip_part2=5
+        thumbnail_skip_part1=6
+        thumbnail_skip_part2=6
     elif [[ "$target_lab" =~ "SIMPLE" ]]; then
         mph=off
         W_levs=( -2 2 21 )
@@ -67,8 +67,6 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
 
     exp_name="${exp_name}."
 
-
-    part2_tke_analysis=TRUE
 
     input_dir=$gendata_dir/preavg/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}
     output_dir=$output_fig_dir/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}
@@ -166,7 +164,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
             --output2 $output2_name \
             --thumbnail-skip-part1 $thumbnail_skip_part1 \
             --thumbnail-skip-part2 $thumbnail_skip_part2 \
-            --part2-tke-analysis $part2_tke_analysis \
+            --part2-tke-analysis $tke_analysis \
             --plot-part1 --plot-part2 \
             --no-display 
         " &

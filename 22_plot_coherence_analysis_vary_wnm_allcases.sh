@@ -11,19 +11,17 @@ hrs_end=$(( 24 * 10 ))
 
 
 thumbnail_skip=0
-for bl_scheme in MYNN25 MYJ YSU ; do
+for target_lab in lab_FULL ; do
 
     input_files=""
     labels=""
     for dT in 100 ; do
-    for target_lab_suffix in SIMPLE FULL ; do
+    for bl_scheme in MYNN25 MYJ YSU ; do
 
-        target_lab=lab_${target_lab_suffix}
-    
         input_file=$gendata_dir/coherence_analysis/coherence_analysis_dSST_vary_wnm_${target_lab}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.nc
 
         input_files="$input_files $input_file"
-        labels="$labels ${bl_scheme}-${target_lab_suffix}"
+        labels="$labels $bl_scheme"
     done
     done
 
@@ -35,9 +33,11 @@ for bl_scheme in MYNN25 MYJ YSU ; do
     linestyles=(
         "solid"
         "dashed"
+        "dotted"
     )
 
     linecolors=(
+        "black"
         "black"
         "black"
     )
@@ -47,7 +47,7 @@ for bl_scheme in MYNN25 MYJ YSU ; do
     
     mkdir -p $output_dir
     
-    output_file=$output_dir/coherence_on_dSST_vary_wnm_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
+    output_file=$output_dir/coherence_on_dSST_vary_wnm_${target_lab}_dSST${dT}_hr${hrs_beg}-${hrs_end}.svg
 
     python3 src/plot_coherence.py \
         --input-files ${input_files[@]} \
@@ -73,4 +73,3 @@ done
 
 wait
 echo "Done."
-

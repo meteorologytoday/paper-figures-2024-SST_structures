@@ -24,7 +24,7 @@ for analysis_style in STYLE1 ; do
 
 
     for avg_before_analysis in "TRUE" ; do
-    for _bl_scheme in MYNN25  MYJ YSU ; do
+    for _bl_scheme in MYJ MYNN25 YSU  ; do
     for target_lab in  lab_FULL lab_SIMPLE ; do
 
     for wnm in 004 005 007 010 020 040 000 ; do
