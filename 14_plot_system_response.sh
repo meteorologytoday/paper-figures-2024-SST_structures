@@ -17,24 +17,30 @@ nproc=5
 proc_cnt=0
 
 target_labs=(
-    lab_FULL
-#    lab_SIMPLE
+#    lab_FULL
+    lab_SIMPLE
 )
 
 bl_schemes=(
     MYNN25
-    MYJ
-    YSU
+#    MYJ
+#    YSU
 )
+
+wnms=(
+    040
+    010
+    005
+)
+
 
 source 98_trapkill.sh
 
 for dT in 100; do
-#for wnm in 010 004 ; do #020 ; do
-for wnm in 040 010 ; do
+for wnm in ${wnms[@]} ; do
 for U in "20" ; do
-for target_lab in "${target_labs[@]}" ; do
-for _bl_scheme in "${bl_schemes[@]}" ; do
+for target_lab in ${target_labs[@]} ; do
+for _bl_scheme in ${bl_schemes[@]} ; do
  
     thumbnail_skip_part1=0
     thumbnail_skip_part2=0
