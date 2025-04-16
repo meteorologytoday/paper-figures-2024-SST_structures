@@ -12,10 +12,11 @@ hrs_end=$(( 24 * 10 ))
 
 thumbnail_skip=0
 for dT in 100 ; do
-for bl_scheme in MYNN25 MYJ YSU ; do
+#for bl_scheme in MYNN25 MYJ YSU ; do
+for bl_scheme in MYJ YSU MYNN25 ; do
 #for bl_scheme in  MYJ ; do
-for target_lab in lab_FULL ; do
-#for target_lab in lab_SIMPLE lab_FULL; do
+#for target_lab in lab_FULL ; do
+for target_lab in lab_SIMPLE lab_FULL; do
 
     output_dir=$fig_dir/linearity_analysis
     

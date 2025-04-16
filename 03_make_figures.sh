@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-nproc=3
+nproc=2
 
 while getopts "p:" arg ; do
     case $arg in
@@ -37,23 +37,26 @@ plot_codes=(
     $sh 14_plot_system_response.sh
     
     # Fig 7
+    $sh 18_plot_dF_flux_decomposition_vary_dSST.sh
+
+    # Fig 8
+    $sh 19_plot_dF_flux_decomposition_vary_wnm.sh
+    
+    # Fig 9
+    $sh 20_plot_linearity.sh
+
+    # Fig 10
+    $sh 21_plot_coherence_analysis_vary_wnm.sh
+
+
+    # old
+    # Fig 7
     #$sh 16-1_plot_misc_vary_dSST.sh
     #$sh 16-2_plot_misc_vary_wnm.sh
 
     # Fig 8
     #$sh 17_plot_DIV_analysis.sh
 
-    # Fig 9
-    $sh 18_plot_dF_flux_decomposition_vary_dSST.sh
-
-    # Fig 10
-    $sh 19_plot_dF_flux_decomposition_vary_wnm.sh
-    
-    # Fig 11
-    $sh 20_plot_linearity.sh
-
-    # Fig 12
-    $sh 21_plot_coherence_analysis_vary_wnm.sh
 
 )
 

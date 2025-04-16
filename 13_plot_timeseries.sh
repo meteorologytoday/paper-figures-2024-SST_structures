@@ -17,7 +17,8 @@ offset=$(( 24 * 0 ))
 dhr=$(( 24 * 15 ))
 
 
-for bl_scheme in MYNN25 ; do
+#for bl_scheme in MYNN25 MYJ YSU ; do
+for bl_scheme in MYJ YSU MYNN25 ; do
 for smooth in 25 ; do
 for wnm in 010 004 ; do
 for dT in 100 ; do

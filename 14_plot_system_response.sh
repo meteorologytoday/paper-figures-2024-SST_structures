@@ -18,11 +18,11 @@ proc_cnt=0
 
 target_labs=(
     lab_FULL
-    lab_SIMPLE
+#    lab_SIMPLE
 )
 
 bl_schemes=(
-#    MYNN25
+    MYNN25
     MYJ
     YSU
 )
@@ -31,7 +31,7 @@ source 98_trapkill.sh
 
 for dT in 100; do
 #for wnm in 010 004 ; do #020 ; do
-for wnm in 010 ; do
+for wnm in 040 010 ; do
 for U in "20" ; do
 for target_lab in "${target_labs[@]}" ; do
 for _bl_scheme in "${bl_schemes[@]}" ; do
@@ -39,17 +39,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
     thumbnail_skip_part1=0
     thumbnail_skip_part2=0
 
-    if [[ "$target_lab" =~ "FULL" ]]; then
-        mph=on
-        #W_levs=( -50 50 11 )
-        W_levs=( -2 2 21 )
-        thumbnail_skip_part1=6
-        thumbnail_skip_part2=6
-    elif [[ "$target_lab" =~ "SIMPLE" ]]; then
-        mph=off
-        W_levs=( -2 2 21 )
-    fi
-        
+       
 
     if [[ "$_bl_scheme" = "MYNN25" ]]; then
         tke_analysis=TRUE 
@@ -65,6 +55,24 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
         exp_name="SIMPLE"
     fi
 
+    if [[ "$target_lab" =~ "FULL" ]]; then
+        mph=on
+        #W_levs=( -50 50 11 )
+        W_levs=( -2 2 21 )
+            
+        thumbnail_skip_part1=5
+    
+        if [[ "$_bl_scheme" = "MYNN25" ]]; then
+            thumbnail_skip_part2=6
+        else
+            thumbnail_skip_part2=4
+        fi
+
+    elif [[ "$target_lab" =~ "SIMPLE" ]]; then
+        mph=off
+        W_levs=( -2 2 21 )
+    fi
+ 
     exp_name="${exp_name}."
 
 
@@ -108,6 +116,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
             part2_Q_rng=(-1 1)
   
         elif [ "$dT" == 100 ] ; then
+            
             part1_U10_rng=(-2 2)
             part1_U500_rng=(-1 1)
             part1_DIVVOR10_rng=(-5 5)
@@ -118,12 +127,18 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
             part1_W_levs=(-1.4 1.4 15)
             part1_TKE_levs=(-1 1 11)
 
-            part2_THETA_rng=(-2 10)
+            if [ "_$bl_scheme" == "YSU" ]; then
+                part1_U10_rng=(-3.5 3.5)
+                part1_DIVVOR10_rng=(-10 10)
+                part1_Q_rng=(-2.5 2.5)
+            fi
+
+            part2_THETA_rng=(-2 15)
             part2_Nfreq2_rng=(-5 5)
             part2_TKE_rng=(-1 1)
             part2_DTKE_rng=(-0.001 0.001)
             part2_U_rng=(-1.5 1.5)
-            part2_Q_rng=(-1 1)
+            part2_Q_rng=(-1.5 1.5)
   
         else
 

@@ -16,8 +16,8 @@ mkdir -p $output_dir
 
 thumbnail_skip=0
 for dT in 100 ; do
-#for bl_scheme in MYNN25 MYJ YSU ; do
-for bl_scheme in MYJ ; do
+for bl_scheme in MYNN25 MYJ YSU ; do
+#for bl_scheme in MYJ ; do
 for target_lab in lab_SIMPLE lab_FULL ; do
 
     output_dir=$fig_dir/coherence_analysis

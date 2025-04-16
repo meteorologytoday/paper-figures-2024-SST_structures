@@ -20,7 +20,7 @@ target_labs=(
 )
 
 bl_schemes=(
-#    MYNN25
+    MYNN25
     MYJ
     YSU
 )
@@ -37,7 +37,13 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
 
     if [[ "$target_lab" =~ "FULL" ]]; then
         mph=on
-        thumbnail_skip=6
+        
+        if [[ "$_bl_scheme" = "MYNN25" ]]; then
+            thumbnail_skip=6
+        else
+            thumbnail_skip=4
+        fi
+
     elif [[ "$target_lab" =~ "SIMPLE" ]]; then
         mph=off
         thumbnail_skip=0
@@ -76,7 +82,7 @@ for _bl_scheme in "${bl_schemes[@]}" ; do
         extra_title="${exp_name}${_bl_scheme}."
 
         THETA_rng=(285 310)
-        Nfreq2_rng=( -0.2  8 )
+        Nfreq2_rng=( -2  8 )
         U_rng=(-5 25)
         TKE_rng=(-0.2 1.5)
         DTKE_rng=(-0.008 0.008)

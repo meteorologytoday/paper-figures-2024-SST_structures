@@ -388,7 +388,7 @@ if __name__ == "__main__":
             if args.legend_outside:
                 _ax.legend(loc="upper center", ncols=4, mode="expand", bbox_to_anchor=(0., -0.25, 1., .102))
             else:
-                _ax.legend()
+                _ax.legend(ncols=4, loc="lower center", columnspacing=1, handletextpad=0.5)
      
     if args.output != "":
         print("Saving output: ", args.output) 

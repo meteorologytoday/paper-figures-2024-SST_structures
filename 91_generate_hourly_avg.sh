@@ -13,20 +13,20 @@ hrs_end=$(( 24 * 16 ))
 
 time_avg_interval=60   # minutes
 
-batch_cnt_limit=2
-nproc=1
+batch_cnt_limit=1
+nproc=30
 
 
-#for _bl_scheme in MYNN25 MYJ YSU ; do
-#for target_lab in lab_FULL lab_SIMPLE ; do 
+for _bl_scheme in MYJ YSU MYNN25 ; do
+for target_lab in lab_SIMPLE lab_FULL ; do 
 
-for _bl_scheme in MYJ ; do
-for target_lab in lab_SIMPLE ; do 
-for wnm in 004 ; do
-for dT in 100 ; do
+#for _bl_scheme in MYJ ; do
+#for target_lab in lab_SIMPLE ; do 
+#for wnm in 004 ; do
+#for dT in 100 ; do
 
-#for wnm in 000 010 004 005 007 010 020 040 ; do
-#for dT in 000 010 030 050 100 150 200 250 300 ; do
+for wnm in 000 010 004 005 007 010 020 040 ; do
+for dT in 000 010 030 050 100 150 200 250 300 ; do
 for U in 20 ; do
 
     if [[ "$target_lab" =~ "SIMPLE" ]]; then

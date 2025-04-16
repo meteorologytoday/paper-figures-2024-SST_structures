@@ -9,13 +9,14 @@ Ugs="20"
 dSSTs="000 010 030 050 100 150 200 250 300"
 
 bl_schemes=(
-    MYNN25
-    MYJ
     YSU
+#    MYNN25
+#    MYJ
+
 )
 target_labs=(
     lab_FULL
-    lab_SIMPLE
+#    lab_SIMPLE
 )
 
 input_params=(

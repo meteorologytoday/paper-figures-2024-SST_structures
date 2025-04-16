@@ -255,6 +255,8 @@ if __name__ == "__main__":
                 
             trans = transforms.blended_transform_factory(_ax1.transAxes, _ax1.transData)
             _ax1.plot([0, 1], [gamma_significance,]*2, "k--", transform=trans)
+
+            phase_diff[(phase_diff*180/np.pi) > 10] = np.nan
      
             _ax2.errorbar(
                 _da.coords["wvlen"] / 1e3,
@@ -274,7 +276,7 @@ if __name__ == "__main__":
         _ax1.set_ylabel("$\\left| \\gamma_{\\delta SST, \\delta u_A} \\left( k \\right) \\right|^2$")
         _ax2.set_ylabel("$\\phi_{\\delta SST, \\delta u_A} \\left( k \\right)$")
         _ax1.set_ylim([0.0, 1.1])
-        _ax2.set_ylim([-90.0, 0.0])
+        _ax2.set_ylim([-90.0, 10.0])
 
         _ax1.set_yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
 
