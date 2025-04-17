@@ -12,7 +12,7 @@ beg_days=(
 dhr=$(( 24 * 5 ))
 output_fig_dir=$fig_dir/snapshots_dhr-${dhr}
 
-nproc=5
+nproc=1
 
 proc_cnt=0
 
@@ -29,8 +29,10 @@ bl_schemes=(
 
 wnms=(
     040
+    020
     010
     005
+    004
 )
 
 
@@ -97,8 +99,8 @@ for _bl_scheme in ${bl_schemes[@]} ; do
         hrs_beg=$( printf "%02d" $(( $beg_day * 24 )) )
         hrs_end=$( printf "%02d" $(( $hrs_beg + $dhr )) )
 
-        output1_name="$output_dir/snapshot-part1_${hrs_beg}-${hrs_end}.svg"
-        output2_name="$output_dir/snapshot-part2_${hrs_beg}-${hrs_end}.svg"
+        output1_name="$output_dir/snapshot-part1_${hrs_beg}-${hrs_end}.${fig_ext}"
+        output2_name="$output_dir/snapshot-part2_${hrs_beg}-${hrs_end}.${fig_ext}"
         extra_title=""
 
         extra_title="${exp_name}${_bl_scheme}."

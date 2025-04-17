@@ -18,7 +18,8 @@ bl_schemes=( MYNN25 )
 gendata_dir=./gendata
 preavg_dir=$gendata_dir/preavg
 
+fig_ext=svg
 
 Lx=2000
-
+f0=1e-4
 mkdir -p $fig_dir

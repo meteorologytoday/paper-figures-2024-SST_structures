@@ -342,13 +342,13 @@ print("Done")
 if args.plot_part1 and base_exists:
 
     ncol = 1
-    nrow = 5
+    nrow = 6
 
     w = [6,]
 
     figsize, gridspec_kw = tool_fig_config.calFigParams(
         w = w,
-        h = [4,] + [4/3,] * 4,
+        h = [4,] + [4/3,] * (nrow-1),
         wspace = 1.0,
         hspace = 1.0,
         w_left = 1.0,
@@ -546,11 +546,11 @@ if args.plot_part1 and base_exists:
     PSFC = diff_ds["PSFC"]
     PSFC_mean = np.mean(diff_ds["PSFC"])
 
-    _ax.plot(X_sT, (PSFC - PSFC_mean) / 1e2, color="black", linestyle="-")
+    _ax.plot(X_sT, (PSFC - PSFC_mean), color="black", linestyle="-")
 
-    _ax.set_title("(%s) $\\delta \\mathrm{p}'_s (-). \n $ \\overline{p_s} = %.2f \\, \\mathrm{hPa}$. $" % (_thumbnail_numbering, PSFC_mean/1e2,))
+    _ax.set_title("(%s) $\\delta \\mathrm{p}'_s (-).$ \n $ \\overline{p_s} = %.2f \\, \\mathrm{Pa}$. " % (_thumbnail_numbering, PSFC_mean,))
 
-    _ax.set_ylabel("[ hPa ]", color="black")
+    _ax.set_ylabel("[ Pa ]", color="black")
     #_ax.set_ylim(args.part1_DIVVOR10_rng)
 
 

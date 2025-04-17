@@ -3,12 +3,136 @@ import pandas as pd
 import numpy as np
 from shared_constants import *
 
+
+
+def genDivAnalysis(
+    ds,
+    data_interval,
+    f0,
+):
+    
+    # This analysis assumes steady-state partial / partial_t =0
+
+    for dimname in ['south_north_stag', 'south_north']:
+        if 'south_north_stag' in ds.dims:
+            ds = ds.mean(dim=dimname, keep_attrs=True)
+ 
+
+
+    ref_ds = ds.mean(dim=['time'], keep_attrs=True)
+    Nx = ref_ds.dims['west_east']
+    Nz = ref_ds.dims['bottom_top']
+
+    X_sU = ds.DX * np.arange(Nx+1) / 1e3
+    X_sT = (X_sU[1:] + X_sU[:-1]) / 2
+    X_T = np.repeat(np.reshape(X_sT, (1, -1)), [Nz,], axis=0)
+    X_W = np.repeat(np.reshape(X_sT, (1, -1)), [Nz+1,], axis=0)
+    dX_sT = ds.DX * np.arange(Nx)
+
+    Z_W = ( (ds.PHB + ds.PH) / 9.81 ).to_numpy()
+    Z_T = ds["T"].copy().rename("Z_T")
+    Z_T.data[:] = (Z_W[:, 1:, :] + Z_W[:, :-1, :]) / 2
+
+    dZ_T = ds["T"].copy().rename("dZ_T")
+    dZ_T.data[:] = Z_W[:, 1:, :] - Z_W[:, :-1, :]    
+
+
+    dZ_U = np.zeros_like(ds["U"])
+    dZ_U[:, :, :-1] = ( (dZ_T + dZ_T.roll(west_east=1)) / 2 ).to_numpy()
+    dZ_U[:, :, -1] = dZ_U[:, :, 0]
+
+    dZ_UW = (dZ_U[:, 1:, :] + dZ_U[:, :-1, :]) / 2 
+
+    ds = ds.assign_coords(dict(
+        west_east = X_sT, 
+        west_east_stag = X_sU,
+    ))
+
+    merge_data = []
+
+    # This is the correct one
+    SFC_PRES = ds["PSFC"]
+    RHO = ds["RHO"].mean(dim=["time","west_east"])
+    
+    # Compute U on T grid
+    _tmp = ds["U"]
+    U_T = ds["T"].copy().rename("U_T")
+    U_T.data[:, :, :] = (_tmp.isel(west_east_stag=slice(1, None)).to_numpy() + _tmp.isel(west_east_stag=slice(0, -1)).to_numpy()) / 2
+    U_T = U_T.rename("U_T")
+    merge_data.append(U_T) 
+   
+    # Compute Divergence
+    DIV = xr.zeros_like(ds["T"]).rename("DIV")
+    tmp = ( ds["U"].roll(west_east_stag=-1) - ds["U"] ) / ds.DX
+    tmp = tmp.isel(west_east_stag=slice(0, -1))
+    DIV.data[:] = tmp[:]
+   
+    # Total derivative
+    dDIVdt = ( DIV.roll(west_east=-1) - DIV.roll(west_east=1)) / (2 * ds.DX / U_T)
+    #dDIVdt = ( dDIVdt.roll(west_east=-1) + dDIVdt + dDIVdt.roll(west_east=1) ) / 3
+    dDIVdt = dDIVdt.rename("dDIVdt")
+
+    # Tilting
+    U = ds["U"].to_numpy()
+    W = ds["W"].to_numpy()
+    dWdx_UW = (ds["W"] - ds["W"].roll(west_east=1)) / (2 * ds.DX)
+    dWdx_UW = dWdx_UW.to_numpy() # Notice this UW grid miss the right most U
+   
+    dUdz_UW = (U[:, 1:, :] - U[:, :-1, :]) / dZ_UW
+   
+    print(dWdx_UW.shape) 
+    print(dUdz_UW.shape) 
+    TILT_term_tmp = - dWdx_UW[:, 1:-1, :] * dUdz_UW[:, :, :-1]
+    TILT_term_tmp = (TILT_term_tmp + np.roll(TILT_term_tmp, -1, axis=2)) / 2
+    TILT_term_tmp = (TILT_term_tmp[:, 1:, :] + TILT_term_tmp[:, :-1, :]) / 2
+    
+    TILT_term = xr.zeros_like(ds["T"]).rename("TILT_term")
+    TILT_term[:, 1:-1, :] = TILT_term_tmp
+ 
+    # DIV cont
+    DIV_term = - DIV**2
+    DIV_term = DIV_term.rename("DIV_term")
+ 
+    # Vorticity term
+    VOR = xr.zeros_like(ds["T"]).rename("VOR")
+    tmp = ( ds["V"] - ds["V"].roll(west_east=1) ) / ds.DX
+    tmp = (tmp.roll(west_east=-1) + tmp ) / 2.0
+    VOR.data[:] = tmp[:]
+
+    VOR_term = f0 * VOR
+    VOR_term = VOR_term.rename("VOR_term")
+   
+    # P laplacian
+    p = ds["PB"] + ds["P"]
+    LAP_p = ( p.roll(west_east=-1) + p.roll(west_east=1) - 2 * p ) / ds.DX**2
+    BPG_term = - LAP_p / RHO
+    BPG_term = BPG_term.rename("BPG_term")
+
+    # Vertical mixing
+    VM_term = dDIVdt - DIV_term - BPG_term - VOR_term - TILT_term
+    VM_term = VM_term.rename("VM_term")
+ 
+    merge_data.append(DIV)
+    merge_data.append(dDIVdt)
+    merge_data.append(TILT_term)
+    merge_data.append(VOR_term)
+    merge_data.append(DIV_term)
+    merge_data.append(BPG_term)
+    merge_data.append(VM_term)
+    merge_data.append(Z_T.rename("Z_T"))
+
+    new_ds = xr.merge(merge_data)
+
+    return new_ds
+
 def genAnalysis(
     ds,
     data_interval,
 ):
 
-    ds = ds.mean(dim=['south_north', 'south_north_stag'], keep_attrs=True)
+    for dimname in ['south_north_stag', 'south_north']:
+        if 'south_north_stag' in ds.dims:
+            ds = ds.mean(dim=dimname, keep_attrs=True)
     
     ref_ds = ds.mean(dim=['time'], keep_attrs=True)
     Nx = ref_ds.dims['west_east']
