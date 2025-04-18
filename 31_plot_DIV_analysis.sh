@@ -17,7 +17,7 @@ nproc=5
 proc_cnt=0
 
 target_labs=(
-#    lab_FULL
+    lab_FULL
     lab_SIMPLE
 )
 
@@ -28,7 +28,7 @@ bl_schemes=(
 )
 
 wnms=(
-    040
+   040
     020
     010
     005
@@ -38,6 +38,7 @@ wnms=(
 
 source 98_trapkill.sh
 
+for xmavg_half_window_size in 0 10; do
 for dT in 100; do
 for wnm in ${wnms[@]} ; do
 for U in "20" ; do
@@ -89,7 +90,7 @@ for _bl_scheme in ${bl_schemes[@]} ; do
         hrs_beg=$( printf "%02d" $(( $beg_day * 24 )) )
         hrs_end=$( printf "%02d" $(( $hrs_beg + $dhr )) )
 
-        output_name="$output_dir/div_analysis_${hrs_beg}-${hrs_end}.${fig_ext}"
+        output_name="$output_dir/div_analysis_${hrs_beg}-${hrs_end}_halfwindow-${xmavg_half_window_size}.${fig_ext}"
         extra_title="${exp_name}${_bl_scheme}."
 
 #            --input-dir-base $input_dir_base  \
@@ -102,11 +103,11 @@ for _bl_scheme in ${bl_schemes[@]} ; do
             --extra-title '$extra_title'         \
             --x-rng 0 $x_rng        \
             --f0 $f0 \
-            --xmavg-half-window-size 0 \
+            --xmavg-half-window-size ${xmavg_half_window_size} \
             --output $output_name \
             --thumbnail-skip $thumbnail_skip \
-            --height-mode grid \
-            --heights 0 \
+            --height-mode Z \
+            --heights 100 \
             --no-display 
         " &
 
@@ -125,5 +126,5 @@ done
 done
 done
 done
-
+done
 wait

@@ -2,7 +2,7 @@
 
 source 00_setup.sh
 source 98_trapkill.sh
-nproc=5
+nproc=1
 
 time_avg_interval=60   # minutes
 

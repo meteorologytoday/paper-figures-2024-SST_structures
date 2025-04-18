@@ -68,9 +68,9 @@ def genDivAnalysis(
     DIV.data[:] = tmp[:]
    
     # Total derivative
-    dDIVdt = ( DIV.roll(west_east=-1) - DIV.roll(west_east=1)) / (2 * ds.DX / U_T)
-    #dDIVdt = ( dDIVdt.roll(west_east=-1) + dDIVdt + dDIVdt.roll(west_east=1) ) / 3
-    dDIVdt = dDIVdt.rename("dDIVdt")
+    dDIVdt_est = ( DIV.roll(west_east=-1) - DIV.roll(west_east=1)) / (2 * ds.DX / U_T)
+    #dDIVdt_est = ( dDIVdt_est.roll(west_east=-1) + dDIVdt_est + dDIVdt_est.roll(west_east=1) ) / 3
+    dDIVdt_est = dDIVdt_est.rename("dDIVdt_est")
 
     # Tilting
     U = ds["U"].to_numpy()
@@ -82,12 +82,12 @@ def genDivAnalysis(
    
     print(dWdx_UW.shape) 
     print(dUdz_UW.shape) 
-    TILT_term_tmp = - dWdx_UW[:, 1:-1, :] * dUdz_UW[:, :, :-1]
-    TILT_term_tmp = (TILT_term_tmp + np.roll(TILT_term_tmp, -1, axis=2)) / 2
-    TILT_term_tmp = (TILT_term_tmp[:, 1:, :] + TILT_term_tmp[:, :-1, :]) / 2
+    DEFO_term_tmp = - dWdx_UW[:, 1:-1, :] * dUdz_UW[:, :, :-1]
+    DEFO_term_tmp = (DEFO_term_tmp + np.roll(DEFO_term_tmp, -1, axis=2)) / 2
+    DEFO_term_tmp = (DEFO_term_tmp[:, 1:, :] + DEFO_term_tmp[:, :-1, :]) / 2
     
-    TILT_term = xr.zeros_like(ds["T"]).rename("TILT_term")
-    TILT_term[:, 1:-1, :] = TILT_term_tmp
+    DEFO_term = xr.zeros_like(ds["T"]).rename("DEFO_term")
+    DEFO_term[:, 1:-1, :] = DEFO_term_tmp
  
     # DIV cont
     DIV_term = - DIV**2
@@ -109,16 +109,38 @@ def genDivAnalysis(
     BPG_term = BPG_term.rename("BPG_term")
 
     # Vertical mixing
-    VM_term = dDIVdt - DIV_term - BPG_term - VOR_term - TILT_term
-    VM_term = VM_term.rename("VM_term")
+
+    U = ds["U"].to_numpy()
+    dUdz_UW = (U[:, 1:, :] - U[:, :-1, :]) / dZ_UW
+    dUdz_UW = np.pad(dUdz_UW, ((0, 0), (1, 1,), (0, 0)), mode='constant', constant_values=0)
+    dUdz_W = (dUdz_UW[:, :, 1: ] + dUdz_UW[:, :,:-1] ) / 2
+
+    print("EXCH_M shape = ",  ds["EXCH_M"].to_numpy().shape)
+    print("dUdz_W = ", dUdz_W.shape)
+
+    mom_flux = - ds["EXCH_M"].to_numpy() * dUdz_W
+    MFLUX_CVG = - ( mom_flux[:, 1:, :] - mom_flux[:, :-1, :] )  / dZ_T.to_numpy()
+    
+    VM_term = xr.zeros_like(ds["T"]).rename("VM_term")
+    VM_term.data[:] = MFLUX_CVG
+    VM_term = ( VM_term.roll(west_east=-1) - VM_term.roll(west_east=1) ) / (2 * ds.DX  )
+
+    VM_term_indirect = dDIVdt_est - DIV_term - BPG_term - VOR_term - DEFO_term
+    VM_term_indirect = VM_term_indirect.rename("VM_term_indirect")
+
+
+    dDIVdt = DIV_term + BPG_term + VOR_term + DEFO_term + VM_term
+    dDIVdt = dDIVdt.rename("dDIVdt")
  
     merge_data.append(DIV)
     merge_data.append(dDIVdt)
-    merge_data.append(TILT_term)
+    merge_data.append(dDIVdt_est)
+    merge_data.append(DEFO_term)
     merge_data.append(VOR_term)
     merge_data.append(DIV_term)
     merge_data.append(BPG_term)
     merge_data.append(VM_term)
+    merge_data.append(VM_term_indirect)
     merge_data.append(Z_T.rename("Z_T"))
 
     new_ds = xr.merge(merge_data)

@@ -19,7 +19,7 @@ def mavg(a, axis, half_window_size=0):
     for shift in range(- half_window_size , half_window_size+1):
         _a += np.roll(a, shift, axis=axis)
 
-    _a /= 2
+    _a /= window
 
     return _a
 
@@ -231,14 +231,17 @@ for i, z in enumerate(diff_ds.coords[vertical_coord]):
      
     for varname, label in [
         ["dDIVdt", "$ \\mathrm{d}\\delta/\\mathrm{d}t$"],
+#        ["dDIVdt_est", "$ \\mathrm{d}\\delta/\\mathrm{d}t$ est"],
         ["VM_term", "VM"],
+#        ["VM_term_indirect", "VM ind"],
         ["BPG_term", "BPG"],
         ["DIV_term", "$-\\delta^2$"],
         ["VOR_term", "$f \\cdot \\zeta$"],
-        ["TILT_term", "$- w_x u_z$"],
+        ["DEFO_term", "$- w_x u_z$"],
     ]:
 
-        plot_data = mavg(_ds[varname], axis=0, half_window_size=args.xmavg_half_window_size)
+        d = _ds[varname].to_numpy()
+        plot_data = mavg(d, axis=0, half_window_size=args.xmavg_half_window_size)
 
         _ax.plot(_ds.coords["west_east"], plot_data, label=label)
     
