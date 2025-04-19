@@ -90,6 +90,8 @@ def loadData(input_dir):
         inclusive="both",
     ).mean(dim=["south_north", 'south_north_stag'], keep_attrs=True)
 
+    SST = ds_nonavg["SST"]
+
     ds = wrf_preprocess.genDivAnalysis(ds_nonavg, wsm.data_interval, f0=args.f0)
     
     needed_vars = list(ds.keys())
@@ -100,15 +102,14 @@ def loadData(input_dir):
         ds_nonavg["T"],
     ])
 
-    print(ds)
-
     if args.height_mode == "Z":
         ds = interpolateZ(ds, needed_vars, z=args.heights)
     elif args.height_mode == "grid":
         grid_array = np.array(args.heights).astype(int)
         ds = ds.isel(bottom_top=grid_array)
         ds = ds.assign_coords({"bottom_top": grid_array})
-    
+
+    ds = xr.merge([ds, SST])    
     ds = ds.mean(dim="time")
 
     return ds
@@ -122,6 +123,9 @@ if base_exists:
     diff_ds = ds - ds_base
 else:
     diff_ds = ds
+
+
+SST = ds["SST"]
 
 if args.height_mode == "Z":
     vertical_coord = "Z"
@@ -153,7 +157,7 @@ w = [6,]
 
 figsize, gridspec_kw = tool_fig_config.calFigParams(
     w = w,
-    h = [4] + [4,] * len(args.heights),
+    h = [2] + [4,] * len(args.heights),
     wspace = 1.0,
     hspace = 1.0,
     w_left = 1.0,
@@ -179,7 +183,7 @@ if args.overwrite_title == "":
     fig.suptitle("%sTime: %d ~ %d hr" % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end),))
     
 else:
-    fig.suptitle(args.overwrite_title)
+    fig.suptitle(args.overwrite_title, fontsize=15)
 
 
 thumbnail_numberings = args.thumbnail_numbering[args.thumbnail_skip:]
@@ -205,23 +209,23 @@ def vertical_expression(mode, z):
     elif mode == "grid":
         return "z-index=%d" % (z,)
 
+_ax_SST = _ax.twinx()
+lines = _ax_SST.plot(diff_ds.coords["west_east"], SST - np.mean(SST), color="blue", label="SST")
+_ax_SST.set_ylabel("$\\mathrm{SST}'$ [ K ]")
+
 
 for i, z in enumerate(diff_ds.coords[vertical_coord]):
   
     _ds = diff_ds.sel(**{vertical_coord: z})
+    line = _ax.plot(_ds.coords["west_east"], _ds["DIV"] / 1e-5, label="$D$ at %s" % (vertical_expression(args.height_mode, z),), color="black")
+    lines += line
 
-    print(_ds)
-    _ax.plot(_ds.coords["west_east"], _ds["DIV"], label=vertical_expression(args.height_mode, z))
-    #"%d m" % (z,))#color="magenta", linestyle=":")
-    
-
-
+labels = [l.get_label() for l in lines]
+_ax.legend(lines, labels, loc=0)
 
 _ax.set_title("(%s) Divergence" % (_thumbnail_numbering,))
-_ax.set_ylabel("[ $ \\mathrm{s}^{-1}$ ]", color="black")
+_ax.set_ylabel("$D$ [ $ \\times 10^{-5} \\, \\mathrm{s}^{-1}$ ]", color="black")
     
-_ax.legend()
-
 
 for i, z in enumerate(diff_ds.coords[vertical_coord]):
   
@@ -229,25 +233,23 @@ for i, z in enumerate(diff_ds.coords[vertical_coord]):
 
     _ax, _thumbnail_numbering = nextAxes()
      
-    for varname, label in [
-        ["dDIVdt", "$ \\mathrm{d}\\delta/\\mathrm{d}t$"],
-#        ["dDIVdt_est", "$ \\mathrm{d}\\delta/\\mathrm{d}t$ est"],
-        ["VM_term", "VM"],
-#        ["VM_term_indirect", "VM ind"],
-        ["BPG_term", "BPG"],
-        ["DIV_term", "$-\\delta^2$"],
-        ["VOR_term", "$f \\cdot \\zeta$"],
-        ["DEFO_term", "$- w_x u_z$"],
+    for varname, label, (lc, ls) in [
+        ["dDIVdt", "$ \\mathrm{d} D /\\mathrm{d}t$", ("black", "solid")],
+        ["VM_term", "VM", ("red", "solid")],
+        ["BPG_term", "BPG", ("dodgerblue", "solid")],
+        ["DIV_term", "$- D^2$", ("silver", "solid") ],
+        ["VOR_term", "$f \\cdot \\zeta$", ("magenta", "solid")],
+        ["DEFO_term", "$- w_x u_z$", ("orange", "solid")],
     ]:
 
-        d = _ds[varname].to_numpy()
+        d = _ds[varname].to_numpy() / 1e-8
         plot_data = mavg(d, axis=0, half_window_size=args.xmavg_half_window_size)
 
-        _ax.plot(_ds.coords["west_east"], plot_data, label=label)
+        _ax.plot(_ds.coords["west_east"], plot_data, label=label, color=lc, linestyle=ls)
     
 
-    _ax.set_title("(%s) %s" % (_thumbnail_numbering, vertical_expression(args.height_mode, z)))
-    _ax.set_ylabel("[ $ \\mathrm{s}^{-2}$ ]", color="black")
+    _ax.set_title("(%s) budget analysis at %s" % (_thumbnail_numbering, vertical_expression(args.height_mode, z)), fontsize=15)
+    _ax.set_ylabel("[ $ \\times 10^{-8} \\, \\mathrm{s}^{-2}$ ]", color="black")
     
 
     _ax.legend()

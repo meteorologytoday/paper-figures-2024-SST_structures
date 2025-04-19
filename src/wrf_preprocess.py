@@ -115,9 +115,6 @@ def genDivAnalysis(
     dUdz_UW = np.pad(dUdz_UW, ((0, 0), (1, 1,), (0, 0)), mode='constant', constant_values=0)
     dUdz_W = (dUdz_UW[:, :, 1: ] + dUdz_UW[:, :,:-1] ) / 2
 
-    print("EXCH_M shape = ",  ds["EXCH_M"].to_numpy().shape)
-    print("dUdz_W = ", dUdz_W.shape)
-
     mom_flux = - ds["EXCH_M"].to_numpy() * dUdz_W
     MFLUX_CVG = - ( mom_flux[:, 1:, :] - mom_flux[:, :-1, :] )  / dZ_T.to_numpy()
     
@@ -221,7 +218,7 @@ def genAnalysis(
     U_T = U_T.rename("U_T")
     merge_data.append(U_T) 
  
-    U_sfc = U_T.isel(bottom_top=0).to_numpy()
+    U_sfc = U_T.isel(bottom_top=0)
     V_sfc = V_T.isel(bottom_top=0)
     WND_sfc = (U_sfc**2 + V_sfc**2)**0.5
     WND_sfc = WND_sfc.rename("WND_sfc")

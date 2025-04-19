@@ -63,6 +63,27 @@ done
 done
 done
 
+echo "Merge divergence tendency analysis... "
+for bl_scheme in MYNN25 MYJ YSU ; do 
+for dT in 100; do
+for target_lab in SIMPLE FULL; do
+
+    if [ "$target_lab" = "FULL" ] ; then
+        mph="on"
+    else
+        mph="off"
+    fi
+    
+    svg_stack.py \
+        --direction=h \
+        $fig_dir/div_analysis_dhr-120/lab_${target_lab}/case_mph-${mph}_wnm010_U20_dT100_${bl_scheme}/div_analysis_120-240_halfwindow-10.svg \
+        $fig_dir/div_analysis_dhr-120/lab_${target_lab}/case_mph-${mph}_wnm005_U20_dT100_${bl_scheme}/div_analysis_120-240_halfwindow-10.svg \
+        > $fig_dir/merged-div_analysis_lab_${target_lab}_dT${dT}_${bl_scheme}.svg
+done
+done
+done
+
+
 if [ ] ; then
 sleep 3
 echo "Figure 7: Merge Fourier analysis... "
@@ -101,27 +122,34 @@ name_pairs=(
     merged-snapshot-vertical-profile_wnm000_U20_dT000_MYNN25.svg                                     fig04
     merged-snapshot_wnm010_U20_dT100_MYNN25_part1.svg                                                fig05
     merged-snapshot_wnm010_U20_dT100_MYNN25_part2.svg                                                fig06
-    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_MYNN25_hr120-240.svg  fig07
-    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_MYNN25_hr120-240.svg   fig08
-    merged-linearity_vary_wnm_MYNN25_hr120-240.svg                                                   fig09
-    coherence_analysis/coherence_on_dSST_vary_wnm_dSST100_MYNN25_hr120-240.svg                       fig10
+    merged-div_analysis_lab_SIMPLE_dT100_MYNN25.svg                                                  fig07 
+    merged-div_analysis_lab_FULL_dT100_MYNN25.svg                                                    fig08 
+    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_MYNN25_hr120-240.svg  fig09
+    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_MYNN25_hr120-240.svg   fig10
+
+    merged-linearity_vary_wnm_MYNN25_hr120-240.svg                                                   fig11
+    coherence_analysis/coherence_on_dSST_vary_wnm_dSST100_MYNN25_hr120-240.svg                       fig12
 
     merged-snapshot-vertical-profile_wnm000_U20_dT000_MYJ.svg                                        figS01
     merged-snapshot_wnm010_U20_dT100_MYJ_part1.svg                                                   figS02
     merged-snapshot_wnm010_U20_dT100_MYJ_part2.svg                                                   figS03
-    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_MYJ_hr120-240.svg  figS04
-    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_MYJ_hr120-240.svg   figS05
-    merged-linearity_vary_wnm_MYJ_hr120-240.svg                                                      figS06 
-    coherence_analysis/coherence_on_dSST_vary_wnm_dSST100_MYJ_hr120-240.svg                          figS07
+    merged-div_analysis_lab_SIMPLE_dT100_MYJ.svg                                                     figS04 
+    merged-div_analysis_lab_FULL_dT100_MYJ.svg                                                       figS05 
+    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_MYJ_hr120-240.svg  figS06
+    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_MYJ_hr120-240.svg   figS07
+    merged-linearity_vary_wnm_MYJ_hr120-240.svg                                                      figS08 
+    coherence_analysis/coherence_on_dSST_vary_wnm_dSST100_MYJ_hr120-240.svg                          figS09
 
 
-    merged-snapshot-vertical-profile_wnm000_U20_dT000_YSU.svg                                        figS08
-    merged-snapshot_wnm010_U20_dT100_YSU_part1.svg                                                   figS09
-    merged-snapshot_wnm010_U20_dT100_YSU_part2.svg                                                   figS10
-    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_YSU_hr120-240.svg  figS11
-    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_YSU_hr120-240.svg   figS12
-    merged-linearity_vary_wnm_YSU_hr120-240.svg                                                      figS13
-    coherence_analysis/coherence_on_dSST_vary_wnm_dSST100_YSU_hr120-240.svg                          figS14
+    merged-snapshot-vertical-profile_wnm000_U20_dT000_YSU.svg                                        figS10
+    merged-snapshot_wnm010_U20_dT100_YSU_part1.svg                                                   figS11
+    merged-snapshot_wnm010_U20_dT100_YSU_part2.svg                                                   figS12
+    merged-div_analysis_lab_SIMPLE_dT100_YSU.svg                                                     figS13 
+    merged-div_analysis_lab_FULL_dT100_YSU.svg                                                       figS14 
+    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_YSU_hr120-240.svg  figS15
+    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_YSU_hr120-240.svg   figS16
+    merged-linearity_vary_wnm_YSU_hr120-240.svg                                                      figS17
+    coherence_analysis/coherence_on_dSST_vary_wnm_dSST100_YSU_hr120-240.svg                          figS18
 
 #    merged-phase_misc_hr120-240.svg                                                                  fig07
 #    DIV_analysis_tracking_wnm/DIV_analysis_lab_FULL_dT100_MYNN25_hr120-240.svg                       fig08

@@ -170,7 +170,7 @@ if __name__ == "__main__":
     import tool_fig_config
     import colorblind
 
-    ncol = 3
+    ncol = 2
     nrow = len(args.varnames)
 
     figsize, gridspec_kw = tool_fig_config.calFigParams(
@@ -212,7 +212,7 @@ if __name__ == "__main__":
         
         _ax1 = ax_flatten[0]
         _ax2 = ax_flatten[1]
-        _ax3 = ax_flatten[2]
+        #_ax3 = ax_flatten[2]
 
 
         for j, _ds in enumerate(data):
@@ -277,7 +277,8 @@ if __name__ == "__main__":
                 color=linecolor,
                 label=labels[j],
             )
-
+            
+            """
             _ax3.plot(
                 _da.coords["wvlen"] / 1e3,
                 _da.coords["wvlen"] * phase_diff / (2*np.pi*1e3),
@@ -287,6 +288,7 @@ if __name__ == "__main__":
                 color=linecolor,
                 label=labels[j],
             )
+            """
 
             """ 
             trans = transforms.blended_transform_factory(_ax2.transData, _ax2,transAxes)
@@ -297,7 +299,7 @@ if __name__ == "__main__":
 
         _ax1.set_ylabel("$\\left| \\gamma_{\\delta SST, \\delta u_A} \\left( k \\right) \\right|^2$")
         _ax2.set_ylabel("$\\phi_{\\delta SST, \\delta u_A} \\left( k \\right)$")
-        _ax3.set_ylabel("Displacement [ km ]")
+        #_ax3.set_ylabel("Displacement [ km ]")
 
         _ax1.set_ylim([0.0, 1.1])
         _ax2.set_ylim([-90.0, 10.0])
@@ -308,7 +310,7 @@ if __name__ == "__main__":
         thumbnail_titles = [
             "Squared Coherence",
             "Phase Difference",
-            "Displacement",
+#            "Displacement",
         ]
 
     for i, title in enumerate(thumbnail_titles):

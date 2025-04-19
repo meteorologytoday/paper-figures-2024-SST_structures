@@ -12,7 +12,7 @@ beg_days=(
 dhr=$(( 24 * 5 ))
 output_fig_dir=$fig_dir/div_analysis_dhr-${dhr}
 
-nproc=5
+nproc=20
 
 proc_cnt=0
 
@@ -23,22 +23,22 @@ target_labs=(
 
 bl_schemes=(
     MYNN25
-#    MYJ
-#    YSU
+    MYJ
+    YSU
 )
 
 wnms=(
-   040
-    020
+#    040
+#    020
     010
     005
-    004
+#    004
 )
 
 
 source 98_trapkill.sh
 
-for xmavg_half_window_size in 0 10; do
+for xmavg_half_window_size in 10 ; do
 for dT in 100; do
 for wnm in ${wnms[@]} ; do
 for U in "20" ; do
@@ -46,8 +46,6 @@ for target_lab in ${target_labs[@]} ; do
 for _bl_scheme in ${bl_schemes[@]} ; do
  
     thumbnail_skip=0
-
-       
 
     if [[ "$_bl_scheme" = "MYNN25" ]]; then
         tke_analysis=TRUE 
@@ -65,13 +63,14 @@ for _bl_scheme in ${bl_schemes[@]} ; do
 
     if [[ "$target_lab" =~ "FULL" ]]; then
         mph=on
-            
-        thumbnail_skip=5
-
     elif [[ "$target_lab" =~ "SIMPLE" ]]; then
         mph=off
     fi
- 
+    
+    if [[ "$wnm" = "005" ]]; then
+        thumbnail_skip=2
+    fi 
+
     exp_name="${exp_name}."
 
 

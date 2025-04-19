@@ -17,22 +17,22 @@ nproc=1
 proc_cnt=0
 
 target_labs=(
-#    lab_FULL
+    lab_FULL
     lab_SIMPLE
 )
 
 bl_schemes=(
     MYNN25
-#    MYJ
-#    YSU
+    MYJ
+    YSU
 )
 
 wnms=(
-    040
-    020
+#    040
+#    020
     010
-    005
-    004
+#    005
+#    004
 )
 
 
