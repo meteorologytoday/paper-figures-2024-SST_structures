@@ -19,9 +19,10 @@ This is the code to generate the figures of the paper "Examining the SST Tendenc
 4. If there is any need to regenerate the "delta analysis", which produce files in `gendata/delta_analysis_style-STYLE1` please run `93_generate_delta_analysis.sh`.
 4. Run `94_pack_data.sh`.
 5. Run `95_generate_coherence_analysis.sh`.
-6. Run `03_make_figures.sh`.
-7. Run `04_postprocess_figures.sh`.
-8. The figures are generated in the folder `final_figures`.
+6. Run `96_generate_Ro_vary_wnm.sh`.
+7. Run `03_make_figures.sh`.
+8. Run `04_postprocess_figures.sh`.
+9. The figures are generated in the folder `final_figures`.
 
 
 
