@@ -496,7 +496,7 @@ figsize, gridspec_kw = tool_fig_config.calFigParams(
     w = 5,
     h = 3,
     wspace = 1.0,
-    hspace = 0.7,
+    hspace = 1.0,
     w_left = 1.0,
     w_right = 1.0,
     h_bottom = 1.0,
@@ -519,7 +519,7 @@ fig, ax = plt.subplots(
 #time_fmt="%y/%m/%d %Hh"
 #fig.suptitle("%sTime: %s ~ %s" % (args.extra_title, time_beg.strftime(time_fmt), time_end.strftime(time_fmt)))
 
-fig.suptitle("%sTime: %d ~ %d hr" % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end),))
+fig.suptitle("%sTime: %d ~ %d hr" % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end),), fontsize=20)
 
 for k, _ds in enumerate(data):
    
@@ -556,8 +556,8 @@ for k, _ds in enumerate(data):
         _ax.set_title("(%s) %s" % (
             args.thumbnail_numbering[i],
             label,
-        ))
-        _ax.set_ylabel("[ %s ]" % (plot_info["unit"],))
+        ), fontsize=20)
+        _ax.set_ylabel("[ %s ]" % (plot_info["unit"],), fontsize=15)
     
         if ylim is not None:
             _ax.set_ylim(ylim)
@@ -582,13 +582,13 @@ for _ax in ax.flatten():
 
     if args.time_unit == "hr":
 
-        _ax.set_xlabel("[ hr ]")
+        _ax.set_xlabel("[ hr ]", fontsize=15)
         _ax.set_xticks(xticks)
 
     elif args.time_unit == "day":
 
-        _ax.set_xlabel("[ day ]")
-        _ax.set_xticks(xticks, labels=["%d" % xtick for xtick in xticks/24 ])
+        _ax.set_xlabel("[ day ]", fontsize=15)
+        _ax.set_xticks(xticks, labels=["%d" % xtick for xtick in xticks/24 ], fontsize=15)
 
     _ax.set_xlim([relTimeInHrs(time_beg), relTimeInHrs(time_end)])
 

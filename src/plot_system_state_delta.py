@@ -342,7 +342,7 @@ print("Done")
 if args.plot_part1 and base_exists:
 
     ncol = 1
-    nrow = 6
+    nrow = 5
 
     w = [6,]
 
@@ -540,6 +540,7 @@ if args.plot_part1 and base_exists:
     _ax.set_ylim(args.part1_DIVVOR10_rng)
     _ax_twinx.set_ylim(args.part1_PRECIP_rng)
 
+    """
     # Thumbnail: The PSFC
     _ax, _thumbnail_numbering = nextAxes()
 
@@ -552,7 +553,7 @@ if args.plot_part1 and base_exists:
 
     _ax.set_ylabel("[ Pa ]", color="black")
     #_ax.set_ylim(args.part1_DIVVOR10_rng)
-
+    """
 
 
     """
