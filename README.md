@@ -31,8 +31,12 @@ This is the code to generate the figures of the paper "Examining the SST Tendenc
 
 ## Download data
 
-You can programmitically download the data using Zenedo access token. The code to download the data is in `download/download.py`
+You can programmitically download the data using Zenedo access token. The code to download the data is in `download/download.py`. You should see the following data:
 
+1. `data.tar.gz`
+2. `gendata.tar.gz.split.[XX]`, wherer XX = 00, 01, ..., 04.
+
+Then merge the split data through `cat gendata.tar.gz.split.?? > gendata.tar.gz`. After that, untar two files into working directory. Done. 
 
 ## For authors to create `gendata` from `data`
 
@@ -46,13 +50,15 @@ You can programmitically download the data using Zenedo access token. The code t
 1. SST map and spectrum
 2. Exp design + vertical profile
 3. Time series.
-4. Atmospheric response plot part 1: cross-section.
-5. Atmospheric response plot part 2: horizontal mean.
-6. IWV and precipitation as functions of dSST and wavelength L.
-7. Divergence and convergence analysis.
-8. Air-sea flux decomposition as a function of dSST.
-9. Air-sea flux decomposition as a function of wavelength L.
-10. Linearity as a function of wavelength L.
-11. Coherence analysis.
+4. Reference atmosphere state.
+5. Atmospheric response plot part 1: cross-section.
+6. Atmospheric response plot part 2: horizontal mean.
+7. Divergence budget analysis 1.
+8. Divergence budget analysis 2.
+9. Air-sea flux decomposition as a function of dSST.
+10. Air-sea flux decomposition as a function of wavelength L.
+11. Linearity as a function of wavelength L.
+12. Coherence analysis.
+13. Rossby number as a function of wavelength L.
 
 
