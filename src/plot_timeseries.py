@@ -519,7 +519,7 @@ fig, ax = plt.subplots(
 #time_fmt="%y/%m/%d %Hh"
 #fig.suptitle("%sTime: %s ~ %s" % (args.extra_title, time_beg.strftime(time_fmt), time_end.strftime(time_fmt)))
 
-fig.suptitle("%sTime: %d ~ %d hr" % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end),), fontsize=20)
+fig.suptitle("%sTime: %d ~ %d hr." % (args.extra_title, relTimeInHrs(time_beg), relTimeInHrs(time_end),), fontsize=20)
 
 for k, _ds in enumerate(data):
    
@@ -575,8 +575,10 @@ total_time = relTimeInHrs(time_end) - relTimeInHrs(time_beg)
 xticks = args.tick_interval_hour * np.arange(np.ceil(total_time / args.tick_interval_hour)+1)
 
 
-for _ax in ax.flatten():
-    #_ax.legend()
+for i, _ax in enumerate(ax.flatten()):
+
+    if i == 0:
+        _ax.legend()
 
     _ax.grid()
 

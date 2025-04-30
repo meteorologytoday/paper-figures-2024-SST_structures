@@ -47,10 +47,10 @@ for dT in 100 ; do
     )
 
     labels=(
-        "SIMPLE-000"
-        "SIMPLE-300"
-        "FULL-000"
-        "FULL-300"
+        "SIMPLE-dSST=0K"
+        "SIMPLE-dSST=1K"
+        "FULL-dSST=0K"
+        "FULL-dSST=1K"
     )
 
     hrs_beg=$( printf "%03d" $(( $offset )) )
