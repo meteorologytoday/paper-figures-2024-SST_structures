@@ -9,9 +9,6 @@ beg_days=(
     5
 )
 
-dhr=$(( 24 * 5 ))
-output_fig_dir=$fig_dir/snapshots_dhr-${dhr}
-
 nproc=1
 
 proc_cnt=0
@@ -22,9 +19,9 @@ target_labs=(
 )
 
 bl_schemes=(
-    MYNN25
+#    MYNN25
     MYJ
-    YSU
+#    YSU
 )
 
 wnms=(
@@ -42,18 +39,23 @@ for dT in 100; do
 for wnm in ${wnms[@]} ; do
 for U in "20" ; do
 for target_lab in ${target_labs[@]} ; do
-for _bl_scheme in ${bl_schemes[@]} ; do
+for bl_scheme in ${bl_schemes[@]} ; do
  
     thumbnail_skip_part1=0
     thumbnail_skip_part2=0
 
+
+    dhr=$( get_dhr $bl_scheme ) 
+
+    output_fig_dir=$fig_dir/snapshots_dhr-${dhr}
+
        
 
-    if [[ "$_bl_scheme" = "MYNN25" ]]; then
+    if [[ "$bl_scheme" = "MYNN25" ]]; then
         tke_analysis=TRUE 
-    elif [[ "$_bl_scheme" = "YSU" ]]; then
+    elif [[ "$bl_scheme" = "YSU" ]]; then
         tke_analysis=FALSE 
-    elif [[ "$_bl_scheme" = "MYJ" ]]; then
+    elif [[ "$bl_scheme" = "MYJ" ]]; then
         tke_analysis=FALSE 
     fi 
 
@@ -70,7 +72,7 @@ for _bl_scheme in ${bl_schemes[@]} ; do
             
         thumbnail_skip_part1=5
     
-        if [[ "$_bl_scheme" = "MYNN25" ]]; then
+        if [[ "$bl_scheme" = "MYNN25" ]]; then
             thumbnail_skip_part2=6
         else
             thumbnail_skip_part2=4
@@ -84,10 +86,10 @@ for _bl_scheme in ${bl_schemes[@]} ; do
     exp_name="${exp_name}."
 
 
-    input_dir=$gendata_dir/preavg/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}
-    output_dir=$output_fig_dir/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}
+    input_dir=$gendata_dir/preavg/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
+    output_dir=$output_fig_dir/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
     
-    input_dir_base=$gendata_dir/preavg/$target_lab/case_mph-${mph}_wnm000_U${U}_dT000_${_bl_scheme}
+    input_dir_base=$gendata_dir/preavg/$target_lab/case_mph-${mph}_wnm000_U${U}_dT000_${bl_scheme}
 
     mkdir -p $output_dir
 
@@ -103,7 +105,7 @@ for _bl_scheme in ${bl_schemes[@]} ; do
         output2_name="$output_dir/snapshot-part2_${hrs_beg}-${hrs_end}.${fig_ext}"
         extra_title=""
 
-        extra_title="${exp_name}${_bl_scheme}."
+        extra_title="${exp_name}${bl_scheme}."
 
         if [ "$dT" == 300 ] ; then
             part1_U10_rng=(-3 3)

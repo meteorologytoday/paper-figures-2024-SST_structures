@@ -7,11 +7,13 @@ nproc=1
 time_avg_interval=60   # minutes
 
 hrs_beg=$(( 24 * 5 ))
-hrs_end=$(( 24 * 10 ))
 
 
 thumbnail_skip=0
 for bl_scheme in MYNN25 MYJ YSU ; do
+
+    dhr=$( get_dhr $bl_scheme ) 
+    hrs_end=$(( $hrs_beg + $dhr ))
 
     input_files=""
     labels=""

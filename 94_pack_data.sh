@@ -2,26 +2,26 @@
 
 source 00_setup.sh
 
-dhr=24
-
 wnms="004 005 007 010 020 040"
 Ugs="20"
 dSSTs="000 010 030 050 100 150 200 250 300"
 
 bl_schemes=(
     YSU
-#    MYNN25
-#    MYJ
-
+    MYNN25
+    MYJ
 )
+
 target_labs=(
     lab_FULL
-#    lab_SIMPLE
+    lab_SIMPLE
 )
 
 input_params=(
     wnm  010   $(( 24 * 5 )) $(( 24 * 10 ))
     dSST 100   $(( 24 * 5 )) $(( 24 * 10 ))
+    wnm  010   $(( 24 * 5 )) $(( 24 * 7 ))
+    dSST 100   $(( 24 * 5 )) $(( 24 * 7 ))
 )
 
 

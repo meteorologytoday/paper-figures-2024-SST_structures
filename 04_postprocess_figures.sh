@@ -131,28 +131,32 @@ name_pairs=(
     coherence_analysis/coherence_on_dSST_vary_wnm_dSST100_MYNN25_hr120-240.svg                       fig12
     Ro_analysis/Ro_analysis_vary_wnm_dSST100_MYNN25_hr120-240.svg                                    fig13 
 
-    merged-snapshot-vertical-profile_wnm000_U20_dT000_MYJ.svg                                        figS01
-    merged-snapshot_wnm010_U20_dT100_MYJ_part1.svg                                                   figS02
-    merged-snapshot_wnm010_U20_dT100_MYJ_part2.svg                                                   figS03
-    merged-div_analysis_lab_SIMPLE_dT100_MYJ.svg                                                     figS04 
-    merged-div_analysis_lab_FULL_dT100_MYJ.svg                                                       figS05 
-    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_MYJ_hr120-240.svg  figS06
-    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_MYJ_hr120-240.svg   figS07
-    merged-linearity_vary_wnm_MYJ_hr120-240.svg                                                      figS08 
-    coherence_analysis/coherence_on_dSST_vary_wnm_dSST100_MYJ_hr120-240.svg                          figS09
-    Ro_analysis/Ro_analysis_vary_wnm_dSST100_MYJ_hr120-240.svg                                       figS10
+    timeseries/timeseries_wnm010_U20_dT100_MYJ_timeseries_smooth-25_000-360.svg                      figS01
+    merged-snapshot-vertical-profile_wnm000_U20_dT000_MYJ.svg                                        figS02
+    merged-snapshot_wnm010_U20_dT100_MYJ_part1.svg                                                   figS03
+    merged-snapshot_wnm010_U20_dT100_MYJ_part2.svg                                                   figS04
+    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_MYJ_hr120-168.svg  figS05
+    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_MYJ_hr120-168.svg   figS06
+
+    #merged-div_analysis_lab_SIMPLE_dT100_MYJ.svg                                                     figS05 
+    #merged-div_analysis_lab_FULL_dT100_MYJ.svg                                                       figS06 
+    #merged-linearity_vary_wnm_MYJ_hr120-168.svg                                                      figS09
+    #coherence_analysis/coherence_on_dSST_vary_wnm_dSST100_MYJ_hr120-168.svg                          figS10
+    #Ro_analysis/Ro_analysis_vary_wnm_dSST100_MYJ_hr120-168.svg                                       figS11
 
 
-    merged-snapshot-vertical-profile_wnm000_U20_dT000_YSU.svg                                        figS11
-    merged-snapshot_wnm010_U20_dT100_YSU_part1.svg                                                   figS12
-    merged-snapshot_wnm010_U20_dT100_YSU_part2.svg                                                   figS13
-    merged-div_analysis_lab_SIMPLE_dT100_YSU.svg                                                     figS14 
-    merged-div_analysis_lab_FULL_dT100_YSU.svg                                                       figS15 
-    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_YSU_hr120-240.svg  figS16
-    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_YSU_hr120-240.svg   figS17
-    merged-linearity_vary_wnm_YSU_hr120-240.svg                                                      figS18
-    coherence_analysis/coherence_on_dSST_vary_wnm_dSST100_YSU_hr120-240.svg                          figS19
-    Ro_analysis/Ro_analysis_vary_wnm_dSST100_YSU_hr120-240.svg                                       figS20
+    timeseries/timeseries_wnm010_U20_dT100_YSU_timeseries_smooth-25_000-360.svg                      figS07
+    merged-snapshot-vertical-profile_wnm000_U20_dT000_YSU.svg                                        figS08
+    merged-snapshot_wnm010_U20_dT100_YSU_part1.svg                                                   figS09
+    merged-snapshot_wnm010_U20_dT100_YSU_part2.svg                                                   figS10
+    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_YSU_hr120-240.svg  figS11
+    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_YSU_hr120-240.svg   figS12
+
+    #merged-div_analysis_lab_SIMPLE_dT100_YSU.svg                                                     figS16 
+    #merged-div_analysis_lab_FULL_dT100_YSU.svg                                                       figS17 
+    #merged-linearity_vary_wnm_YSU_hr120-240.svg                                                      figS20
+    #coherence_analysis/coherence_on_dSST_vary_wnm_dSST100_YSU_hr120-240.svg                          figS21
+    #Ro_analysis/Ro_analysis_vary_wnm_dSST100_YSU_hr120-240.svg                                       figS22
 
 #    merged-phase_misc_hr120-240.svg                                                                  fig07
 #    DIV_analysis_tracking_wnm/DIV_analysis_lab_FULL_dT100_MYNN25_hr120-240.svg                       fig08

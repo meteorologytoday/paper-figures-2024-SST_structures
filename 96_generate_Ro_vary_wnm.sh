@@ -7,7 +7,6 @@ nproc=1
 time_avg_interval=60   # minutes
 
 hrs_beg=$(( 24 * 5 ))
-hrs_end=$(( 24 * 10 ))
     
 output_dir=$gendata_dir/Ro_analysis
 
@@ -19,6 +18,9 @@ for dT in 100 ; do
 for bl_scheme in MYNN25 MYJ YSU ; do
 #for bl_scheme in MYJ ; do
 for target_lab in lab_SIMPLE lab_FULL ; do
+
+    dhr=$( get_dhr $bl_scheme ) 
+    hrs_end=$(( $hrs_beg + $dhr ))
 
     output_dir=$fig_dir/coherence_analysis
     

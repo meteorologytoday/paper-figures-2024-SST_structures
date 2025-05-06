@@ -14,7 +14,12 @@ for Ug in 20 ; do
 for wnm in 010 ; do
 for bl_scheme in MYNN25 YSU MYJ; do
 #for bl_scheme in MYNN25 ; do
-for hr in 120-240 ; do
+
+    dhr=$( get_dhr $bl_scheme ) 
+    hr_beg=120
+    hr_end=$(( $hr_beg + $dhr ))
+
+    hr=${hr_beg}-${hr_end}
 
     input_file=$gendata_dir/dF_phase_analysis/fixed_wnm/$target_lab/collected_flux_${bl_scheme}_hr${hr}.nc
     output_dir=$fig_dir/dF_flux_decomposition_varying_dSST/$target_lab
@@ -33,8 +38,7 @@ for hr in 120-240 ; do
         --HFX-rng -5 5 \
         --spacing 0.02 \
         --no-display
-            
-done
+                
 done
 done
 done

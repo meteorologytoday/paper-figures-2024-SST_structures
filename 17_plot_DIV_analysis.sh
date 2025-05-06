@@ -9,8 +9,7 @@ beg_days=(
     5
 )
 
-dhr=$(( 24 * 5 ))
-output_fig_dir=$fig_dir/div_analysis_dhr-${dhr}
+
 
 nproc=20
 
@@ -43,15 +42,19 @@ for dT in 100; do
 for wnm in ${wnms[@]} ; do
 for U in "20" ; do
 for target_lab in ${target_labs[@]} ; do
-for _bl_scheme in ${bl_schemes[@]} ; do
+for bl_scheme in ${bl_schemes[@]} ; do
  
     thumbnail_skip=0
 
-    if [[ "$_bl_scheme" = "MYNN25" ]]; then
+
+    dhr=$( get_dhr $bl_scheme ) 
+    output_fig_dir=$fig_dir/div_analysis_dhr-${dhr}
+
+    if [[ "$bl_scheme" = "MYNN25" ]]; then
         tke_analysis=TRUE 
-    elif [[ "$_bl_scheme" = "YSU" ]]; then
+    elif [[ "$bl_scheme" = "YSU" ]]; then
         tke_analysis=FALSE 
-    elif [[ "$_bl_scheme" = "MYJ" ]]; then
+    elif [[ "$bl_scheme" = "MYJ" ]]; then
         tke_analysis=FALSE 
     fi 
 
@@ -74,10 +77,10 @@ for _bl_scheme in ${bl_schemes[@]} ; do
     exp_name="${exp_name}."
 
 
-    input_dir=$gendata_dir/preavg/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}
-    output_dir=$output_fig_dir/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}
+    input_dir=$gendata_dir/preavg/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
+    output_dir=$output_fig_dir/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
     
-    input_dir_base=$gendata_dir/preavg/$target_lab/case_mph-${mph}_wnm000_U${U}_dT000_${_bl_scheme}
+    input_dir_base=$gendata_dir/preavg/$target_lab/case_mph-${mph}_wnm000_U${U}_dT000_${bl_scheme}
 
     mkdir -p $output_dir
 
@@ -90,7 +93,7 @@ for _bl_scheme in ${bl_schemes[@]} ; do
         hrs_end=$( printf "%02d" $(( $hrs_beg + $dhr )) )
 
         output_name="$output_dir/div_analysis_${hrs_beg}-${hrs_end}_halfwindow-${xmavg_half_window_size}.${fig_ext}"
-        extra_title="${exp_name}${_bl_scheme}."
+        extra_title="${exp_name}${bl_scheme}."
 
 #            --input-dir-base $input_dir_base  \
         eval "python3 src/plot_divergence_analysis.py  \

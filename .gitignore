@@ -31,3 +31,4 @@ gendata
 sim_data/*
 *.tar.gz
 *.tar
+trash_can/*

@@ -23,3 +23,13 @@ fig_ext=svg
 Lx=2000
 f0=1e-4
 mkdir -p $fig_dir
+
+
+function get_dhr {
+    
+    if [ "$1" = "MYJ" ] ; then
+        echo $(( 2 * 24 ))
+    else
+        echo $(( 5 * 24 ))
+    fi
+}
