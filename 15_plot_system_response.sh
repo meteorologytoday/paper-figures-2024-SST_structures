@@ -19,9 +19,9 @@ target_labs=(
 )
 
 bl_schemes=(
-#    MYNN25
+    MYNN25
     MYJ
-#    YSU
+    YSU
 )
 
 wnms=(

@@ -30,11 +30,16 @@ echo "Figure 4: Merge vertical... "
 for bl_scheme in MYNN25 MYJ YSU ; do 
 for dT in 000; do
 for wnm in 000 ; do
-    
+   
+    hrs_beg=120
+    dhr=$( get_dhr $bl_scheme ) 
+    hrs_end=$(( $hrs_beg + $dhr ))
+    hrs=${hrs_beg}-${hrs_end}
+ 
     svg_stack.py \
         --direction=v \
-        $fig_dir/snapshots-full_dhr-120/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-full-vertical-profile_120-240.svg \
-        $fig_dir/snapshots-full_dhr-120/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-full-vertical-profile_120-240.svg \
+        $fig_dir/snapshots-full_dhr-$dhr/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-full-vertical-profile_${hrs}.svg \
+        $fig_dir/snapshots-full_dhr-$dhr/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-full-vertical-profile_${hrs}.svg \
         > $fig_dir/merged-snapshot-vertical-profile_wnm${wnm}_U20_dT${dT}_${bl_scheme}.svg
 done
 done
@@ -46,17 +51,22 @@ echo "Figure 5 and 6: Merge snapshots... "
 for bl_scheme in MYNN25 MYJ YSU ; do 
 for dT in 100; do
 for wnm in 010 ; do
+ 
+    hrs_beg=120
+    dhr=$( get_dhr $bl_scheme ) 
+    hrs_end=$(( $hrs_beg + $dhr ))
+    hrs=${hrs_beg}-${hrs_end}
     
     svg_stack.py \
         --direction=h \
-        $fig_dir/snapshots_dhr-120/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-part1_120-240.svg \
-        $fig_dir/snapshots_dhr-120/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-part1_120-240.svg \
+        $fig_dir/snapshots_dhr-${dhr}/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-part1_${hrs}.svg \
+        $fig_dir/snapshots_dhr-${dhr}/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-part1_${hrs}.svg \
         > $fig_dir/merged-snapshot_wnm${wnm}_U20_dT${dT}_${bl_scheme}_part1.svg
 
     svg_stack.py \
         --direction=v \
-        $fig_dir/snapshots_dhr-120/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-part2_120-240.svg \
-        $fig_dir/snapshots_dhr-120/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-part2_120-240.svg \
+        $fig_dir/snapshots_dhr-${dhr}/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-part2_${hrs}.svg \
+        $fig_dir/snapshots_dhr-${dhr}/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_${bl_scheme}/snapshot-part2_${hrs}.svg \
         > $fig_dir/merged-snapshot_wnm${wnm}_U20_dT${dT}_${bl_scheme}_part2.svg
 
 done
@@ -68,6 +78,11 @@ for bl_scheme in MYNN25 MYJ YSU ; do
 for dT in 100; do
 for target_lab in SIMPLE FULL; do
 
+    hrs_beg=120
+    dhr=$( get_dhr $bl_scheme ) 
+    hrs_end=$(( $hrs_beg + $dhr ))
+    hrs=${hrs_beg}-${hrs_end}
+ 
     if [ "$target_lab" = "FULL" ] ; then
         mph="on"
     else
@@ -76,45 +91,28 @@ for target_lab in SIMPLE FULL; do
     
     svg_stack.py \
         --direction=h \
-        $fig_dir/div_analysis_dhr-120/lab_${target_lab}/case_mph-${mph}_wnm010_U20_dT100_${bl_scheme}/div_analysis_120-240_halfwindow-10.svg \
-        $fig_dir/div_analysis_dhr-120/lab_${target_lab}/case_mph-${mph}_wnm005_U20_dT100_${bl_scheme}/div_analysis_120-240_halfwindow-10.svg \
+        $fig_dir/div_analysis_dhr-${dhr}/lab_${target_lab}/case_mph-${mph}_wnm010_U20_dT100_${bl_scheme}/div_analysis_${hrs}_halfwindow-10.svg \
+        $fig_dir/div_analysis_dhr-${dhr}/lab_${target_lab}/case_mph-${mph}_wnm005_U20_dT100_${bl_scheme}/div_analysis_${hrs}_halfwindow-10.svg \
         > $fig_dir/merged-div_analysis_lab_${target_lab}_dT${dT}_${bl_scheme}.svg
 done
 done
 done
 
 
-if [ ] ; then
-sleep 3
-echo "Figure 7: Merge Fourier analysis... "
+echo "Merge linearity"
 for bl_scheme in MYNN25 MYJ YSU ; do 
-    fixed_dSST=100
-    fixed_wnm=010
-    svg_stack.py \
-        --direction=v \
-        $fig_dir/spectral_analysis_linearity_on_dSST/linearity_on_dSST_lab_FULL_wnm${fixed_wnm}_${bl_scheme}_hr120-240.svg \
-        $fig_dir/spectral_analysis_tracking_wnm/spectral_analysis_lab_FULL_dT${fixed_dSST}_${bl_scheme}_hr120-240.svg \
-        > $fig_dir/merged-spectral_analysis_wnm${fixed_wnm}_dSST${fixed_dSST}_${bl_scheme}_hr120-240.svg
-done
-fi
-
-echo "Figure 9: Merging the misc phase diagram..."
-svg_stack.py \
-    --direction=h \
-    $fig_dir/phase_misc/lab_FULL/phase_misc_wnm010_varying_dSST_hr120-240.svg \
-    $fig_dir/phase_misc/lab_FULL/phase_misc_dSST100_varying_wnm_hr120-240.svg \
-    > $fig_dir/merged-phase_misc_hr120-240.svg
-
-
-sleep 3
-echo "Figure 10: Merge linearity"
-for bl_scheme in MYNN25 MYJ YSU ; do 
+    hrs_beg=120
+    dhr=$( get_dhr $bl_scheme ) 
+    hrs_end=$(( $hrs_beg + $dhr ))
+    hrs=${hrs_beg}-${hrs_end}
+ 
     svg_stack.py      \
        --direction=h \
-        $fig_dir/linearity_analysis/linearity_vary_wnm_lab_SIMPLE_dSST100_${bl_scheme}_hr120-240.svg \
-        $fig_dir/linearity_analysis/linearity_vary_wnm_lab_FULL_dSST100_${bl_scheme}_hr120-240.svg \
+        $fig_dir/linearity_analysis/linearity_vary_wnm_lab_SIMPLE_dSST100_${bl_scheme}_hr${hrs}.svg \
+        $fig_dir/linearity_analysis/linearity_vary_wnm_lab_FULL_dSST100_${bl_scheme}_hr${hrs}.svg \
         > $fig_dir/merged-linearity_vary_wnm_${bl_scheme}_hr120-240.svg
 done
+
 name_pairs=(
     sst_analysis_20240101.svg                                                                        fig01
     merged-exp.svg                                                                                   fig02
