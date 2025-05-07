@@ -423,7 +423,7 @@ plot_infos = dict(
 
     CH = dict(
         factor = 1e3 / (1.22 * 1004.0), # density of air
-        label = "$\\overline{C}_H \\approx \\overline{C}_Q $",
+        label = "$\\overline{C}_H$ and $\\overline{C}_Q$",
         unit = "$ \\times 10^{-3} $",
         #ylim = [0.95, 1.10],
     ),
