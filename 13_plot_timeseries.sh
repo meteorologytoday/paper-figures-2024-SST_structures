@@ -18,9 +18,9 @@ dhr=$(( 24 * 15 ))
 
 
 #for bl_scheme in MYNN25 MYJ YSU ; do
-for bl_scheme in MYJ YSU MYNN25 ; do
+for bl_scheme in MYNN25 MYJ YSU ; do
 for smooth in 25 ; do
-for wnm in 010 004 ; do
+for wnm in 010 ; do
 for dT in 100 ; do
 
 
@@ -77,7 +77,7 @@ for dT in 100 ; do
         --no-display                         \
         --varnames    PBLH    TA     QA      \
                       PRECIP  HFX    LH      \
-                      WND_sfc CH     CQ      \
+                      WND_sfc CH     CD0     \
         --output $output & 
 
         nproc_cnt=$(( $nproc_cnt + 1))

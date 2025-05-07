@@ -241,9 +241,14 @@ def genAnalysis(
     CQ = ds["FLQC"] / WND_sfc
     CQ = CQ.rename("CQ")
 
+    CD0 = (ds["UST"] / WND_sfc)**2.0
+    CD0 = CD0.rename("CD0")
+
+
     merge_data.append(WND_sfc)
     merge_data.append(CH)
     merge_data.append(CQ)
+    merge_data.append(CD0)
 
 
     TTL_RAIN = ds["RAINNC"] + ds["RAINC"] #+ ds["RAINSH"] + ds["SNOWNC"] + ds["HAILNC"] + ds["GRAUPELNC"]
@@ -264,7 +269,6 @@ def genAnalysis(
     merge_data.append(PRECIP)
     merge_data.append(TTL_RAIN)
     #merge_data.append(dWATER_TTLdt)
-
 
     DIV10 = ( ( ds["U10"].roll(west_east=-1) - ds["U10"] ) / ds.DX ).rename("DIV10")
     VOR10 = ( ( ds["V10"].roll(west_east=-1) - ds["V10"] ) / ds.DX ).rename("VOR10")

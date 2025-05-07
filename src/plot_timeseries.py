@@ -422,13 +422,24 @@ plot_infos = dict(
     ),
 
     CH = dict(
-        label = "$\\overline{C}_H $",
-        unit = "$ \\mathrm{J} \\, / \\, \\mathrm{K} \\, / \\, \\mathrm{m}^3 $",
+        factor = 1e3 / (1.22 * 1004.0), # density of air
+        label = "$\\overline{C}_H \\approx \\overline{C}_Q $",
+        unit = "$ \\times 10^{-3} $",
+        #ylim = [0.95, 1.10],
     ),
 
     CQ = dict(
+        factor = 1e3 / 1.22, # density of air
         label = "$\\overline{C}_Q $",
-        unit = "$ \\mathrm{kg} \\, / \\, \\mathrm{m}^3 $",
+        unit = "$ \\times 10^{-3} $",
+        #ylim = [0.95, 1.10],
+    ),
+
+    CD0 = dict(
+        factor = 1e3, # density of air
+        label = "$\\overline{C}_D $",
+        unit = "$ \\times 10^{-3} $",
+        #ylim = [0.95, 1.10],
     ),
 
 
