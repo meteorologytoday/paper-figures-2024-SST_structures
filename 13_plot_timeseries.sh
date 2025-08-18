@@ -18,17 +18,19 @@ dhr=$(( 24 * 15 ))
 
 
 #for bl_scheme in MYNN25 MYJ YSU ; do
-for bl_scheme in MYNN25 MYJ YSU ; do
+#for U in 10 20 ; do
+for U in 10 ; do
+for bl_scheme in MYNN25 ; do
 for smooth in 25 ; do
 for wnm in 010 ; do
 for dT in 100 ; do
 
 
     input_dirs=(
-        $preavg_dir/lab_SIMPLE/case_mph-off_wnm000_U20_dT000_${bl_scheme}
-        $preavg_dir/lab_SIMPLE/case_mph-off_wnm${wnm}_U20_dT${dT}_${bl_scheme}
-        $preavg_dir/lab_FULL/case_mph-on_wnm000_U20_dT000_${bl_scheme}
-        $preavg_dir/lab_FULL/case_mph-on_wnm${wnm}_U20_dT${dT}_${bl_scheme}
+        $preavg_dir/lab_SIMPLE/case_mph-off_wnm000_U${U}_dT000_${bl_scheme}
+        $preavg_dir/lab_SIMPLE/case_mph-off_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
+        $preavg_dir/lab_FULL/case_mph-on_wnm000_U${U}_dT000_${bl_scheme}
+        $preavg_dir/lab_FULL/case_mph-on_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
     )
 
 
@@ -59,7 +61,7 @@ for dT in 100 ; do
 
 
     echo "Doing diagnostic simple"
-    output="$output_fig_dir/timeseries_wnm${wnm}_U20_dT${dT}_${bl_scheme}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
+    output="$output_fig_dir/timeseries_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}_timeseries_smooth-${smooth}_${hrs_beg}-${hrs_end}.svg"
     extra_title=""
     python3 src/plot_timeseries.py \
         --input-dirs "${input_dirs[@]}"      \
@@ -88,6 +90,7 @@ for dT in 100 ; do
             nproc_cnt=0
         fi
      
+done
 done
 done
 done

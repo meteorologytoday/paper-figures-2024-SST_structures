@@ -10,7 +10,7 @@ source 00_setup.sh
 
 for _bl_scheme in MYNN25 MYJ YSU ; do
 for target_lab in  lab_SIMPLE lab_FULL ; do 
-for U in 20 ; do
+for U in 10 20 ; do
 for wnm in 004 005 007 010 020 040 ; do
 
     if [[ "$target_lab" =~ "SIMPLE" ]]; then
