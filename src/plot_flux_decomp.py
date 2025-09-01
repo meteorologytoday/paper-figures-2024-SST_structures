@@ -47,8 +47,9 @@ print("sel_dict = ", str(sel_dict))
 
 print("Start loading data.")
 ds = xr.open_dataset(args.input_file)#, engine="scipy")
+print("Loaded ds: ", ds)
 ds = ds.sel(**sel_dict)
-print(ds)
+print("After selection: ", ds)
 
 coord_x = ds.coords[args.varying_param]
 

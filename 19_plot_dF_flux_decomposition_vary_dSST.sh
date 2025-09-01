@@ -9,11 +9,11 @@ parameter=dT
 output_dir=$fig_dir/dF_total_flux_decomposition/$parameter
 
 
-for target_lab in lab_FULL ; do
-for Ug in 20 ; do
+for target_lab in lab_SIMPLE lab_FULL ; do
+for Ug in 10 20; do
 for wnm in 010 ; do
-for bl_scheme in MYNN25 YSU MYJ; do
-#for bl_scheme in MYNN25 ; do
+#for bl_scheme in MYNN25 YSU MYJ; do
+for bl_scheme in MYNN25 ; do
 
     dhr=$( get_dhr $bl_scheme ) 
     hr_beg=120
@@ -23,7 +23,7 @@ for bl_scheme in MYNN25 YSU MYJ; do
 
     input_file=$gendata_dir/dF_phase_analysis/fixed_wnm/$target_lab/collected_flux_${bl_scheme}_hr${hr}.nc
     output_dir=$fig_dir/dF_flux_decomposition_varying_dSST/$target_lab
-    output_file=$output_dir/dF_flux_decomposition_onefig_wnm${wnm}_varying_dSST_${bl_scheme}_hr${hr}.svg
+    output_file=$output_dir/dF_flux_decomposition_onefig_U${Ug}_wnm${wnm}_varying_dSST_${bl_scheme}_hr${hr}.svg
 
     mkdir -p $output_dir
 

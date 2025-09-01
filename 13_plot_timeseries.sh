@@ -20,6 +20,8 @@ dhr=$(( 24 * 15 ))
 #for bl_scheme in MYNN25 MYJ YSU ; do
 #for U in 10 20 ; do
 for U in 10 ; do
+
+_preavg_dir=${preavg_dir}_U${U}
 for bl_scheme in MYNN25 ; do
 for smooth in 25 ; do
 for wnm in 010 ; do
@@ -27,10 +29,10 @@ for dT in 100 ; do
 
 
     input_dirs=(
-        $preavg_dir/lab_SIMPLE/case_mph-off_wnm000_U${U}_dT000_${bl_scheme}
-        $preavg_dir/lab_SIMPLE/case_mph-off_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
-        $preavg_dir/lab_FULL/case_mph-on_wnm000_U${U}_dT000_${bl_scheme}
-        $preavg_dir/lab_FULL/case_mph-on_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
+        $_preavg_dir/lab_SIMPLE/case_mph-off_wnm000_U${U}_dT000_${bl_scheme}
+        $_preavg_dir/lab_SIMPLE/case_mph-off_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
+        $_preavg_dir/lab_FULL/case_mph-on_wnm000_U${U}_dT000_${bl_scheme}
+        $_preavg_dir/lab_FULL/case_mph-on_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
     )
 
 

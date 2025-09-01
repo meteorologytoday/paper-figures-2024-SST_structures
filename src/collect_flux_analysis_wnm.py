@@ -63,67 +63,76 @@ if __name__ == "__main__":
                     )
                 )
 
-                print("Loading wrf dir: %s" % (sim_dir,))
-                _ds = wrf_load_helper.loadWRFDataFromDir(
-                    wsm, 
-                    sim_dir,
-                    beg_time = time_beg,
-                    end_time = time_end,
-                    prefix="analysis_",
-                    suffix=".nc",
-                    avg=None,
-                    verbose=False,
-                    inclusive="left",
-                )
-
-                if "PRECIP" in _ds:
-                    print("Drop PRECIP")
-                    _ds = _ds.drop_vars(["PRECIP",])
-
-                if not args.no_extra_variable:
-                    print("Compute PRECIP")
-                    PRECIP = ( _ds["TTL_RAIN"] - _ds["TTL_RAIN"].shift(time=1) ) / wrfout_data_interval.total_seconds()
-                    PRECIP = PRECIP.rename("PRECIP")
-                   
-                    _ds = xr.merge([
-                        _ds, PRECIP,
-                    ])
-     
-                if data is None:
-
-                    varnames = _ds.keys()
-                    
-                    data = xr.Dataset(
-                        data_vars = {
-                            l : ( ["stat", "Ug", "wnm", "dSST"], np.zeros((len(stat_array), len(args.Ugs), len(args.wnms), len(args.dSSTs))) )
-                            for l in varnames
-                        },
-
-                        coords = dict(
-                            Ug = (["Ug"], args.Ugs),
-                            wnm = (["wnm"], args.wnms),
-                            dSST = (["dSST"], np.array(args.dSSTs)/100.0),
-                            stat= (["stat",], stat_array),
-                        )
+                try:
+                    print("Loading wrf dir: %s" % (sim_dir,))
+                    _ds = wrf_load_helper.loadWRFDataFromDir(
+                        wsm, 
+                        sim_dir,
+                        beg_time = time_beg,
+                        end_time = time_end,
+                        prefix="analysis_",
+                        suffix=".nc",
+                        avg=None,
+                        verbose=False,
+                        inclusive="left",
                     )
-                 
-                
-                # Do moving average
-                _ds = _ds.rolling(time=args.moving_avg_cnt, center=True).mean()
 
-                if "west_east" in _ds.dims:
-                    _ds = _ds.mean(dim="west_east")
+                    if "PRECIP" in _ds:
+                        print("Drop PRECIP")
+                        _ds = _ds.drop_vars(["PRECIP",])
 
-                # Do uncertainties
-                _ds_mean = _ds.mean(dim="time")
-                _ds_std  = _ds.std(dim="time")
-                
-                for varname in data.keys():
-                    print("Saving varname: ", varname)
-                    data[varname][0, i, j, k] = _ds_mean[varname]
-                    data[varname][1, i, j, k] = _ds_std[varname]
-    
-    
+                    if not args.no_extra_variable:
+                        print("Compute PRECIP")
+                        PRECIP = ( _ds["TTL_RAIN"] - _ds["TTL_RAIN"].shift(time=1) ) / wrfout_data_interval.total_seconds()
+                        PRECIP = PRECIP.rename("PRECIP")
+                       
+                        _ds = xr.merge([
+                            _ds, PRECIP,
+                        ])
+         
+                    if data is None:
+
+                        varnames = _ds.keys()
+                        
+                        data = xr.Dataset(
+                            data_vars = {
+                                l : ( ["stat", "Ug", "wnm", "dSST"], np.zeros((len(stat_array), len(args.Ugs), len(args.wnms), len(args.dSSTs))) )
+                                for l in varnames
+                            },
+
+                            coords = dict(
+                                Ug = (["Ug"], args.Ugs),
+                                wnm = (["wnm"], args.wnms),
+                                dSST = (["dSST"], np.array(args.dSSTs)/100.0),
+                                stat= (["stat",], stat_array),
+                            )
+                        )
+                     
+                    
+                    # Do moving average
+                    _ds = _ds.rolling(time=args.moving_avg_cnt, center=True).mean()
+
+                    if "west_east" in _ds.dims:
+                        _ds = _ds.mean(dim="west_east")
+
+                    # Do uncertainties
+                    _ds_mean = _ds.mean(dim="time")
+                    _ds_std  = _ds.std(dim="time")
+                    
+                    for varname in data.keys():
+                        print("Saving varname: ", varname)
+                        data[varname][0, i, j, k] = _ds_mean[varname]
+                        data[varname][1, i, j, k] = _ds_std[varname]
+        
+                except Exception as e:
+                    
+                    import traceback
+                    
+                    print("Exception happens.")
+                    traceback.print_exc()
+
+                    
+                     
     print("Output file: ", args.output)
     data.to_netcdf(args.output)
     
