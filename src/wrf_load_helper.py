@@ -5,6 +5,7 @@ import os
 import os.path
 import re
 from datetime import datetime
+from dataclasses import dataclass
 
 engine = "netcdf4"
 wrfout_time_fmt="%Y-%m-%d_%H:%M:%S"
@@ -13,7 +14,12 @@ wrfout_suffix=""
 
 class WRFSimMetadata:
 
-    def __init__(self, start_datetime, data_interval, frames_per_file):
+    def __init__(
+        self,
+        start_datetime,
+        data_interval,
+        frames_per_file
+    ):
 
         self.start_datetime = pd.Timestamp(start_datetime)
         self.data_interval = data_interval
@@ -92,15 +98,30 @@ def computeIndex(wsm, index_time=None, time_passed=None):
         elif time_passed is not None:
             raise Exception("The provided `time_passed` is not a multiple of `data_interval` away from `start_datetime`.")
 
+    
+    delta_frames = int(np.floor(delta_frames))
+
+    # WRF named output file time using its first time of data
+    # Also, the initial condition is forced input into the first file
+    # Therefore,
+    # 1. the first output file will have `frames_per_file+1` entries.
+    # 2. the first output file might have different time signature from the rest, due
+    #    to the extra output of initial condition
+    frames_per_batch = int(wsm.sim_length_per_batch / wsm.data_interval)
+    delta_batch =  ( delta_frames - 1 ) / frames_per_batch
 
     # Now compute the file and frame in file
-    delta_frames = int(delta_frames)
     delta_files = int( np.floor( delta_frames / wsm.frames_per_file ) )
-    frame = delta_frames - delta_files * wsm.frames_per_file
+    frame_res = delta_frames - delta_files * wsm.frames_per_file
 
-    file_time = wsm.start_datetime + delta_files * wsm.file_interval
+    file_time = wsm.start_datetime + delta_files * wsm.file_interval + wsm.data_interval
 
-    return file_time, frame
+    if delta_batch == 0:
+        file_time -= wsm.data_interval
+
+    print("index_time: ", index_time, " => ", file_time, "; delta_batch = ", delta_batch)
+
+    return file_time, frame_res
 
 
 def genInclusiveBounds(wsm, beg_dt, end_dt, interval, inclusive):
@@ -126,7 +147,6 @@ def genInclusiveBounds(wsm, beg_dt, end_dt, interval, inclusive):
 
     return _beg_dt, _end_dt
 
-
 def genFilenameFromDateRange(wsm, time_rng, inclusive="left", prefix=wrfout_prefix, suffix="", dirname=None, time_fmt=wrfout_time_fmt):
    
     beg_dt, end_dt = genInclusiveBounds(wsm, time_rng[0], time_rng[1], wsm.data_interval, inclusive)
@@ -146,6 +166,57 @@ def genFilenameFromDateRange(wsm, time_rng, inclusive="left", prefix=wrfout_pref
             fnames[i] = os.path.join(dirname, fnames[i])
     
     return fnames
+
+
+def constructWRFOutputInfo(dirname, prefix=wrfout_prefix, suffix="", append_dirname=False):
+
+    valid_files = []
+    
+    pattern = "^%s(?P<DATETIME>[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2})%s$" % (prefix, suffix)
+    ptn = re.compile(pattern)
+    file_times = []
+
+    for fname in os.listdir(dirname):
+            
+        m =  ptn.match(fname)
+
+        if m:
+            if append_dirname:
+                fname = os.path.join(dirname, fname)
+
+            t = pd.Timestamp(datetime.strptime(m.group('DATETIME'), "%Y-%m-%d_%H:%M:%S"))
+            valid_files.append(dict(time=t, fname=fname))
+
+    valid_files.sort(key=lambda x: x["time"])
+
+    return valid_files
+
+
+def findFilenameFromDateRange(wsm, time_rng, dirname, inclusive="left", prefix=wrfout_prefix, suffix="", time_fmt=wrfout_time_fmt):
+   
+    buffer_time = wsm.data_interval * wsm.frames_per_file
+    beg_dt, end_dt =  time_rng[0] - buffer_time, time_rng[1] + buffer_time
+    #genInclusiveBounds(wsm, time_rng[0], time_rng[1], wsm.data_interval, inclusive)
+
+    print("beg_dt = ", beg_dt)   
+    print("end_dt = ", end_dt)   
+    print("wsm.data_interval = ", wsm.data_interval)   
+    
+    wrfout_infos = constructWRFOutputInfo(dirname, prefix=prefix, suffix=suffix)
+    
+    fnames = []
+    for i, wrfout_info in enumerate(wrfout_infos):
+        if ( beg_dt <= wrfout_info["time"] ) and ( wrfout_info["time"] <= end_dt ):
+            print("Want this file: ", wrfout_info["fname"])
+            fnames.append(wrfout_info["fname"])
+    
+    if dirname is not None:
+        for i in range(len(fnames)):
+            fnames[i] = os.path.join(dirname, fnames[i])
+    
+    return fnames
+
+
 
 
 def listWRFOutputFiles(dirname, prefix=wrfout_prefix, suffix="", append_dirname=False, time_rng=None):
@@ -201,6 +272,7 @@ def loadWRFDataFromDir(wsm, input_dir, beg_time, end_time=None, prefix=wrfout_pr
     if verbose:
         print("[loadWRFDataFromDir] Going to load time range: [", beg_time, ", ", end_time, "]")
  
+    """
     fnames = genFilenameFromDateRange(
         wsm,
         [beg_time, end_time],
@@ -210,7 +282,21 @@ def loadWRFDataFromDir(wsm, input_dir, beg_time, end_time=None, prefix=wrfout_pr
         dirname=input_dir,
         time_fmt=time_fmt,
     )
+    """
  
+    fnames = findFilenameFromDateRange(
+        wsm,
+        [beg_time, end_time],
+        dirname=input_dir,
+        inclusive=inclusive,
+        prefix=prefix,
+        suffix=suffix,
+        time_fmt=time_fmt,
+    )
+    
+    if len(fnames) == 0:
+        raise Exception(f"There is no file found in directory `{input_dir:s}`.")
+     
     if verbose:
         print("[loadWRFDataFromDir] Going to load files: ")
         for i, fname in enumerate(fnames):
@@ -232,7 +318,7 @@ def loadWRFDataFromDir(wsm, input_dir, beg_time, end_time=None, prefix=wrfout_pr
     if 'time' in test_ds:
         print(fnames)
         ds = xr.open_mfdataset(fnames, decode_times=True, engine=engine, concat_dim=["time"], combine='nested')
-
+        
  
     else:
         ds = xr.open_mfdataset(fnames, decode_times=False, engine=engine, concat_dim=["Time"], combine='nested')
@@ -272,15 +358,24 @@ def loadWRFDataFromDir(wsm, input_dir, beg_time, end_time=None, prefix=wrfout_pr
         inclusive = inclusive,
     )
 
-    start_select = findfirst(ds_dts == beg_time)
-    if start_select == -1:
-        raise Exception("Error: Cannot find the matching `beg_time` = %s" % (str(beg_time),))
+    #start_select = findfirst(ds_dts == beg_time)
+    #if start_select == -1:
+    #    raise Exception("Error: Cannot find the matching `beg_time` = %s" % (str(beg_time),))
         
-    for i, select_dt in enumerate(select_dts):
-        if ds_dts[start_select + i] != select_dt:
-            raise Exception("Error: Cannot find the matching `time` = %s" % (str(select_dt),))
+    #for i, select_dt in enumerate(select_dts):
+    #    if ds_dts[start_select + i] != select_dt:
+    #        raise Exception("Error: Cannot find the matching `time` = %s" % (str(select_dt),))
             
-    ds = ds.isel( time = slice(start_select, start_select + len(select_dts) ) )
+    #ds = ds.isel( time = slice(start_select, start_select + len(select_dts) ) )
+    #print("before selection: ", ds.coords)
+    #print("needed_dts: ",select_dts)
+
+    idx = [ i for i, dt in enumerate(ds.coords["time"].to_numpy()) if dt in select_dts ]
+
+    if len(idx) != len(select_dts):
+        raise Exception("Some dt does not exists: ", select_dts)
+
+    ds = ds.isel( time = idx )
     ts = ds.coords["time"] 
     if verbose:
         print("Loaded time: ")
