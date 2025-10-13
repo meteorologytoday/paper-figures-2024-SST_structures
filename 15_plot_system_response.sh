@@ -6,7 +6,7 @@ how_many_cycles_to_plot=2
 
 
 beg_days=(
-    8
+    10
 )
 
 nproc=1
@@ -37,11 +37,11 @@ source 98_trapkill.sh
 
 for dT in 100; do
 for wnm in ${wnms[@]} ; do
-for U in "10" ; do
+for U in "${Us[@]}" ; do
 for target_lab in ${target_labs[@]} ; do
 for bl_scheme in ${bl_schemes[@]} ; do
  
-    _preavg_dir=${preavg_dir}_U${U}
+    preavg_dir=$( gen_preavg_dir $U )
     thumbnail_skip_part1=0
     thumbnail_skip_part2=0
 
@@ -87,10 +87,10 @@ for bl_scheme in ${bl_schemes[@]} ; do
     exp_name="${exp_name}."
 
 
-    input_dir=$_preavg_dir/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
+    input_dir=$preavg_dir/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
     output_dir=$output_fig_dir/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
     
-    input_dir_base=$_preavg_dir/$target_lab/case_mph-${mph}_wnm000_U${U}_dT000_${bl_scheme}
+    input_dir_base=$preavg_dir/$target_lab/case_mph-${mph}_wnm000_U${U}_dT000_${bl_scheme}
 
     mkdir -p $output_dir
 

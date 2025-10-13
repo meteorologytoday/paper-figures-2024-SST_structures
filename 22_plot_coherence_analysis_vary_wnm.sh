@@ -11,6 +11,7 @@ hrs_beg=$(( 24 * 5 ))
 
 thumbnail_skip=0
 for bl_scheme in MYNN25 MYJ YSU ; do
+for U in 20 ; do
 
     dhr=$( get_dhr $bl_scheme ) 
     hrs_end=$(( $hrs_beg + $dhr ))
@@ -22,7 +23,7 @@ for bl_scheme in MYNN25 MYJ YSU ; do
 
         target_lab=lab_${target_lab_suffix}
     
-        input_file=$gendata_dir/coherence_analysis/coherence_analysis_dSST_vary_wnm_${target_lab}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.nc
+        input_file=$( gen_gendata_dir $U )/coherence_analysis/coherence_analysis_dSST_vary_wnm_${target_lab}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.nc
 
         input_files="$input_files $input_file"
         labels="$labels ${bl_scheme}-${target_lab_suffix}"
@@ -49,7 +50,7 @@ for bl_scheme in MYNN25 MYJ YSU ; do
     
     mkdir -p $output_dir
     
-    output_file=$output_dir/coherence_on_dSST_vary_wnm_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
+    output_file=$output_dir/coherence_on_dSST_vary_wnm_U${U}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
 
     python3 src/plot_coherence.py \
         --input-files ${input_files[@]} \
@@ -71,6 +72,7 @@ for bl_scheme in MYNN25 MYJ YSU ; do
         nproc_cnt=0
     fi
 
+done
 done
 
 wait

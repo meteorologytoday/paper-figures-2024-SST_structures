@@ -28,7 +28,6 @@ mkdir -p $fig_dir
 
 
 function get_dhr {
-    
     if [ "$1" = "MYJ" ] ; then
         echo $(( 2 * 24 ))
     else

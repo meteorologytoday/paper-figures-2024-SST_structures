@@ -43,7 +43,7 @@ for target_lab in lab_SIMPLE lab_FULL; do
         casename="case_mph-${mph}_wnm${wnm}_U${Ug}_dT${dT}_${bl_scheme}"
         casename_base="case_mph-${mph}_wnm000_U${Ug}_dT000_${bl_scheme}"
 
-        input_dir_root=$gendata_dir/preavg/$target_lab
+        input_dir_root=$( gen_preavg_dir $Ug )/$target_lab
         
         input_dir="$input_dir_root/$casename"
         input_dirs="$input_dirs $input_dir"

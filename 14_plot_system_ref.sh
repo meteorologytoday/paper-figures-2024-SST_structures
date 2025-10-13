@@ -4,11 +4,10 @@ source 00_setup.sh
     
 
 beg_days=(
-    5
+    10
 )
 
 nproc=5
-
 proc_cnt=0
 
 target_labs=(
@@ -26,15 +25,12 @@ source 98_trapkill.sh
 
 for dT in 000; do
 for wnm in 000 ; do
-for U in "20" ; do
+for U in ${Us[@]} ; do
 for target_lab in "${target_labs[@]}" ; do
 for bl_scheme in "${bl_schemes[@]}" ; do
 
     dhr=$( get_dhr $bl_scheme ) 
-    
     output_fig_dir=$fig_dir/snapshots-full_dhr-${dhr}
-
-
 
     if [[ "$target_lab" =~ "FULL" ]]; then
         mph=on
@@ -66,8 +62,9 @@ for bl_scheme in "${bl_schemes[@]}" ; do
 
     exp_name="${exp_name}."
 
+    preavg_dir=$( gen_preavg_dir $U )
 
-    input_dir=$gendata_dir/preavg/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
+    input_dir=$preavg_dir/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
     output_dir=$output_fig_dir/$target_lab/case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
 
     mkdir -p $output_dir

@@ -7,7 +7,7 @@ input_dir_root=$data_dir/$target_lab
 
 
 for target_lab in lab_FULL ; do
-for Ug in 20 ; do
+for Ug in "${Us[@]}" ; do
 for dSST in 100 ; do
 for hr in 120-240  ; do
 

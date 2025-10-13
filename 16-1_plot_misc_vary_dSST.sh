@@ -7,9 +7,10 @@ input_dir_root=$data_dir/$target_lab
 
 
 for target_lab in lab_FULL ; do
-for Ug in 20 ; do
+for Ug in ${Us[@]} ; do
 for wnm in 010 ; do
-for hr in 120-240 ; do
+#for hr in 120-240 ; do
+for hr in 240-360 ; do
 
     input_files=""
     labels=""
