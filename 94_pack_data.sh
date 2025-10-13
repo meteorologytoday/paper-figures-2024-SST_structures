@@ -3,9 +3,9 @@
 source 00_setup.sh
 
 wnms="004 005 007 010 020 040"
-Ugs="10 20"
-dSSTs="000 010 030 050 100 150 200 250 300"
 
+dSSTs="000 010 030 050 100 150 200 250 300"
+Us=( 20 )
 bl_schemes=(
     MYNN25
     YSU
@@ -18,19 +18,19 @@ target_labs=(
 )
 
 input_params=(
-    wnm  010   $(( 24 * 5 )) $(( 24 * 10 ))
-    dSST 100   $(( 24 * 5 )) $(( 24 * 10 ))
-    dSST 050   $(( 24 * 5 )) $(( 24 * 10 ))
+#    wnm  010   $(( 24 * 5 )) $(( 24 * 10 ))
+#    dSST 100   $(( 24 * 5 )) $(( 24 * 10 ))
+#    dSST 050   $(( 24 * 5 )) $(( 24 * 10 ))
 
-    wnm  010   $(( 24 * 8 )) $(( 24 * 13 ))
-    dSST 100   $(( 24 * 8 )) $(( 24 * 13))
+    wnm  010   $(( 24 * 10 )) $(( 24 * 15 ))
+    dSST 100   $(( 24 * 10 )) $(( 24 * 15 ))
 )
 
 
 nparams=4
 nproc=1
 
-analysis_root=$gendata_dir/delta_analysis_style-STYLE1/
+
 
 
 N=$(( ${#input_params[@]} / $nparams ))
@@ -46,7 +46,6 @@ for i in $( seq 1 $N ) ; do
     echo "hrs_beg = $hrs_beg"
     echo "hrs_end = $hrs_end"
 
-    output_root=$gendata_dir/dF_phase_analysis/fixed_${fixed_param}
 
     if [[ "$fixed_param" =~ "wnm" ]] ; then
         
@@ -64,7 +63,7 @@ for i in $( seq 1 $N ) ; do
         exit 1
     fi
 
-
+    for Ug in "${Us[@]}"; do
     for bl_scheme in "${bl_schemes[@]}" ; do
     for target_lab in "${target_labs[@]}" ; do       
         
@@ -74,12 +73,16 @@ for i in $( seq 1 $N ) ; do
             mph=off
         fi
 
+        gendata_dir=$( gen_gendata_dir $Ug )
+        analysis_root=$( gen_delta_analysis_dir $Ug STYLE1 )
+        output_root=$gendata_dir/dF_phase_analysis/fixed_${fixed_param}
+
         casename=case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}
 
         input_dir_fmt=$analysis_root/$target_lab/case_mph-${mph}_wnm{wnm:s}_U{Ug:s}_dT{dSST:s}_${bl_scheme}/avg_before_analysis-TRUE
 
         output_dir=$output_root/${target_lab}
-        output_file=$output_dir/collected_flux_${bl_scheme}_hr${hrs_beg}-${hrs_end}.nc
+        output_file=$output_dir/collected_flux_U${Ug}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.nc
 
         mkdir -p $output_dir
 
@@ -91,7 +94,7 @@ for i in $( seq 1 $N ) ; do
         eval "python3 src/collect_flux_analysis_wnm.py  \
             --input-dir-fmt $input_dir_fmt  \
             --output $output_file \
-            --Ugs $Ugs \
+            --Ugs $Ug \
             --wnms $_wnms \
             --dSSTs $_dSSTs \
             --time-rng $hrs_beg $hrs_end \
@@ -113,7 +116,7 @@ for i in $( seq 1 $N ) ; do
 
     done
     done
-
+    done
 done   
  
 echo "Done"

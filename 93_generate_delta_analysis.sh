@@ -8,19 +8,19 @@ exp_names=""
 
 
 hrs_beg=$(( 24 * 5 ))
-hrs_end=$(( 24 * 14 ))
+hrs_end=$(( 24 * 16 ))
 
 
 time_avg_interval=60   # minutes
 
-batch_cnt_limit=3
+batch_cnt_limit=1
 nproc=10
 
 source 98_trapkill.sh
 
 for analysis_style in STYLE1 ; do 
 
-    output_dir_root=$gendata_dir/delta_analysis_style-$analysis_style
+
 
 
     for avg_before_analysis in "TRUE" ; do
@@ -40,8 +40,7 @@ for analysis_style in STYLE1 ; do
             
 
     for dT in "${dTs[@]}" ; do
-    for U in 10 ; do
-        _preavg_dir=${preavg_dir}_U${U}
+    for U in "${Us[@]}" ; do
 
         if [[ "$target_lab" =~ "FULL" ]]; then
             mph=on
@@ -49,9 +48,13 @@ for analysis_style in STYLE1 ; do
             mph=off
         fi
 
+        gendata_dir=$( gen_gendata_dir $U )
+        preavg_dir=$( gen_preavg_dir $U )
+        output_dir_root=$( gen_delta_analysis_dir $U $analysis_style )
+
         casename="case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}"
         casename_base="case_mph-${mph}_wnm000_U${U}_dT000_${_bl_scheme}"
-        input_dir_root=$_preavg_dir/$target_lab
+        input_dir_root=$preavg_dir/$target_lab
 
         input_dir="${input_dir_root}/${casename}"
         input_dir_base="${input_dir_root}/${casename_base}"

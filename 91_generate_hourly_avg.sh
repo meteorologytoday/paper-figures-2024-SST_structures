@@ -5,7 +5,7 @@ source 00_setup.sh
 source 98_trapkill.sh
 
 
-output_dir_root=$preavg_dir
+
 
 hrs_beg=$(( 24 * 0 ))
 hrs_end=$(( 24 * 16 ))
@@ -14,24 +14,17 @@ hrs_end=$(( 24 * 16 ))
 time_avg_interval=60   # minutes
 
 batch_cnt_limit=1
-nproc=30
+nproc=10
 
 
 #for _bl_scheme in MYNN25 MYJ YSU ; do
 for _bl_scheme in MYNN25 ; do
 for target_lab in lab_SIMPLE lab_FULL ; do 
 
-#for _bl_scheme in MYJ ; do
-#for target_lab in lab_SIMPLE ; do 
-#for wnm in 004 ; do
-#for dT in 100 ; do
-
 for wnm in 000 010 004 005 007 010 020 040 ; do
-#for wnm in 000 ; do
 for dT in 000 010 030 050 100 150 200 250 300 ; do
-#for dT in 000 ; do
-#for U in 20 ; do
-for U in 10 ; do
+for U in 15 ; do
+#for U in ${Us[@]} ; do
 
 
     if [[ "$target_lab" =~ "SIMPLE" ]]; then
@@ -48,6 +41,7 @@ for U in 10 ; do
         continue
     fi
 
+    output_dir_root=$( gen_preavg_dir $U ) 
     casename="case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${_bl_scheme}"
     input_dir_root=$data_sim_dir/$target_lab
     input_dir="${input_dir_root}/${casename}"
@@ -65,8 +59,7 @@ for U in 10 ; do
         --wrfout-data-interval 600                 \
         --frames-per-wrfout-file 36                \
         --output-count 12                          \
-        --nproc $nproc &
-
+        --nproc $nproc & 
 
     batch_cnt=$(( $batch_cnt + 1))
     

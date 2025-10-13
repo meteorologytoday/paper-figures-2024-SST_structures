@@ -7,10 +7,8 @@ nproc=1
 time_avg_interval=60   # minutes
 
 hrs_beg=$(( 24 * 5 ))
-    
-output_dir=$gendata_dir/coherence_analysis
 
-mkdir -p $output_dir
+
 
 
 thumbnail_skip=0
@@ -30,12 +28,13 @@ for target_lab in lab_SIMPLE lab_FULL ; do
     input_dirs=""
     dSSTs=""
     tracking_wnms=""
-    for Ug in 20 ; do
+    for Ug in "${Us[@]}" ; do
     for wnm in 004 005 007 010 020 040; do
-    #for wnm in 004 040; do
-    #for wnm in 004 010 ; do
-    #for wnm in 004 005 ; do
-    
+
+        gendata_dir=$( gen_gendata_dir $Ug )     
+        output_dir=$gendata_dir/coherence_analysis
+        mkdir -p $output_dir
+               
         if [[ "$target_lab" =~ "FULL" ]]; then
             mph=on
         elif [[ "$target_lab" =~ "SIMPLE" ]]; then

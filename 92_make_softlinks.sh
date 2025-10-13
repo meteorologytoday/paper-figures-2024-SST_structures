@@ -10,7 +10,7 @@ source 00_setup.sh
 
 for _bl_scheme in MYNN25 MYJ YSU ; do
 for target_lab in  lab_SIMPLE lab_FULL ; do 
-for U in 10 20 ; do
+for U in "${Us[@]}" ; do
 for wnm in 004 005 007 010 020 040 ; do
 
     if [[ "$target_lab" =~ "SIMPLE" ]]; then
@@ -19,7 +19,7 @@ for wnm in 004 005 007 010 020 040 ; do
         mph=on
     fi
 
-    lab_root=$preavg_dir/$target_lab
+    lab_root=$( gen_preavg_dir $U )/$target_lab
     actual_casename="case_mph-${mph}_wnm000_U${U}_dT000_${_bl_scheme}"
     softlink_casename="case_mph-${mph}_wnm${wnm}_U${U}_dT000_${_bl_scheme}"
 
