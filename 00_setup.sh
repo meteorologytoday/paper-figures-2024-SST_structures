@@ -6,7 +6,6 @@ sh=bash
 src_dir=src
 data_dir=./data
 data_sim_dir=$data_dir/sim_data
-data_SQ15_dir=./data/data_SQ15
 fig_dir=figures
 fig_static_dir=figures_static
 finalfig_dir=final_figures
@@ -15,10 +14,13 @@ finalfig_dir=final_figures
 target_lab=lab_sine_forcedry
 bl_schemes=( MYNN25 )
 
-gendata_dir=./gendata
-preavg_dir=$gendata_dir/preavg
-
 fig_ext=svg
+
+Us=(
+    20
+#    15
+)
+
 
 Lx=2000
 f0=1e-4
@@ -33,3 +35,17 @@ function get_dhr {
         echo $(( 5 * 24 ))
     fi
 }
+
+function gen_gendata_dir {
+    echo "./gendata_U$1"
+}
+
+function gen_preavg_dir {
+    echo $( gen_gendata_dir $1 )/preavg
+}
+
+function gen_delta_analysis_dir {
+    echo $( gen_gendata_dir $1 )/delta_analysis_style-$2
+}
+
+
