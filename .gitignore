@@ -27,7 +27,7 @@ gendata/*
 *.swp
 !figures_static/*
 data
-gendata
+gendata*
 sim_data/*
 *.tar.gz
 *.tar
