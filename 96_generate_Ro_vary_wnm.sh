@@ -8,9 +8,7 @@ time_avg_interval=60   # minutes
 
 hrs_beg=$(( 24 * 5 ))
     
-output_dir=$gendata_dir/Ro_analysis
 
-mkdir -p $output_dir
 
 
 thumbnail_skip=0
@@ -18,19 +16,19 @@ for dT in 100 ; do
 for bl_scheme in MYNN25 MYJ YSU ; do
 #for bl_scheme in MYJ ; do
 for target_lab in lab_SIMPLE lab_FULL ; do
+for Ug in 20 ; do
+
 
     dhr=$( get_dhr $bl_scheme ) 
     hrs_end=$(( $hrs_beg + $dhr ))
 
-    output_dir=$fig_dir/coherence_analysis
-    
-    mkdir -p $output_dir
+
     
     input_dirs_base=""
     input_dirs=""
     dSSTs=""
     tracking_wnms=""
-    for Ug in 20 ; do
+
     for wnm in 004 005 007 010 020 040; do
     #for wnm in 004 040; do
     #for wnm in 004 010 ; do
@@ -56,9 +54,12 @@ for target_lab in lab_SIMPLE lab_FULL ; do
         tracking_wnms="$tracking_wnms $wnm"
 
     done
-    done
+
         
-    output_file=$gendata_dir/Ro_analysis/Ro_analysis_vary_wnm_${target_lab}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.nc
+    output_dir=$( gen_gendata_dir $Ug )/Ro_analysis
+    mkdir -p $output_dir
+
+    output_file=$output_dir/Ro_analysis_vary_wnm_${target_lab}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.nc
 
     if [ -f "$output_file" ] ; then
 
@@ -87,6 +88,7 @@ for target_lab in lab_SIMPLE lab_FULL ; do
         fi
 
     fi
+done
 done
 done
 done
