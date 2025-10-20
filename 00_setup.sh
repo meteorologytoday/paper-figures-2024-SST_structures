@@ -8,7 +8,7 @@ data_dir=./data
 data_sim_dir=$data_dir/sim_data
 fig_dir=figures
 fig_static_dir=figures_static
-
+finalfig_dir=./final_figures
 
 
 target_lab=lab_sine_forcedry
@@ -45,9 +45,5 @@ function gen_preavg_dir {
 
 function gen_delta_analysis_dir {
     echo $( gen_gendata_dir $1 )/delta_analysis_style-$2
-}
-
-function gen_final_figures_dir {
-    echo ./final_figures_U$1
 }
 
