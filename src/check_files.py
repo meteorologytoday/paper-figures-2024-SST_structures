@@ -8,6 +8,8 @@ from pathlib import Path
 import datetime
 import sys
 
+from check_if_simulation_wanted import check_if_simulation_wanted
+
 
 if __name__ == "__main__":
 
@@ -35,7 +37,7 @@ if __name__ == "__main__":
     exp_beg_time = pd.Timestamp("2001-01-01T00:00:00")
 
     check_time_beg = exp_beg_time
-    check_time_end = exp_beg_time + pd.Timedelta(days=15)
+    check_time_end = exp_beg_time + pd.Timedelta(days=17)
 
     print("IMPORTANT -- Output log file: ", output_log_file)
     with open(output_log_file, "w") as log_file:
@@ -55,23 +57,13 @@ if __name__ == "__main__":
 
                         for dT in dTs:
 
-                            if target_lab == "FULL":
-         
-                                if wnm == 0 and dT == 0:
-                                    pass
-                                elif (dT == 0) != (wnm == 0):
-                                    continue
-                                elif not ( wnm in [10, ] or dT in [1,] ):
-                                    continue
-       
-                            elif target_lab == "SIMPLE":
-
-                                if wnm == 0 and dT == 0:
-                                    pass
-                                elif (dT == 0) != (wnm == 0):
-                                    continue
-                                elif (wnm, dT) not in [ (5, 1.0) , (10, 1.0) ]:
-                                    continue
+                            if not check_if_simulation_wanted(
+                                target_lab = target_lab,
+                                dT = dT,
+                                wnm = wnm,
+                                U = U,
+                            ):
+                                continue
                                 
                             mph = "on" if target_lab == "FULL" else "off"
                             dT_int = int(dT*100)

@@ -8,42 +8,40 @@ source 98_trapkill.sh
 
 
 hrs_beg=$(( 24 * 0 ))
-hrs_end=$(( 24 * 16 ))
+hrs_end=$(( 24 * 20 ))
 
 
 time_avg_interval=60   # minutes
 
 batch_cnt_limit=1
-nproc=10
+nproc=50
 
 
-#for _bl_scheme in MYNN25 MYJ YSU ; do
-for _bl_scheme in MYNN25 ; do
-for target_lab in lab_SIMPLE lab_FULL ; do 
+for U in ${Us[@]} ; do
+for _bl_scheme in MYNN25 MYJ YSU ; do
+for target_lab in lab_FULL lab_SIMPLE ; do 
+for wnm in 000 004 005 007 010 020 040 ; do
+for dT in 000 010 030 050 100 150 200 250 300 ; do
 
-#for wnm in 000 010 004 005 007 010 020 040 ; do
-#for dT in 000 010 030 050 100 150 200 250 300 ; do
-#for U in 10 ; do
 
-for wnm in 000 010 005 ; do
-for dT in 000 100 ; do
-for U in 10 ; do
 
-#for U in ${Us[@]} ; do
+    if_wanted=$( python3 src/check_if_simulation_wanted.py --target-lab $target_lab --dT100 $dT --U $U --wnm $wnm )
+    label="${target_lab}-U${U}-wnm${wnm}-dT${dT}_${_bl_scheme}"
 
+    if [ "$if_wanted" = "TRUE" ]; then
+        echo "Need $label"
+    elif [ "$if_wanted" = "FALSE" ]; then
+        echo "Skip $label"
+        continue
+    else
+        echo "Unknown answer $if_wanted. Skip $label"
+        continue
+    fi 
 
     if [[ "$target_lab" =~ "SIMPLE" ]]; then
         mph=off
     elif [[ "$target_lab" =~ "FULL" ]]; then
         mph=on
-    fi
-
-    if [[ "$wnm" = "000" ]] && [[ "$dT" != "000" ]] ; then
-        continue
-    fi
-
-    if [[ "$wnm" != "000" ]] && [[ "$dT" = "000" ]] ; then
-        continue
     fi
 
     output_dir_root=$( gen_preavg_dir $U ) 
@@ -64,7 +62,8 @@ for U in 10 ; do
         --wrfout-data-interval 600                 \
         --frames-per-wrfout-file 36                \
         --output-count 12                          \
-        --nproc $nproc & 
+        --nproc $nproc 
+ 
 
     batch_cnt=$(( $batch_cnt + 1))
     
@@ -73,13 +72,11 @@ for U in 10 ; do
         wait
         batch_cnt=0
     fi
-   
-done
-done
-done
-done
-done
 
-wait
+done
+done
+done
+done
+done
 
 echo "Done"

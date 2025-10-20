@@ -24,24 +24,25 @@ for analysis_style in STYLE1 ; do
 
 
     for avg_before_analysis in "TRUE" ; do
-    #for _bl_scheme in MYJ MYNN25 YSU  ; do
-    for _bl_scheme in MYNN25 ; do
+    for _bl_scheme in MYNN25 YSU MYJ ; do
     for target_lab in  lab_FULL lab_SIMPLE ; do
-
-    #for wnm in 004 005 007 010 020 040 000 ; do
-    for wnm in 010 ; do
-
-#        if [ "$wnm" = "004" ] || [ "$wnm" = "010" ]; then
-
-            dTs=( 000 010 030 050 100 150 200 250 300 )
-
-#        else
-            dTs=( 030 )
-#        fi
-            
-
-    for dT in "${dTs[@]}" ; do
     for U in "${Us[@]}" ; do
+    for wnm in 004 005 007 010 020 040 000 ; do
+    for dT in  000 010 030 050 100 150 200 250 300 ; do
+
+
+        if_wanted=$( python3 src/check_if_simulation_wanted.py --target-lab $target_lab --dT100 $dT --U $U --wnm $wnm )
+        label="${target_lab}-U${U}-wnm${wnm}-dT${dT}_${_bl_scheme}"
+
+        if [ "$if_wanted" = "TRUE" ]; then
+            echo "Need $label"
+        elif [ "$if_wanted" = "FALSE" ]; then
+            echo "Skip $label"
+            continue
+        else
+            echo "Unknown answer $if_wanted. Skip $label"
+            continue
+        fi 
 
         if [[ "$target_lab" =~ "FULL" ]]; then
             mph=on

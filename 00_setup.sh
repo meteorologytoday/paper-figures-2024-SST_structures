@@ -17,9 +17,8 @@ bl_schemes=( MYNN25 )
 fig_ext=svg
 
 Us=(
+    20
     10
-#    20
-#    15
 )
 
 
@@ -37,7 +36,7 @@ function get_dhr {
 }
 
 function gen_gendata_dir {
-    echo "./gendata_U$1"
+    echo "./gendata/gendata_U$1"
 }
 
 function gen_preavg_dir {

@@ -87,11 +87,21 @@ def avgData(
         new_ds.attrs["time_beg"] = full_range_time_beg.strftime("%Y-%m-%d_%H:%M:%S"),
         new_ds.attrs["time_end"] = full_range_time_end.strftime("%Y-%m-%d_%H:%M:%S"),
  
+        # Define compression settings
+        comp = dict(zlib=True, complevel=4)
+
+        # Apply same compression to all variables
+        encoding = {var: comp for var in ds.data_vars}
+        encoding.update({
+            'time': {'units':'hours since 2001-01-01'},
+        })
         print("Writing file: %s" % (output_filename,))
+
         new_ds.to_netcdf(
             output_filename,
+            engine = "netcdf4",
             unlimited_dims="time",
-            encoding={'time':{'units':'hours since 2001-01-01'}}
+            encoding=encoding,
         )
 
         

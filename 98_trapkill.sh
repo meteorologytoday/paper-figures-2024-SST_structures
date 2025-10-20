@@ -10,7 +10,8 @@ else
 
     echo "___TRAPKILL___ is not set. Do it now."
 
-    trap 'echo "Exiting... kill jobs now!"; pkill -9 -P $$' SIGINT SIGTERM
+    trap 'echo "Exiting... kill all subprocess..."; kill -- -$$ 2>/dev/null || true' EXIT
+    # trap 'echo "Exiting... kill jobs now!"; pkill -9 -P $$' SIGINT SIGTERM
     #trap 'echo "Exiting... ready to kill jobs... "; kill $$' EXIT
 
     ___TRAPKILL___=TRUE
