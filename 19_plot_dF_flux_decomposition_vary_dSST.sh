@@ -14,15 +14,15 @@ for Ug in ${Us[@]}; do
 for wnm in 010 ; do
 #for bl_scheme in MYNN25 YSU MYJ; do
 for bl_scheme in MYNN25 ; do
+for hr_beg in 240 ; do
 
     dhr=$( get_dhr $bl_scheme ) 
-    hr_beg=120
     hr_end=$(( $hr_beg + $dhr ))
 
     hr=${hr_beg}-${hr_end}
 
     gendata_dir=$( gen_gendata_dir $Ug )
-    input_file=$gendata_dir/dF_phase_analysis/fixed_wnm/$target_lab/collected_flux_${bl_scheme}_hr${hr}.nc
+    input_file=$gendata_dir/dF_phase_analysis/fixed_wnm/$target_lab/collected_flux_U${Ug}_${bl_scheme}_hr${hr}.nc
     output_dir=$fig_dir/dF_flux_decomposition_varying_dSST/$target_lab
     output_file=$output_dir/dF_flux_decomposition_onefig_U${Ug}_wnm${wnm}_varying_dSST_${bl_scheme}_hr${hr}.svg
 
@@ -44,5 +44,5 @@ done
 done
 done
 done
-
+done
 

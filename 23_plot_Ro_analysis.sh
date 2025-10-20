@@ -6,10 +6,13 @@ nproc=1
 
 time_avg_interval=60   # minutes
 
-hrs_beg=$(( 24 * 5 ))
+hrs_beg=$(( 24 * 10 ))
 
 thumbnail_skip=0
 for bl_scheme in MYNN25 MYJ YSU ; do
+for U in "${Us[@]}" ; do
+
+    gendata_dir=$( gen_gendata_dir $U )
 
     dhr=$( get_dhr $bl_scheme ) 
     hrs_end=$(( $hrs_beg + $dhr ))
@@ -21,7 +24,7 @@ for bl_scheme in MYNN25 MYJ YSU ; do
 
         target_lab=lab_${target_lab_suffix}
     
-        input_file=$gendata_dir/Ro_analysis/Ro_analysis_vary_wnm_${target_lab}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.nc
+        input_file=$gendata_dir/Ro_analysis/Ro_analysis_vary_wnm_${target_lab}_U${U}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.nc
 
         input_files="$input_files $input_file"
         labels="$labels ${bl_scheme}-${target_lab_suffix}"
@@ -44,7 +47,7 @@ for bl_scheme in MYNN25 MYJ YSU ; do
     
     mkdir -p $output_dir
     
-    output_file=$output_dir/Ro_analysis_vary_wnm_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
+    output_file=$output_dir/Ro_analysis_U${U}_vary_wnm_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
 
     python3 src/plot_Ro_analysis.py \
         --input-files ${input_files[@]} \
@@ -64,6 +67,7 @@ for bl_scheme in MYNN25 MYJ YSU ; do
         nproc_cnt=0
     fi
 
+done
 done
 
 wait

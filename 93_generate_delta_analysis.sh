@@ -28,14 +28,15 @@ for analysis_style in STYLE1 ; do
     for _bl_scheme in MYNN25 ; do
     for target_lab in  lab_FULL lab_SIMPLE ; do
 
-    for wnm in 004 005 007 010 020 040 000 ; do
+    #for wnm in 004 005 007 010 020 040 000 ; do
+    for wnm in 010 ; do
 
 #        if [ "$wnm" = "004" ] || [ "$wnm" = "010" ]; then
 
-            dTs=( 100 000 010 030 050 100 150 ) #200 250 300 )
+            dTs=( 000 010 030 050 100 150 200 250 300 )
 
 #        else
-#            dTs=( 000 100 300 )
+            dTs=( 030 )
 #        fi
             
 

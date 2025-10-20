@@ -6,12 +6,12 @@ nproc=1
 
 time_avg_interval=60   # minutes
 
-hrs_beg=$(( 24 * 5 ))
+hrs_beg=$(( 24 * 10 ))
 
 
 thumbnail_skip=0
 for bl_scheme in MYNN25 MYJ YSU ; do
-for U in 20 ; do
+for U in "${Us[@]}" ; do
 
     dhr=$( get_dhr $bl_scheme ) 
     hrs_end=$(( $hrs_beg + $dhr ))
@@ -23,7 +23,7 @@ for U in 20 ; do
 
         target_lab=lab_${target_lab_suffix}
     
-        input_file=$( gen_gendata_dir $U )/coherence_analysis/coherence_analysis_dSST_vary_wnm_${target_lab}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.nc
+        input_file=$( gen_gendata_dir $U )/coherence_analysis/coherence_analysis_dSST_vary_wnm_${target_lab}_U${U}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.nc
 
         input_files="$input_files $input_file"
         labels="$labels ${bl_scheme}-${target_lab_suffix}"

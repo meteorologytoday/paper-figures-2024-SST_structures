@@ -6,16 +6,15 @@ nproc=1
 
 time_avg_interval=60   # minutes
 
-hrs_beg=$(( 24 * 5 ))
-
-
-
+hrs_beg=$(( 24 * 10 ))
 
 thumbnail_skip=0
+for Ug in "${Us[@]}" ; do
 for dT in 100 ; do
-for bl_scheme in MYNN25 MYJ YSU ; do
-#for bl_scheme in MYJ ; do
+#for bl_scheme in MYNN25 MYJ YSU ; do
+for bl_scheme in MYNN25 ; do
 for target_lab in lab_SIMPLE lab_FULL ; do
+
 
     dhr=$( get_dhr $bl_scheme ) 
     hrs_end=$(( $hrs_beg + $dhr ))
@@ -28,7 +27,8 @@ for target_lab in lab_SIMPLE lab_FULL ; do
     input_dirs=""
     dSSTs=""
     tracking_wnms=""
-    for Ug in "${Us[@]}" ; do
+
+
     for wnm in 004 005 007 010 020 040; do
 
         gendata_dir=$( gen_gendata_dir $Ug )     
@@ -55,13 +55,13 @@ for target_lab in lab_SIMPLE lab_FULL ; do
         tracking_wnms="$tracking_wnms $wnm"
 
     done
-    done
+
         
     varnames=(
         UA
     )
 
-    output_file=$gendata_dir/coherence_analysis/coherence_analysis_dSST_vary_wnm_${target_lab}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.nc
+    output_file=$gendata_dir/coherence_analysis/coherence_analysis_dSST_vary_wnm_${target_lab}_U${Ug}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.nc
 
     if [ -f "$output_file" ] ; then
 
@@ -92,6 +92,7 @@ for target_lab in lab_SIMPLE lab_FULL ; do
         fi
 
     fi
+done
 done
 done
 done

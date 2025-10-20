@@ -8,8 +8,8 @@ dSSTs="000 010 030 050 100 150 200 250 300"
 Us=( 20 )
 bl_schemes=(
     MYNN25
-    YSU
-    MYJ
+#    YSU
+#    MYJ
 )
 
 target_labs=(

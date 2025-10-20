@@ -8,14 +8,18 @@ U=15
 deltaGamma=3e-3
 z_st=10000.0
 
-python3 $src_dir/make_ideal_sounding_simple.py \
-    --output $data_dir/input_sounding_woML.ref \
-    --Delta-Gamma $deltaGamma \
-    --U $U   \
-    --RH $RH \
-    --T-sfc $SST_base  \
-    --z-st  $z_st \
-    --output-fig $fig_dir/input_sounding_woML.svg \
-    --thumbnail-numbering bcdefg \
-    --no-display
 
+for U in "${Us[@]}"; do
+
+    python3 $src_dir/make_ideal_sounding_simple.py \
+        --output $data_dir/sounding_U${U}.ref \
+        --Delta-Gamma $deltaGamma \
+        --U $U   \
+        --RH $RH \
+        --T-sfc $SST_base  \
+        --z-st  $z_st \
+        --output-fig $fig_dir/sounding_U${U}.svg \
+        --thumbnail-numbering bcdefg \
+        --no-display
+
+done

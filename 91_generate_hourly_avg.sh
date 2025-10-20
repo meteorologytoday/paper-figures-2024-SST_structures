@@ -21,9 +21,14 @@ nproc=10
 for _bl_scheme in MYNN25 ; do
 for target_lab in lab_SIMPLE lab_FULL ; do 
 
-for wnm in 000 010 004 005 007 010 020 040 ; do
-for dT in 000 010 030 050 100 150 200 250 300 ; do
-for U in 15 ; do
+#for wnm in 000 010 004 005 007 010 020 040 ; do
+#for dT in 000 010 030 050 100 150 200 250 300 ; do
+#for U in 10 ; do
+
+for wnm in 000 010 005 ; do
+for dT in 000 100 ; do
+for U in 10 ; do
+
 #for U in ${Us[@]} ; do
 
 

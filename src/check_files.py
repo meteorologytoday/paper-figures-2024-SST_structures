@@ -15,7 +15,7 @@ if __name__ == "__main__":
     parser.add_argument('--input-root',  type=str, help='Input directories.', required=True)
     parser.add_argument('--data-type',   type=str, help='Can be: `raw` or `preavg`. ', choices=["raw", "preavg"], required=True)
     parser.add_argument('--output-log-dir', type=str, help='Output filename for not-ok simulations', default=".")
-    parser.add_argument('--U',           type=float, help='Backaground wind.', required=True)
+    parser.add_argument('--U',           type=int, help='Backaground wind.', required=True)
     args = parser.parse_args()
 
     print(args)
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
         for target_lab in ["FULL", "SIMPLE"]:
             for bl_scheme in ["MYNN25", "MYJ", "YSU"]:
-                for U in [20, ]:
+                for U in [args.U, ]:
                     for wnm in [0, 4, 5, 7, 10, 20, 40]:
                         
                         dTs = dict(

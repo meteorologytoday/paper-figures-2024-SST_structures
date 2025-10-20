@@ -192,22 +192,24 @@ def constructWRFOutputInfo(dirname, prefix=wrfout_prefix, suffix="", append_dirn
     return valid_files
 
 
-def findFilenameFromDateRange(wsm, time_rng, dirname, inclusive="left", prefix=wrfout_prefix, suffix="", time_fmt=wrfout_time_fmt):
-   
-    buffer_time = wsm.data_interval * wsm.frames_per_file
+def findFilenameFromDateRange(wsm, time_rng, dirname, inclusive="left", prefix=wrfout_prefix, suffix="", time_fmt=wrfout_time_fmt, verbose=True):
+  
+    # Buffer time is there for sometimes the beg and end time are too close that they do not enclose any file 
+    buffer_time = pd.Timedelta(hours=6)
     beg_dt, end_dt =  time_rng[0] - buffer_time, time_rng[1] + buffer_time
-    #genInclusiveBounds(wsm, time_rng[0], time_rng[1], wsm.data_interval, inclusive)
+    #beg_dt, end_dt =  time_rng[0], time_rng[1]
 
-    print("beg_dt = ", beg_dt)   
-    print("end_dt = ", end_dt)   
-    print("wsm.data_interval = ", wsm.data_interval)   
+    if verbose:
+        print("beg_dt = ", beg_dt)   
+        print("end_dt = ", end_dt)   
+        print("wsm.data_interval = ", wsm.data_interval)   
     
     wrfout_infos = constructWRFOutputInfo(dirname, prefix=prefix, suffix=suffix)
     
     fnames = []
     for i, wrfout_info in enumerate(wrfout_infos):
         if ( beg_dt <= wrfout_info["time"] ) and ( wrfout_info["time"] <= end_dt ):
-            print("Want this file: ", wrfout_info["fname"])
+            verbose and print("Want this file: ", wrfout_info["fname"])
             fnames.append(wrfout_info["fname"])
     
     if dirname is not None:

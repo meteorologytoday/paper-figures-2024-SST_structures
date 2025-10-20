@@ -6,14 +6,14 @@ nproc=1
 
 time_avg_interval=60   # minutes
 
-hrs_beg=$(( 24 * 5 ))
+hrs_beg=$(( 24 * 10 ))
 
 
 
 thumbnail_skip=0
 for dT in 100 ; do
 for bl_scheme in MYNN25 MYJ YSU ; do
-for target_lab in lab_SIMPLE lab_FULL; do
+for target_lab in lab_FULL lab_SIMPLE; do
 
     
     dhr=$( get_dhr $bl_scheme ) 
@@ -28,7 +28,7 @@ for target_lab in lab_SIMPLE lab_FULL; do
     labels=""
     dSSTs=""
     tracking_wnms=""
-    for Ug in 20 ; do
+    for U in "${Us[@]}" ; do
     for wnm in 004 005 007 010 020 040; do
     #for wnm in 004 005 ; do
     
@@ -40,10 +40,10 @@ for target_lab in lab_SIMPLE lab_FULL; do
             title="SIMPLE"
         fi
 
-        casename="case_mph-${mph}_wnm${wnm}_U${Ug}_dT${dT}_${bl_scheme}"
-        casename_base="case_mph-${mph}_wnm000_U${Ug}_dT000_${bl_scheme}"
+        casename="case_mph-${mph}_wnm${wnm}_U${U}_dT${dT}_${bl_scheme}"
+        casename_base="case_mph-${mph}_wnm000_U${U}_dT000_${bl_scheme}"
 
-        input_dir_root=$( gen_preavg_dir $Ug )/$target_lab
+        input_dir_root=$( gen_preavg_dir $U )/$target_lab
         
         input_dir="$input_dir_root/$casename"
         input_dirs="$input_dirs $input_dir"
@@ -82,7 +82,7 @@ for target_lab in lab_SIMPLE lab_FULL; do
         "orange"
     )
 
-    output_file=$output_dir/linearity_vary_wnm_${target_lab}_dSST${dT}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
+    output_file=$output_dir/linearity_vary_wnm_${target_lab}_dSST${dT}_U${U}_${bl_scheme}_hr${hrs_beg}-${hrs_end}.svg
 
     eval "python3 src/plot_linearity_vary_wnm.py    \
         --input-dirs $input_dirs                   \
