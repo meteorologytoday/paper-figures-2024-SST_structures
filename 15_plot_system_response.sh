@@ -25,11 +25,7 @@ bl_schemes=(
 )
 
 wnms=(
-#    040
-#    020
     010
-#    005
-#    004
 )
 
 
@@ -37,7 +33,7 @@ source 98_trapkill.sh
 
 for dT in 100; do
 for wnm in ${wnms[@]} ; do
-for U in "${Us[@]}" ; do
+for U in 20 ; do
 for target_lab in ${target_labs[@]} ; do
 for bl_scheme in ${bl_schemes[@]} ; do
  
@@ -133,7 +129,7 @@ for bl_scheme in ${bl_schemes[@]} ; do
             part1_DIVVOR10_rng=(-5 5)
             part1_DIVVOR500_rng=(-2 2)
             part1_PRECIP_rng=(-0.5 0.5)
-            part1_Q_rng=(-1 1)
+            part1_Q_rng=(-1.5 1.5)
             part1_SST_rng=(-1.5 1.5)
             part1_W_levs=(-1.4 1.4 15)
             part1_TKE_levs=(-1 1 11)
@@ -144,8 +140,8 @@ for bl_scheme in ${bl_schemes[@]} ; do
                 part1_Q_rng=(-2.5 2.5)
             fi
 
-            part2_THETA_rng=(-2 15)
-            part2_Nfreq2_rng=(-5 5)
+            part2_THETA_rng=(-5 15)
+            part2_Nfreq2_rng=(-8 10)
             part2_TKE_rng=(-1 1)
             part2_DTKE_rng=(-0.001 0.001)
             part2_U_rng=(-1.5 1.5)
@@ -211,4 +207,4 @@ done
 done
 done
 
-wait
+echo "Final figures done."
