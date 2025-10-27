@@ -218,9 +218,10 @@ def genAnalysis(
     U_T = U_T.rename("U_T")
     merge_data.append(U_T) 
  
-    U_sfc = U_T.isel(bottom_top=0)
-    V_sfc = V_T.isel(bottom_top=0)
-    WND_sfc = (U_sfc**2 + V_sfc**2)**0.5
+    WND = ( U_T**2 + V_T**2 )**0.5
+    WND = WND.rename("WND")
+
+    WND_sfc = WND.isel(bottom_top=0)
     WND_sfc = WND_sfc.rename("WND_sfc")
 
     HFX_from_FLHC = ds["FLHC"] * TOA
@@ -244,7 +245,8 @@ def genAnalysis(
     CD0 = (ds["UST"] / WND_sfc)**2.0
     CD0 = CD0.rename("CD0")
 
-
+    merge_data.append(U_T)
+    merge_data.append(WND)
     merge_data.append(WND_sfc)
     merge_data.append(CH)
     merge_data.append(CQ)
@@ -279,27 +281,15 @@ def genAnalysis(
     DIV = xr.zeros_like(ds["T"]).rename("DIV")
     tmp = ( ds["U"].roll(west_east_stag=-1) - ds["U"] ) / ds.DX
     tmp = tmp.isel(west_east_stag=slice(0, -1))
-    DIV[:] = tmp[:]
+    DIV.values[:] = tmp.values[:]
 
     VOR = xr.zeros_like(ds["V"]).rename("VOR")
     tmp = ( ds["V"] - ds["V"].roll(west_east=1) ) / ds.DX
     tmp = (tmp.roll(west_east=-1) + tmp ) / 2.0
-    VOR[:] = tmp[:]
+    VOR.values[:] = tmp.values[:]
 
     merge_data.append(DIV)
     merge_data.append(VOR)
-
-    U_T = xr.zeros_like(ds["T"]).rename("U_T")
-    tmp = (ds["U"].roll(west_east_stag=-1) + ds["U"] ) / 2.0
-    tmp = tmp.isel(west_east_stag=slice(0, -1))
-    U_T[:] = tmp[:]
-
-    WND = ( U_T**2 + ds["V"]**2 )**0.5
-    WND = WND.rename("WND")
-
-    merge_data.append(U_T)
-    merge_data.append(WND)
-
 
     new_ds = xr.merge(merge_data)
 

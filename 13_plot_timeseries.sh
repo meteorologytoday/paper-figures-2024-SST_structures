@@ -18,9 +18,9 @@ dhr=$(( 24 * 15 ))
 
 
 
-#for bl_scheme in MYNN25 MYJ YSU ; do
+
 for U in "${Us[@]}" ; do
-for bl_scheme in MYNN25 ; do
+for bl_scheme in MYNN25 MYJ YSU ; do
 for smooth in 25 ; do
 for wnm in 010 ; do
 for dT in 100 ; do

@@ -141,16 +141,16 @@ name_pairs=(
     merged-snapshot-vertical-profile_wnm000_U20_dT000_MYJ.svg                                        figS02
     merged-snapshot_wnm010_U20_dT100_MYJ_part1.svg                                                   figS03
     merged-snapshot_wnm010_U20_dT100_MYJ_part2.svg                                                   figS04
-    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_MYJ_hr240-360.svg  figS05
-    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_MYJ_hr240-360.svg   figS06
+    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_U20_wnm010_varying_dSST_MYJ_hr240-360.svg  figS05
+    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_U20_dSST100_varying_wnm_MYJ_hr240-360.svg   figS06
 
 # YSU
     timeseries/timeseries_wnm010_U20_dT100_YSU_timeseries_smooth-25_000-360.svg                      figS07
     merged-snapshot-vertical-profile_wnm000_U20_dT000_YSU.svg                                        figS08
     merged-snapshot_wnm010_U20_dT100_YSU_part1.svg                                                   figS09
     merged-snapshot_wnm010_U20_dT100_YSU_part2.svg                                                   figS10
-    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_wnm010_varying_dSST_YSU_hr240-360.svg  figS11
-    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_dSST100_varying_wnm_YSU_hr240-360.svg   figS12
+    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_U20_wnm010_varying_dSST_YSU_hr240-360.svg  figS11
+    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_U20_dSST100_varying_wnm_YSU_hr240-360.svg   figS12
 
 )
 
@@ -177,5 +177,6 @@ for i in $( seq 1 $N ) ; do
     } &
 done
 
+wait
 
 echo "Done."

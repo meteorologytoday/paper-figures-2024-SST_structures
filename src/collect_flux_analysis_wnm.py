@@ -13,7 +13,7 @@ if __name__ == "__main__":
     parser.add_argument('--input-dir-fmt', type=str, help='Input directories.', required=True)
     parser.add_argument('--output', type=str, help='Output filename in png.', default="")
 
-    parser.add_argument('--Ugs', type=int, nargs="+", help='Ug in m/s.', required=True)
+    parser.add_argument('--Us', type=int, nargs="+", help='U in m/s.', required=True)
     parser.add_argument('--wnms', type=int, nargs="+", help='wnm in km.', required=True)
     parser.add_argument('--dSSTs', type=int, nargs="+", help='dSST in 0.01K.', required=True)
 
@@ -51,15 +51,29 @@ if __name__ == "__main__":
     data = None
    
     
-    for i, Ug in enumerate(args.Ugs):
+    for i, U in enumerate(args.Us):
         for j, wnm in enumerate(args.wnms):
             for k, dSST in enumerate(args.dSSTs):
+
+
+                _wnm = wnm
+                _dSST = dSST
+
+                if dSST == 0:
+                    if wnm != 0:
+                        print("WARNING: dSST = 0, force wnm = 0")
+                        _wnm = 0
+ 
+                if wnm == 0:
+                    if dSST != 0:
+                        print("WARNING: wnm = 0, force dSST = 0")
+                        _dSST = 0
                 
                 sim_dir = os.path.join(
                     args.input_dir_fmt.format(
-                        Ug = "%d" % ( Ug, ),
-                        wnm = "%03d" % ( wnm, ),
-                        dSST = "%03d" % ( int(dSST), ),
+                        U = "%d" % ( U, ),
+                        wnm = "%03d" % ( _wnm, ),
+                        dSST = "%03d" % ( int(_dSST), ),
                     )
                 )
 
@@ -96,12 +110,12 @@ if __name__ == "__main__":
                         
                         data = xr.Dataset(
                             data_vars = {
-                                l : ( ["stat", "Ug", "wnm", "dSST"], np.zeros((len(stat_array), len(args.Ugs), len(args.wnms), len(args.dSSTs))) )
+                                l : ( ["stat", "U", "wnm", "dSST"], np.zeros((len(stat_array), len(args.Us), len(args.wnms), len(args.dSSTs))) )
                                 for l in varnames
                             },
 
                             coords = dict(
-                                Ug = (["Ug"], args.Ugs),
+                                U = (["U"], args.Us),
                                 wnm = (["wnm"], args.wnms),
                                 dSST = (["dSST"], np.array(args.dSSTs)/100.0),
                                 stat= (["stat",], stat_array),

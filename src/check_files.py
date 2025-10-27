@@ -26,7 +26,7 @@ if __name__ == "__main__":
     print("If there is any data that does not pass check, the message will be output to stderr.")
     
 
-    output_log_file = Path(args.output_log_dir) / datetime.datetime.now().strftime(f"data_detect_{args.data_type:s}_%Y-%m-%d_%H%M%S.log")
+    output_log_file = Path(args.output_log_dir) / datetime.datetime.now().strftime(f"data_detect_{args.data_type:s}_U{args.U:d}_%Y-%m-%d_%H%M%S.log")
 
     
     
@@ -44,6 +44,7 @@ if __name__ == "__main__":
         
         def log(*args, **kwargs):
             print(*args, flush=True, file=log_file, **kwargs)
+            print(*args, flush=True, **kwargs)
 
         for target_lab in ["FULL", "SIMPLE"]:
             for bl_scheme in ["MYNN25", "MYJ", "YSU"]:
@@ -52,7 +53,7 @@ if __name__ == "__main__":
                         
                         dTs = dict(
                             FULL   = [0.0, 0.1, 0.3, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0],
-                            SIMPLE = [0.0 , 0.5, 1.0, 1.5, 2.0, 2.5, 3.0],
+                            SIMPLE = [0.0 ,          0.5, 1.0, 1.5, 2.0, 2.5, 3.0],
                         )[target_lab]
 
                         for dT in dTs:
@@ -82,8 +83,21 @@ if __name__ == "__main__":
                             print(str(casedir))
 
 
-        if len(case_infos) != ( 14 + 3 ) * 3:
-            raise Exception(f"Number of cases count is not correct. There should be {(14+3)*3:d} cases. We have {len(case_infos):d} cases here.")
+        if args.U == 10.0:
+
+            if len(case_infos) == ( 3 + 3 ) * 3 :
+                log(f"Number of cases count for U=10m/s is as expected. We have {len(case_infos):d} cases here.")
+            else:
+                log(f"Number of cases count for U=10m/s is not correct. There should be {(3+3)*3:d} cases. We have {len(case_infos):d} cases here.")
+
+        if args.U == 20.0:
+
+            if len(case_infos) == ( 14 + 12 ) * 3 :
+                log(f"Number of cases count for U=20m/s is as expected. We have {len(case_infos):d} cases here.")
+            else:
+                log(f"Number of cases count for U=20m/s is not correct. There should be {(14+12)*3:d} cases. We have {len(case_infos):d} cases here.")
+
+
 
         for case_info in case_infos:
             
@@ -142,32 +156,20 @@ if __name__ == "__main__":
            
 
 
+            log(f"# Case: {str(casedir):s}", end="")
             if len(error_msgs) == 0:
                 error_case_info = None
+                log(f" OK")
             else: 
                 error_case_info = dict(
                     casedir = casedir,
                     error_msgs = error_msgs,    
                 )
                 
-                log(f"# Case: {str(casedir):s}")
                 for i, error_msg in enumerate(error_msgs):
                     log(f"{i+1:d}: {error_msg:s}")
 
                 log("")
             
-
-
-             
-
-
-
-
-
-
-
-
-
-
-
+        log("Detection program ends.")
 

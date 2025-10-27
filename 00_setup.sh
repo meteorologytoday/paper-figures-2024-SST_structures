@@ -28,11 +28,7 @@ mkdir -p $fig_dir
 
 
 function get_dhr {
-    if [ "$1" = "MYJ" ] ; then
-        echo $(( 2 * 24 ))
-    else
-        echo $(( 5 * 24 ))
-    fi
+    echo $(( 5 * 24 ))
 }
 
 function gen_gendata_dir {

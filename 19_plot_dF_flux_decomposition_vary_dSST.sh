@@ -10,10 +10,10 @@ output_dir=$fig_dir/dF_total_flux_decomposition/$parameter
 
 
 for target_lab in lab_SIMPLE lab_FULL ; do
-for Ug in ${Us[@]}; do
+for U in ${Us[@]}; do
 for wnm in 010 ; do
-#for bl_scheme in MYNN25 YSU MYJ; do
-for bl_scheme in MYNN25 ; do
+for bl_scheme in MYNN25 YSU MYJ; do
+#for bl_scheme in MYNN25 ; do
 for hr_beg in 240 ; do
 
     dhr=$( get_dhr $bl_scheme ) 
@@ -21,10 +21,10 @@ for hr_beg in 240 ; do
 
     hr=${hr_beg}-${hr_end}
 
-    gendata_dir=$( gen_gendata_dir $Ug )
-    input_file=$gendata_dir/dF_phase_analysis/fixed_wnm/$target_lab/collected_flux_U${Ug}_${bl_scheme}_hr${hr}.nc
+    gendata_dir=$( gen_gendata_dir $U )
+    input_file=$gendata_dir/dF_phase_analysis/fixed_wnm/$target_lab/collected_flux_U${U}_${bl_scheme}_hr${hr}.nc
     output_dir=$fig_dir/dF_flux_decomposition_varying_dSST/$target_lab
-    output_file=$output_dir/dF_flux_decomposition_onefig_U${Ug}_wnm${wnm}_varying_dSST_${bl_scheme}_hr${hr}.svg
+    output_file=$output_dir/dF_flux_decomposition_onefig_U${U}_wnm${wnm}_varying_dSST_${bl_scheme}_hr${hr}.svg
 
     mkdir -p $output_dir
 
@@ -33,8 +33,8 @@ for hr_beg in 240 ; do
         --output $output_file \
         --delta-analysis \
         --varying-param dSST \
-        --fixed-params Ug wnm \
-        --fixed-param-values $Ug $wnm \
+        --fixed-params U wnm \
+        --fixed-param-values $U $wnm \
         --LH-rng -35 10 \
         --HFX-rng -5 5 \
         --spacing 0.02 \

@@ -28,7 +28,8 @@ for target_lab in lab_FULL lab_SIMPLE; do
     labels=""
     dSSTs=""
     tracking_wnms=""
-    for U in "${Us[@]}" ; do
+    #for U in "${Us[@]}" ; do
+    for U in 20 ; do
     for wnm in 004 005 007 010 020 040; do
     #for wnm in 004 005 ; do
     
@@ -100,7 +101,7 @@ for target_lab in lab_FULL lab_SIMPLE; do
         --tracking-wnms ${tracking_wnms[@]}        \
         --varnames "${varnames[@]}"                \
         --thumbnail-skip $thumbnail_skip           \
-        --ylim 0.0 1.02                            \
+        --ylim 0.9 1.02                            \
         --thumbnail-titles "$title"
     " &
 

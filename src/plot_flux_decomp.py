@@ -12,8 +12,8 @@ parser.add_argument('--output', type=str, help='Output filename in png.', defaul
 parser.add_argument('--title', type=str, help='Title', default="")
 parser.add_argument('--no-display', action="store_true")
 parser.add_argument('--delta-analysis', action="store_true")
-parser.add_argument('--varying-param', type=str, help='Parameters. The first and second parameters will be the varying parameters while the rest stays fixed.', required=True, choices=["dSST", "Ug", "Lx", "wnm"])
-parser.add_argument('--fixed-params', type=str, nargs='*', help='Parameters that stay fixed.', required=True, choices=["dSST", "Ug", "Lx", "wnm"])
+parser.add_argument('--varying-param', type=str, help='Parameters. The first and second parameters will be the varying parameters while the rest stays fixed.', required=True, choices=["dSST", "U", "Lx", "wnm"])
+parser.add_argument('--fixed-params', type=str, nargs='*', help='Parameters that stay fixed.', required=True, choices=["dSST", "U", "Lx", "wnm"])
 parser.add_argument('--thumbnail-numbering', type=str, help='Thumbnail numbering.', default="abcdefghijklmn")
 parser.add_argument('--fixed-param-values', type=float, nargs="*", help='The values of the fixed parameters', default=[])
 parser.add_argument('--ref-exp-order', type=int, help='The reference case (start from 0) to perform decomposition', default=0)
@@ -787,7 +787,7 @@ for k, flux_type in enumerate(plotted_fluxes):
 
     if args.varying_param == "dSST":
         title_param = "$\\Delta \\mathrm{SST}$"
-    elif args.varying_param == "Ug":
+    elif args.varying_param == "U":
         title_param = "$U_g$"
     elif args.varying_param == "Lx":
         title_param = "$L$"
@@ -868,7 +868,7 @@ for k, flux_type in enumerate(plotted_fluxes):
     xlabel_text = ""
     if args.varying_param == "dSST":
         xlabel_text = "$\\Delta \\mathrm{SST}$ [ $\\mathrm{K}$ ]"
-    elif args.varying_param == "Ug":
+    elif args.varying_param == "U":
         xlabel_text = "$U_\\mathrm{g}$ [ $\\mathrm{m} \\, / \\, \\mathrm{s}$ ]"
     elif args.varying_param == "Lx":
         xlabel_text = "$ L $ [ $\\mathrm{km} $ ]"

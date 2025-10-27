@@ -18,24 +18,13 @@ def check_if_simulation_wanted(
     result = True
     
     if U in [15, 20]:
-        if target_lab in ["FULL", "lab_FULL"]:
+        if wnm == 0 and dT == 0:
+            pass
+        elif (dT == 0) != (wnm == 0):
+            result = False
+        elif not ( wnm in [10, ] or dT in [1,] ):
+            result = False
 
-            if wnm == 0 and dT == 0:
-                pass
-            elif (dT == 0) != (wnm == 0):
-                result = False
-            elif not ( wnm in [10, ] or dT in [1,] ):
-                result = False
-
-        elif target_lab in ["SIMPLE", "lab_SIMPLE"]:
-
-            if wnm == 0 and dT == 0:
-                pass
-            elif (dT == 0) != (wnm == 0):
-                result = False
-            elif (wnm, dT) not in [ (5, 1.0) , (10, 1.0) ]:
-                result = False
- 
     elif U in [10,]:  # only needed for DIV analysis
 
         if wnm == 0 and dT == 0:

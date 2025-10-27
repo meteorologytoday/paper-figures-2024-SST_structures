@@ -195,7 +195,7 @@ def constructWRFOutputInfo(dirname, prefix=wrfout_prefix, suffix="", append_dirn
 def findFilenameFromDateRange(wsm, time_rng, dirname, inclusive="left", prefix=wrfout_prefix, suffix="", time_fmt=wrfout_time_fmt, verbose=True):
   
     # Buffer time is there for sometimes the beg and end time are too close that they do not enclose any file 
-    buffer_time = pd.Timedelta(hours=6)
+    buffer_time = pd.Timedelta(hours=24)
     beg_dt, end_dt =  time_rng[0] - buffer_time, time_rng[1] + buffer_time
     #beg_dt, end_dt =  time_rng[0], time_rng[1]
 

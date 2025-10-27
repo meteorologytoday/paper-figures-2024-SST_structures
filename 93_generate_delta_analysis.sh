@@ -7,14 +7,14 @@ exp_names=""
 
 
 
-hrs_beg=$(( 24 * 5 ))
-hrs_end=$(( 24 * 16 ))
+hrs_beg=$(( 24 * 10 ))
+hrs_end=$(( 24 * 15 ))
 
 
 time_avg_interval=60   # minutes
 
 batch_cnt_limit=1
-nproc=10
+nproc=40
 
 source 98_trapkill.sh
 
