@@ -527,18 +527,18 @@ if args.plot_part1 and base_exists:
     PRECIP = diff_ds["PRECIP"]#RAINC"] + diff_ds["RAINNC"]
     PRECIP_mean = np.mean(PRECIP)
 
-    _ax_twinx = _ax.twinx()
+    #_ax_twinx = _ax.twinx()
 
     _ax.plot(X_sU[:-1], ( diff_ds["DIV10"] - DIV10_mean ) * 1e5, color="black", linestyle="-")
     _ax.plot(X_sU[:-1], ( diff_ds["VOR10"] - VOR10_mean ) * 1e5, color="black", linestyle="--")
-    _ax_twinx.plot(X_sT, (PRECIP - PRECIP_mean)*86400, color='black', linestyle=":", label="$P$")
+    #_ax_twinx.plot(X_sT, (PRECIP - PRECIP_mean)*86400, color='black', linestyle=":", label="$P$")
 
-    _ax.set_title("(%s) $\\delta \\mathrm{D}'_\\mathrm{10m}$ (-), $\\delta \\zeta'_\\mathrm{10m}$ (--), and $\\delta P'$ (:).\n$\\left(\\delta \\overline{D}_\\mathrm{10m}, \\delta \\overline{\\zeta}_\\mathrm{10m} \\right) = \\left( %.2f, %.2f \\right) \\times 10^{-5} \\, \\mathrm{s}^{-1}$. $\\delta \\overline{P} = %.2f \\, \\mathrm{mm} / \\mathrm{day} $ " % (_thumbnail_numbering, DIV10_mean*1e5, VOR10_mean*1e5, PRECIP_mean*86400))
+    _ax.set_title("(%s) $\\delta \\mathrm{D}'_\\mathrm{10m}$ (-), and $\\delta \\zeta'_\\mathrm{10m}$ (--)\n$\\left(\\delta \\overline{D}_\\mathrm{10m}, \\delta \\overline{\\zeta}_\\mathrm{10m} \\right) = \\left( %.2f, %.2f \\right) \\times 10^{-5} \\, \\mathrm{s}^{-1}$." % (_thumbnail_numbering, DIV10_mean*1e5, VOR10_mean*1e5))
 
     _ax.set_ylabel("[ $ \\times 10^{-5} \\, \\mathrm{s}^{-1}$ ]", color="black")
-    _ax_twinx.set_ylabel("$\\delta P'$ [ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
+    #_ax_twinx.set_ylabel("$\\delta P'$ [ $ \\mathrm{mm} \\, / \\, \\mathrm{day} $ ]", color="black")
     _ax.set_ylim(args.part1_DIVVOR10_rng)
-    _ax_twinx.set_ylim(args.part1_PRECIP_rng)
+    #_ax_twinx.set_ylim(args.part1_PRECIP_rng)
 
     """
     # Thumbnail: The PSFC

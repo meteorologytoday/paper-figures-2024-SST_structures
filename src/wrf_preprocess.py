@@ -281,12 +281,12 @@ def genAnalysis(
     DIV = xr.zeros_like(ds["T"]).rename("DIV")
     tmp = ( ds["U"].roll(west_east_stag=-1) - ds["U"] ) / ds.DX
     tmp = tmp.isel(west_east_stag=slice(0, -1))
-    DIV.values[:] = tmp.values[:]
+    DIV[:] = tmp.to_numpy()[:]
 
     VOR = xr.zeros_like(ds["V"]).rename("VOR")
     tmp = ( ds["V"] - ds["V"].roll(west_east=1) ) / ds.DX
     tmp = (tmp.roll(west_east=-1) + tmp ) / 2.0
-    VOR.values[:] = tmp.values[:]
+    VOR[:] = tmp.to_numpy()[:]
 
     merge_data.append(DIV)
     merge_data.append(VOR)

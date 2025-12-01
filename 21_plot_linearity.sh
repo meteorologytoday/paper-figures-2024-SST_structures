@@ -6,14 +6,14 @@ nproc=1
 
 time_avg_interval=60   # minutes
 
-hrs_beg=$(( 24 * 10 ))
 
 
 
 thumbnail_skip=0
+for hrs_beg in $(( 24 * 5 )) $(( 24 * 10 )) ; do
 for dT in 100 ; do
 for bl_scheme in MYNN25 MYJ YSU ; do
-for target_lab in lab_FULL lab_SIMPLE; do
+for target_lab in lab_SIMPLE lab_FULL ; do
 
     
     dhr=$( get_dhr $bl_scheme ) 
@@ -31,7 +31,6 @@ for target_lab in lab_FULL lab_SIMPLE; do
     #for U in "${Us[@]}" ; do
     for U in 20 ; do
     for wnm in 004 005 007 010 020 040; do
-    #for wnm in 004 005 ; do
     
         if [[ "$target_lab" =~ "FULL" ]]; then
             mph=on
@@ -101,7 +100,7 @@ for target_lab in lab_FULL lab_SIMPLE; do
         --tracking-wnms ${tracking_wnms[@]}        \
         --varnames "${varnames[@]}"                \
         --thumbnail-skip $thumbnail_skip           \
-        --ylim 0.9 1.02                            \
+        --ylim 0.8 1.02                            \
         --thumbnail-titles "$title"
     " &
 
@@ -114,6 +113,7 @@ for target_lab in lab_FULL lab_SIMPLE; do
         nproc_cnt=0
     fi
 
+done
 done
 done
 done

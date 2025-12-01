@@ -135,22 +135,22 @@ name_pairs=(
     Ro_analysis/Ro_analysis_U20_vary_wnm_dSST100_MYNN25_hr240-360.svg                              fig15
 
 # Supplementary
-
+    cloud_rain_snapshots_dhr-1/lab_FULL/case_mph-on_wnm010_U20_dT100_MYNN25/cloud_rain_240-241.svg   figS01
 # MYJ
-    timeseries/timeseries_wnm010_U20_dT100_MYJ_timeseries_smooth-25_000-360.svg                      figS01
-    merged-snapshot-vertical-profile_wnm000_U20_dT000_MYJ.svg                                        figS02
-    merged-snapshot_wnm010_U20_dT100_MYJ_part1.svg                                                   figS03
-    merged-snapshot_wnm010_U20_dT100_MYJ_part2.svg                                                   figS04
-    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_U20_wnm010_varying_dSST_MYJ_hr240-360.svg  figS05
-    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_U20_dSST100_varying_wnm_MYJ_hr240-360.svg   figS06
+    timeseries/timeseries_wnm010_U20_dT100_MYJ_timeseries_smooth-25_000-360.svg                      figS02
+    merged-snapshot-vertical-profile_wnm000_U20_dT000_MYJ.svg                                        figS03
+    merged-snapshot_wnm010_U20_dT100_MYJ_part1.svg                                                   figS04
+    merged-snapshot_wnm010_U20_dT100_MYJ_part2.svg                                                   figS05
+    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_U20_wnm010_varying_dSST_MYJ_hr240-360.svg  figS06
+    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_U20_dSST100_varying_wnm_MYJ_hr240-360.svg   figS07
 
 # YSU
-    timeseries/timeseries_wnm010_U20_dT100_YSU_timeseries_smooth-25_000-360.svg                      figS07
-    merged-snapshot-vertical-profile_wnm000_U20_dT000_YSU.svg                                        figS08
-    merged-snapshot_wnm010_U20_dT100_YSU_part1.svg                                                   figS09
-    merged-snapshot_wnm010_U20_dT100_YSU_part2.svg                                                   figS10
-    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_U20_wnm010_varying_dSST_YSU_hr240-360.svg  figS11
-    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_U20_dSST100_varying_wnm_YSU_hr240-360.svg   figS12
+    timeseries/timeseries_wnm010_U20_dT100_YSU_timeseries_smooth-25_000-360.svg                      figS08
+    merged-snapshot-vertical-profile_wnm000_U20_dT000_YSU.svg                                        figS09
+    merged-snapshot_wnm010_U20_dT100_YSU_part1.svg                                                   figS10
+    merged-snapshot_wnm010_U20_dT100_YSU_part2.svg                                                   figS11
+    dF_flux_decomposition_varying_dSST/lab_FULL/dF_flux_decomposition_onefig_U20_wnm010_varying_dSST_YSU_hr240-360.svg  figS12
+    dF_flux_decomposition_varying_wnm/lab_FULL/dF_flux_decomposition_onefig_U20_dSST100_varying_wnm_YSU_hr240-360.svg   figS13
 
 )
 

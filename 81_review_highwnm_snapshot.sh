@@ -61,7 +61,7 @@ for bl_scheme in ${bl_schemes[@]} ; do
 
     for beg_day in "${beg_days[@]}"; do
      
-        hrs_beg=$( printf "%02d" $(( $beg_day * 24 )) )
+        hrs_beg=$( printf "%02d" $(( $beg_day * 24 + 1 )) )
         hrs_end=$( printf "%02d" $(( $hrs_beg + $dhr )) )
 
         output="$output_dir/cloud_rain_${hrs_beg}-${hrs_end}.${fig_ext}"

@@ -4,6 +4,7 @@ source 00_setup.sh
     
 
 beg_days=(
+    5
     10
 )
 
@@ -80,7 +81,7 @@ for bl_scheme in "${bl_schemes[@]}" ; do
         extra_title="${exp_name}${bl_scheme}."
 
         THETA_rng=(285 310)
-        Nfreq2_rng=( -2  8 )
+        Nfreq2_rng=( -2  12 )
         U_rng=(-5 25)
         TKE_rng=(-0.2 1.5)
         DTKE_rng=(-0.008 0.008)

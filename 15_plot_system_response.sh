@@ -6,6 +6,7 @@ how_many_cycles_to_plot=2
 
 
 beg_days=(
+    5
     10
 )
 

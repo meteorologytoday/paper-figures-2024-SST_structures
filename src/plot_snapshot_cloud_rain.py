@@ -217,7 +217,7 @@ cmap_linear = cmocean.cm.matter
 _ax, _thumbnail_numbering = nextAxes()
 
 # Version 2: shading = W, contour = TKE
-mappable1 = _ax.contourf(X_T, Z_T, ds["QRAIN"] * 1e6, levels = np.linspace(0.5, 5, 10), cmap=cmap_linear, extend="max")
+mappable1 = _ax.contourf(X_T, Z_T, ds["QRAIN"] * 1e6, levels = np.arange(0.5, 10, 1.0), cmap=cmap_linear, extend="max")
 cax = tool_fig_config.addAxesNextToAxes(fig, _ax, "right", thickness=0.03, spacing=0.05)
 cbar0 = plt.colorbar(mappable1, cax=cax, orientation="vertical")
 cbar0.set_label("$Q_{\\mathrm{rain}}$ [$ \\times 10^{3} \\mathrm{g} / \\mathrm{kg}$]")
